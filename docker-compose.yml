@@ -167,6 +167,33 @@ services:
     networks:
       - standard_network
 
+  # ===========================================================================
+  # 6. MONITORING STACK (Optional: docker compose --profile monitoring up -d)
+  # ===========================================================================
+  standard_prometheus:
+    image: prom/prometheus:latest
+    container_name: standard_prometheus
+    profiles: ["monitoring"]
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    networks:
+      - standard_network
+
+  standard_grafana:
+    image: grafana/grafana:latest
+    container_name: standard_grafana
+    profiles: ["monitoring"]
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    depends_on:
+      - standard_prometheus
+    networks:
+      - standard_network
+
 volumes:
   standard_pg_data:
   standard_redis_data:

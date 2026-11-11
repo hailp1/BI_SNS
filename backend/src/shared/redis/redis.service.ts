@@ -5,7 +5,7 @@ import Redis from 'ioredis';
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
-  public client: Redis;
+  public client!: Redis;
 
   constructor(private readonly configService: ConfigService) {}
 

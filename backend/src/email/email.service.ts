@@ -122,7 +122,8 @@ export class EmailService {
         isLiveSent = true;
         this.logger.log(`✅ Đã gửi email OTP thực tế tới: ${masked}`);
       } catch (err) {
-        this.logger.error(`❌ Lỗi gửi mail SMTP tới ${masked}: ${err.message}`);
+        const msg = err instanceof Error ? err.message : String(err);
+        this.logger.error(`❌ Lỗi gửi mail SMTP tới ${masked}: ${msg}`);
       }
     } else if (process.env.NODE_ENV !== 'production') {
       this.logger.log(`[DEV EMAIL SIMULATOR] Mã OTP cho ${masked}: ${otpCode}`);

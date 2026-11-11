@@ -68,3 +68,4 @@ export interface UpsertUserPayload {
   scope_value: string;
   password?: string;
 }
+

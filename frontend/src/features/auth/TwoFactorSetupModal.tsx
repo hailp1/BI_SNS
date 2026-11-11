@@ -113,3 +113,4 @@ export function TwoFactorSetupModal({ onClose }: TwoFactorSetupModalProps) {
     </div>
   );
 }
+

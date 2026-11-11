@@ -49,3 +49,4 @@ CREATE INDEX IF NOT EXISTS idx_stock_doi_npp
 
 CREATE INDEX IF NOT EXISTS idx_perf_year_month_chan
   ON datamart.fact_monthly_performance (year, month, channel);
+

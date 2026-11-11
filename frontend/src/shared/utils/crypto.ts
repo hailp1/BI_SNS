@@ -172,3 +172,4 @@ export async function fetchDecryptedPayload<T = unknown[]>(propName: string): Pr
   await idbPutEnc(propName, encBytes);
   return parsed;
 }
+

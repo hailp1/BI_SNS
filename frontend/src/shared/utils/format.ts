@@ -21,3 +21,4 @@ export function getAchievementBadgeColor(rate: number): string {
   if (rate >= 85) return 'text-amber-700 bg-amber-50 border-amber-200';
   return 'text-red-700 bg-red-50 border-red-200';
 }
+

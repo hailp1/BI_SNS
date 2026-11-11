@@ -74,3 +74,4 @@ export const usePayloadsStore = create<PayloadsState>((set, get) => ({
 
   clearAll: () => set({ cache: {}, loading: {}, errors: {} }),
 }));
+

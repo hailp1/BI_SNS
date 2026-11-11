@@ -133,3 +133,4 @@ export function GeoFilterBar({ records }: GeoFilterBarProps) {
     </div>
   );
 }
+

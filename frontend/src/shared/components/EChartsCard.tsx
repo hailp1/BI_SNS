@@ -28,3 +28,4 @@ export function EChartsCard({ title, subtitle, option, height = 320, loading = f
     </div>
   );
 }
+

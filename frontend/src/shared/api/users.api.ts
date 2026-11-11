@@ -37,3 +37,4 @@ export const usersApi = {
     return data;
   },
 };
+

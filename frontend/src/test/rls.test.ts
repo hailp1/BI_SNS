@@ -42,3 +42,4 @@ describe('applyEnterpriseRls', () => {
     expect(filtered[0].office).toBe('HCM 1');
   });
 });
+

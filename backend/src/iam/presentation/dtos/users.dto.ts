@@ -16,7 +16,7 @@ export class UpsertUserDto {
   @ApiProperty({ example: 'asm_hanoi' })
   @IsString()
   @IsNotEmpty()
-  username: string;
+  username!: string;
 
   @ApiPropertyOptional({ example: 'asm.hanoi@cjfoods.com.vn' })
   @IsOptional()
@@ -85,25 +85,25 @@ export class BulkImportUsersDto {
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => UpsertUserDto)
-  users: UpsertUserDto[];
+  users!: UpsertUserDto[];
 }
 
 export class UpdateEmailDto {
   @ApiProperty({ example: 'user@cjfoods.com.vn' })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 }
 
 export class UpdateStatusDto {
   @ApiProperty({ example: true })
   @IsBoolean()
-  isActive: boolean;
+  isActive!: boolean;
 }
 
 export class ResetPasswordDto {
   @ApiProperty({ minLength: 8 })
   @IsString()
   @MinLength(8, { message: 'Mật khẩu mới phải có tối thiểu 8 ký tự!' })
-  newPassword: string;
+  newPassword!: string;
 }

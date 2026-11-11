@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'cj-backend-health'
+    metrics_path: '/api/v1/health'
+    static_configs:
+      - targets: ['standard_backend:3000']
+
+  - job_name: 'cj-nginx'
+    metrics_path: '/nginx-health'
+    static_configs:
+      - targets: ['standard_nginx:80']

@@ -59,3 +59,4 @@ describe('crypto utils', () => {
     expect(() => decryptAndInflateEnc(enc, 'short-key')).toThrow(/Missing or invalid payload decryption key/);
   });
 });
+

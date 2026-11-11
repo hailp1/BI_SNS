@@ -11,7 +11,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     const host = configService.get<string>('DATABASE_HOST', 'standard_postgres');
     const port = configService.get<number>('DATABASE_PORT', 5432);
     const user = configService.get<string>('DATABASE_USER', 'cj_sec_admin');
-    const password = configService.get<string>('DATABASE_PASSWORD');
+    const password = configService.get<string>('DATABASE_PASSWORD') ?? '';
     const dbName = configService.get<string>('DATABASE_NAME', 'cj_enterprise_db');
 
     const url =

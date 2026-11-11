@@ -199,3 +199,4 @@ export function applyEnterpriseRls<T>(
     return !hasAnyGeoCol;
   });
 }
+
