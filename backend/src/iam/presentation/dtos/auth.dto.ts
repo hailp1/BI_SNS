@@ -55,3 +55,15 @@ export class ResendEmailOtpDto {
   @IsNotEmpty()
   temp_token!: string;
 }
+
+export class ChangePasswordDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  currentPassword!: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  newPassword!: string;
+}

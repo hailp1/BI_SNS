@@ -1,4 +1,11 @@
-import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { AuditService } from '../../../shared/audit/audit.service';
@@ -300,5 +307,43 @@ export class ManageUsersUseCase {
     });
 
     return { status: 'success', message: `Đã xóa tài khoản @${username}` };
+  }
+
+  /** Allow an authenticated user to change their own password after verifying the current one. */
+  async changeOwnPassword(userId: string, currentPassword: string, newPassword: string, ip: string, userAgent: string) {
+    const user = await this.userRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy tài khoản người dùng');
+    }
+
+    const matches = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!matches) {
+      throw new UnauthorizedException('Mật khẩu hiện tại không chính xác!');
+    }
+
+    let cleanNewPass: string;
+    try {
+      cleanNewPass = PasswordPolicy.validate(newPassword);
+    } catch (e) {
+      throw new BadRequestException((e as Error).message);
+    }
+
+    const hash = await bcrypt.hash(cleanNewPass, 12);
+    await this.userRepo.updateById(user.id, { passwordHash: hash });
+
+    await this.audit.log({
+      userId: user.id,
+      username: user.username,
+      action: 'USER_PASSWORD_CHANGED',
+      module: 'AUTH',
+      ipAddress: ip,
+      userAgent,
+      status: 'SUCCESS',
+    });
+
+    return {
+      status: 'success',
+      message: 'Đã đổi mật khẩu thành công!',
+    };
   }
 }

@@ -9,9 +9,17 @@ import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { AuthenticatedUser, JwtPayload } from '../../../shared/interfaces/jwt-payload.interface';
 import { extractClientIp } from '../../../shared/utils/request.util';
 import { LoginUseCase } from '../../application/commands/login.command';
+import { ManageUsersUseCase } from '../../application/commands/manage-users.command';
 import { VerifyOtpUseCase } from '../../application/commands/verify-otp.command';
 import { TOKEN_SERVICE_PORT, TokenServicePort } from '../../application/ports/token.service.port';
-import { LoginDto, ResendEmailOtpDto, Verify2faDto, Verify2faLoginDto, VerifyEmailOtpDto } from '../dtos/auth.dto';
+import {
+  ChangePasswordDto,
+  LoginDto,
+  ResendEmailOtpDto,
+  Verify2faDto,
+  Verify2faLoginDto,
+  VerifyEmailOtpDto,
+} from '../dtos/auth.dto';
 
 @ApiTags('Auth')
 @Controller('api/v1/auth')
@@ -19,14 +27,16 @@ export class AuthController {
   constructor(
     private readonly loginUseCase: LoginUseCase,
     private readonly verifyOtpUseCase: VerifyOtpUseCase,
+    private readonly manageUsersUseCase: ManageUsersUseCase,
     @Inject(TOKEN_SERVICE_PORT) private readonly tokenService: TokenServicePort,
     private readonly configService: ConfigService,
   ) {}
 
-  private setAuthCookie(res: Response, token: string): void {
+  private setAuthCookie(req: Request, res: Response, token: string): void {
+    const isHttps = req.secure || req.headers['x-forwarded-proto'] === 'https';
     res.cookie('cj_auth_token', token, {
       httpOnly: true,
-      secure: this.configService.get<string>('NODE_ENV') === 'production',
+      secure: isHttps,
       sameSite: 'lax',
       maxAge: 8 * 60 * 60 * 1000,
       path: '/',
@@ -51,7 +61,7 @@ export class AuthController {
     });
 
     if (result.access_token) {
-      this.setAuthCookie(res, result.access_token);
+      this.setAuthCookie(req, res, result.access_token);
     }
 
     return {
@@ -149,7 +159,7 @@ export class AuthController {
     const result = await this.verifyOtpUseCase.verify2faLogin(body.temp_token, body.code, ip, userAgent);
 
     if (result.access_token) {
-      this.setAuthCookie(res, result.access_token);
+      this.setAuthCookie(req, res, result.access_token);
     }
 
     return result;
@@ -171,7 +181,7 @@ export class AuthController {
     const result = await this.verifyOtpUseCase.verifyEmailOtp(body.temp_token, body.code, ip, userAgent);
 
     if (result.access_token) {
-      this.setAuthCookie(res, result.access_token);
+      this.setAuthCookie(req, res, result.access_token);
     }
 
     return result;
@@ -186,5 +196,20 @@ export class AuthController {
     const ip = extractClientIp(req);
     const userAgent = String(req.headers['user-agent'] || '');
     return this.verifyOtpUseCase.resendEmailOtp(body.temp_token, ip, userAgent);
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiCookieAuth('cj_auth_token')
+  @ApiOperation({ summary: 'Change password for currently authenticated user' })
+  async changePassword(@Body() body: ChangePasswordDto, @CurrentUser() user: AuthenticatedUser, @Req() req: Request) {
+    return this.manageUsersUseCase.changeOwnPassword(
+      user.id,
+      body.currentPassword,
+      body.newPassword,
+      extractClientIp(req),
+      String(req.headers['user-agent'] || ''),
+    );
   }
 }
