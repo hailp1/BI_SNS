@@ -25,8 +25,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 1024M
+          cpus: "1.5"
+          memory: 1536M
     networks:
       - standard_network
 
@@ -67,6 +67,7 @@ services:
     restart: always
     environment:
       NODE_ENV: ${NODE_ENV:-production}
+      NODE_OPTIONS: "--max-old-space-size=1024"
       PORT: ${PORT:-3000}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8090}
       DATABASE_HOST: standard_postgres
@@ -79,7 +80,6 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
-      DATA_PAYLOADS_DIR: ${DATA_PAYLOADS_DIR:-/app/data_payloads}
       PAYLOAD_KEY: ${PAYLOAD_KEY:?PAYLOAD_KEY is required}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}
@@ -88,8 +88,6 @@ services:
       SMTP_FROM: ${SMTP_FROM:-}
       SMTP_SECURE: ${SMTP_SECURE:-false}
       SMTP_TLS_REJECT_UNAUTHORIZED: ${SMTP_TLS_REJECT_UNAUTHORIZED:-true}
-    volumes:
-      - ./data_payloads:/app/data_payloads:ro
     depends_on:
       standard_postgres:
         condition: service_healthy
@@ -104,8 +102,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
-          memory: 1024M
+          cpus: "1.5"
+          memory: 1536M
     networks:
       - standard_network
 

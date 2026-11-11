@@ -49,6 +49,22 @@
             }
         }
 
+        async function syncDbRefreshMetadata() {
+            try {
+                const res = await fetch('/api/v1/dashboard/meta', { credentials: 'same-origin' });
+                if (!res.ok) return;
+                const meta = await res.json();
+                window.__DB_META__ = meta;
+                if (meta && meta.data_refresh_date) {
+                    const hdr = document.getElementById('header-data-refresh-date');
+                    if (hdr) hdr.textContent = meta.data_refresh_date;
+                    const lgn = document.getElementById('login-data-refresh-date');
+                    if (lgn) lgn.textContent = 'Dữ liệu: ' + meta.data_refresh_date;
+                }
+            } catch (_) {}
+        }
+
+        syncDbRefreshMetadata();
         initApp();
 
         window.addEventListener('hashchange', () => {

@@ -17,7 +17,7 @@ import { RedisModule } from './shared/redis/redis.module';
     AppLoggerModule,
     SharedDatabaseModule,
     RedisModule,
-    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 600 }]),
     AuditModule,
     EmailModule,
     IamModule,

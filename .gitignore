@@ -12,6 +12,7 @@ frontend/.vite/
 
 # Large data dumps & encrypted payloads
 data_payloads/*.enc
+.tmp_etl/
 web_app/apps/routemap/dms_data.js
 web_app/data/modules/ctkm_data.js
 database/init/04_full_real_database.sql

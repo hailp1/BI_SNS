@@ -6922,8 +6922,13 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                             appContainer.style.removeProperty('display');
                             appContainer.style.setProperty('display', 'flex', 'important');
                         }
-                        if (typeof applyUserScope === 'function') applyUserScope(safeUser);
-                        if (typeof initApp === 'function') initApp();
+                        window._isStage1Render = true;
+                        try {
+                            if (typeof applyUserScope === 'function') applyUserScope(safeUser);
+                            if (typeof initApp === 'function') initApp();
+                        } finally {
+                            window._isStage1Render = false;
+                        }
                     } catch (e) {
                         alert('Lỗi kết nối máy chủ xác thực Email OTP!');
                         btnSubmitOtp.disabled = false;
@@ -7002,12 +7007,17 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
             appContainer.style.setProperty('display', 'flex', 'important');
         }
 
-        if (typeof applyUserScope === 'function') {
-            applyUserScope(safeUser);
-        }
+        window._isStage1Render = true;
+        try {
+            if (typeof applyUserScope === 'function') {
+                applyUserScope(safeUser);
+            }
 
-        if (typeof initApp === 'function') {
-            initApp();
+            if (typeof initApp === 'function') {
+                initApp();
+            }
+        } finally {
+            window._isStage1Render = false;
         }
     } catch (err) {
         console.error("Login fetch error:", err);

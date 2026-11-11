@@ -239,10 +239,27 @@
         const _payloadCache = window._payloadCache = window._payloadCache || {};
 
         const _payloadInflight = window._payloadInflight = window._payloadInflight || {};
-        const _IDB_NAME = 'CJ_Enterprise_Cache_v1793605759';
-        const _IDB_STORE = 'enc_payloads';
+        const _IDB_NAME = 'CJ_Enterprise_PG_v20261110';
+        const _IDB_STORE = 'pg_datasets';
         const _IDB_VERSION = 1;
         let _idbPromise = null;
+
+        function _getDbCacheTag() {
+            const u = (typeof currentUser !== 'undefined' && currentUser && currentUser.username)
+                ? currentUser.username
+                : (sessionStorage.getItem('cj_current_user_name') || 'anon');
+            const dt = (window.__DB_META__ && window.__DB_META__.data_refresh_date) || '2026-11-10';
+            return u + '::' + dt;
+        }
+
+        function _getAuthHeaders() {
+            const h = {};
+            try {
+                const tok = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
+                if (tok) h['Authorization'] = 'Bearer ' + tok;
+            } catch (_) {}
+            return h;
+        }
 
         function _openEnterpriseIDB() {
             if (_idbPromise) return _idbPromise;
@@ -341,40 +358,33 @@
         }
 
         async function _loadPayloadAsync(propName) {
+            if (typeof currentUser === 'undefined' || !currentUser) return null;
             if (_payloadCache[propName]) return _payloadCache[propName];
             if (_payloadInflight[propName]) return _payloadInflight[propName];
 
             _payloadInflight[propName] = (async () => {
+                const idbKey = propName + '::' + _getDbCacheTag();
                 try {
-                    // 1. Check Persistent IndexedDB Cache first (0 KB network!)
-                    let encBytes = await _idbGetEnc(propName);
-                    if (encBytes && encBytes.byteLength > 16) {
-                        try {
-                            if (!(encBytes instanceof Uint8Array)) {
-                                encBytes = new Uint8Array(encBytes);
-                            }
-                            const parsed = _decryptAndInflateEnc(encBytes);
-                            if (Array.isArray(parsed) || (parsed && typeof parsed === 'object')) {
-                                _payloadCache[propName] = parsed;
-                                return _payloadCache[propName];
-                            }
-                        } catch (idbErr) {
-                            console.warn('Corrupt IDB cache for ' + propName + ', refetching fresh:', idbErr);
-                        }
+                    // 1. Check Persistent IndexedDB Cache keyed by user & PostgreSQL refresh version
+                    const cached = await _idbGetEnc(idbKey);
+                    if (Array.isArray(cached) || (cached && typeof cached === 'object')) {
+                        _payloadCache[propName] = cached;
+                        return _payloadCache[propName];
                     }
 
-                    // 2. Parallel async network fetch (.enc binary via JWT-authenticated API)
-                    const resp = await fetch('/api/v1/data/' + propName + '.enc?v=' + _IDB_NAME, { credentials: 'same-origin' });
+                    // 2. Parallel async fetch directly from PostgreSQL API (/api/v1/sales/datasets/:name)
+                    const resp = await fetch('/api/v1/sales/datasets/' + encodeURIComponent(propName), {
+                        credentials: 'same-origin',
+                        headers: _getAuthHeaders()
+                    });
                     if (resp.ok) {
-                        const buf = await resp.arrayBuffer();
-                        encBytes = new Uint8Array(buf);
-                        const parsed = _decryptAndInflateEnc(encBytes);
+                        const parsed = await resp.json();
                         _payloadCache[propName] = parsed;
-                        _idbPutEnc(propName, encBytes);
+                        _idbPutEnc(idbKey, parsed);
                         return _payloadCache[propName];
                     }
                 } catch (err) {
-                    console.warn('Async load warning for ' + propName + ':', err);
+                    console.warn('PostgreSQL dataset load warning for ' + propName + ':', err);
                 } finally {
                     delete _payloadInflight[propName];
                 }
@@ -429,14 +439,19 @@
                     'GT_CUST_ROUTES', 'GT_CUST_PROD_SALES'
                 ];
                 for (const name of priorityOrder) {
+                    if (typeof currentUser === 'undefined' || !currentUser) break;
                     if (!name || _payloadCache[name] || _payloadInflight[name]) continue;
-                    const cached = await _idbGetEnc(name);
+                    const idbKey = name + '::' + _getDbCacheTag();
+                    const cached = await _idbGetEnc(idbKey);
                     if (!cached) {
                         try {
-                            const r = await fetch('/api/v1/data/' + name + '.enc?v=' + _IDB_NAME, { credentials: 'same-origin' });
+                            const r = await fetch('/api/v1/sales/datasets/' + encodeURIComponent(name), {
+                                credentials: 'same-origin',
+                                headers: _getAuthHeaders()
+                            });
                             if (r.ok) {
-                                const b = new Uint8Array(await r.arrayBuffer());
-                                await _idbPutEnc(name, b);
+                                const parsed = await r.json();
+                                await _idbPutEnc(idbKey, parsed);
                             }
                         } catch (_) {}
                         await new Promise(res => setTimeout(res, 60));
@@ -736,35 +751,31 @@
                 get: function() {
                     if (!currentUser) return [];
                     if (!_payloadCache[propName]) {
-                        // Never block UI with sync XHR during Stage 1 instant rendering!
-                        if (window._isStage1Render) {
+                        // Never block UI with sync XHR during boot/Stage-1 render or while an async fetch is in flight
+                        if (window._isStage1Render || _payloadInflight[propName]) {
                             return [];
                         }
                         try {
                             const xhr = new XMLHttpRequest();
-                            xhr.open('GET', '/api/v1/data/' + propName + '.enc?v=' + _IDB_NAME, false);
+                            xhr.open('GET', '/api/v1/sales/datasets/' + encodeURIComponent(propName), false);
                             xhr.withCredentials = true;
-                            if (xhr.overrideMimeType) {
-                                xhr.overrideMimeType('text/plain; charset=x-user-defined');
+                            const authHeaders = _getAuthHeaders();
+                            if (authHeaders['Authorization']) {
+                                xhr.setRequestHeader('Authorization', authHeaders['Authorization']);
                             }
                             xhr.send(null);
 
                             if (xhr.status === 200 && xhr.responseText) {
-                                const rawText = xhr.responseText;
-                                const totalLen = rawText.length;
-                                const encBytes = new Uint8Array(totalLen);
-                                for (let i = 0; i < totalLen; i++) {
-                                    encBytes[i] = rawText.charCodeAt(i) & 0xff;
-                                }
-                                const parsed = _decryptAndInflateEnc(encBytes);
+                                const parsed = JSON.parse(xhr.responseText);
                                 _payloadCache[propName] = parsed;
-                                _idbPutEnc(propName, encBytes);
+                                _idbPutEnc(propName + '::' + _getDbCacheTag(), parsed);
                             } else {
-                                _payloadCache[propName] = [];
+                                // Do not poison _payloadCache with [] on transient non-200 responses
+                                return [];
                             }
                         } catch (err) {
-                            console.error('Error in fallback sync decryption for ' + propName + ':', err);
-                            _payloadCache[propName] = [];
+                            console.warn('Fallback sync PostgreSQL fetch skipped/failed for ' + propName + ':', err);
+                            return [];
                         }
                     }
                     const rawData = _payloadCache[propName];
