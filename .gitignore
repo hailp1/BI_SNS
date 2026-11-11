@@ -6,6 +6,9 @@
 node_modules/
 backend/node_modules/
 backend/dist/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
 
 # Large data dumps & encrypted payloads
 data_payloads/*.enc
