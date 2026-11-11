@@ -1,13 +1,34 @@
 import { Module } from '@nestjs/common';
-import { DatabaseModule } from './database/database.module';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuditModule } from './audit/audit.module';
-import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-import { DashboardModule } from './dashboard/dashboard.module';
-import { UsersModule } from './users/users.module';
-import { DataPayloadModule } from './data-payload/data-payload.module';
+import { HealthModule } from './health/health.module';
+import { IamModule } from './iam/iam.module';
+import { SalesModule } from './sales/sales.module';
+import { AppConfigModule } from './shared/config/config.module';
+import { SharedDatabaseModule } from './shared/database/database.module';
+import { AppLoggerModule } from './shared/logger/logger.module';
+import { RedisModule } from './shared/redis/redis.module';
 
 @Module({
-  imports: [DatabaseModule, AuditModule, EmailModule, AuthModule, DashboardModule, UsersModule, DataPayloadModule],
+  imports: [
+    AppConfigModule,
+    AppLoggerModule,
+    SharedDatabaseModule,
+    RedisModule,
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    AuditModule,
+    EmailModule,
+    IamModule,
+    SalesModule,
+    HealthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule {}

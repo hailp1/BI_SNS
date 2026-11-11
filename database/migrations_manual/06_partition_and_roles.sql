@@ -1,0 +1,41 @@
+-- ============================================================================
+-- PHASE 3 MANUAL DBA ROLLOUT SCRIPT:
+-- 1. Monthly partitioning for iam.audit_logs (run during maintenance window)
+-- 2. Least-privilege database roles (replace placeholder passwords before running)
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- PART A: Partition iam.audit_logs by month (PostgreSQL Declarative Partitioning)
+-- ----------------------------------------------------------------------------
+-- BEGIN;
+-- ALTER TABLE iam.audit_logs RENAME TO audit_logs_legacy;
+-- CREATE TABLE iam.audit_logs (LIKE iam.audit_logs_legacy INCLUDING DEFAULTS INCLUDING CONSTRAINTS)
+--   PARTITION BY RANGE (created_at);
+-- CREATE TABLE iam.audit_logs_2026_11 PARTITION OF iam.audit_logs
+--   FOR VALUES FROM ('2026-11-01') TO ('2026-12-01');
+-- CREATE TABLE iam.audit_logs_2026_12 PARTITION OF iam.audit_logs
+--   FOR VALUES FROM ('2026-12-01') TO ('2027-01-01');
+-- CREATE TABLE iam.audit_logs_default PARTITION OF iam.audit_logs DEFAULT;
+-- INSERT INTO iam.audit_logs SELECT * FROM iam.audit_logs_legacy;
+-- COMMIT;
+
+-- ----------------------------------------------------------------------------
+-- PART B: Least-Privilege Application Database Roles
+-- ----------------------------------------------------------------------------
+-- DO $$
+-- BEGIN
+--   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'cj_app_reader') THEN
+--     CREATE ROLE cj_app_reader WITH LOGIN PASSWORD 'REPLACE_WITH_STRONG_READER_PASSWORD';
+--   END IF;
+--   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'cj_app_writer') THEN
+--     CREATE ROLE cj_app_writer WITH LOGIN PASSWORD 'REPLACE_WITH_STRONG_WRITER_PASSWORD';
+--   END IF;
+-- END
+-- $$;
+--
+-- GRANT USAGE ON SCHEMA iam, datamart TO cj_app_reader;
+-- GRANT SELECT ON ALL TABLES IN SCHEMA iam, datamart TO cj_app_reader;
+-- GRANT cj_app_reader TO cj_app_writer;
+-- GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA iam TO cj_app_writer;
+-- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA iam TO cj_app_writer;
+

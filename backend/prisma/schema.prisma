@@ -1,0 +1,197 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["iam", "datamart"]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+model Role {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique @db.VarChar(50)
+  description String?
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  permissions RolePermission[]
+
+  @@map("roles")
+  @@schema("iam")
+}
+
+model Permission {
+  id          Int              @id @default(autoincrement())
+  code        String           @unique @db.VarChar(100)
+  module      String           @db.VarChar(50)
+  description String?
+  roles       RolePermission[]
+
+  @@map("permissions")
+  @@schema("iam")
+}
+
+model RolePermission {
+  roleId       Int        @map("role_id")
+  permissionId Int        @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+  @@schema("iam")
+}
+
+model User {
+  id               String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username         String     @unique @db.VarChar(50)
+  email            String?    @unique @db.VarChar(100)
+  passwordHash     String     @map("password_hash") @db.VarChar(255)
+  fullName         String     @map("full_name") @db.VarChar(150)
+  channel          String     @default("all") @db.VarChar(50)
+  role             String     @db.VarChar(50)
+  scopeLevel       String     @default("all") @map("scope_level") @db.VarChar(50)
+  scopeValue       String     @default("Toàn Quốc") @map("scope_value") @db.VarChar(150)
+  isActive         Boolean    @default(true) @map("is_active")
+  failedAttempts   Int        @default(0) @map("failed_attempts")
+  lockedUntil      DateTime?  @map("locked_until") @db.Timestamptz
+  twoFactorSecret  String?    @map("two_factor_secret") @db.VarChar(100)
+  twoFactorEnabled Boolean    @default(false) @map("two_factor_enabled")
+  lastLoginAt      DateTime?  @map("last_login_at") @db.Timestamptz
+  lastLoginIp      String?    @map("last_login_ip") @db.VarChar(45)
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+  auditLogs        AuditLog[]
+
+  @@index([username], name: "idx_iam_users_username")
+  @@index([role], name: "idx_iam_users_role")
+  @@map("users")
+  @@schema("iam")
+}
+
+model AuditLog {
+  id              BigInt   @id @default(autoincrement())
+  userId          String?  @map("user_id") @db.Uuid
+  username        String   @db.VarChar(50)
+  action          String   @db.VarChar(50)
+  module          String   @db.VarChar(50)
+  ipAddress       String   @map("ip_address") @db.VarChar(45)
+  userAgent       String?  @map("user_agent")
+  endpoint        String?  @db.VarChar(255)
+  method          String?  @db.VarChar(10)
+  status          String   @default("SUCCESS") @db.VarChar(20)
+  details         Json?
+  executionTimeMs Int      @default(0) @map("execution_time_ms")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt], name: "idx_audit_created_at")
+  @@index([username], name: "idx_audit_username")
+  @@index([action], name: "idx_audit_action")
+  @@map("audit_logs")
+  @@schema("iam")
+}
+
+model TrustedNetwork {
+  id          Int      @id @default(autoincrement())
+  networkName String   @map("network_name") @db.VarChar(100)
+  cidrOrIp    String   @map("cidr_or_ip") @db.VarChar(50)
+  description String?  @db.VarChar(255)
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("trusted_networks")
+  @@schema("iam")
+}
+
+model FactMonthlyPerformance {
+  id              Int      @id @default(autoincrement())
+  year            Int
+  month           String   @db.VarChar(7)
+  channel         String   @db.VarChar(50)
+  subChannel      String   @default("ALL") @map("sub_channel") @db.VarChar(100)
+  sellinRevenue   Decimal  @default(0) @map("sellin_revenue") @db.Decimal(18, 2)
+  targetSellin    Decimal  @default(0) @map("target_sellin") @db.Decimal(18, 2)
+  gapSellin       Decimal  @default(0) @map("gap_sellin") @db.Decimal(18, 2)
+  achievementRate Decimal  @default(0) @map("achievement_rate") @db.Decimal(6, 2)
+  lySellin        Decimal  @default(0) @map("ly_sellin") @db.Decimal(18, 2)
+  yoyGrowthAmt    Decimal  @default(0) @map("yoy_growth_amt") @db.Decimal(18, 2)
+  yoyGrowthRate   Decimal  @default(0) @map("yoy_growth_rate") @db.Decimal(6, 2)
+  momMtdRate      Decimal  @default(0) @map("mom_mtd_rate") @db.Decimal(6, 2)
+  ytdRevenue      Decimal  @default(0) @map("ytd_revenue") @db.Decimal(18, 2)
+  channelShare    Decimal  @default(0) @map("channel_share") @db.Decimal(6, 2)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([year, month, channel, subChannel], map: "uq_std_monthly_perf")
+  @@index([month, channel], name: "idx_std_perf_month_chan")
+  @@map("fact_monthly_performance")
+  @@schema("datamart")
+}
+
+model FactDailySales {
+  id               Int      @id @default(autoincrement())
+  saleDate         DateTime @map("sale_date") @db.Date
+  year             Int
+  month            String   @db.VarChar(7)
+  channel          String   @db.VarChar(50)
+  sellinAmt        Decimal  @default(0) @map("sellin_amt") @db.Decimal(18, 2)
+  targetAmt        Decimal  @default(0) @map("target_amt") @db.Decimal(18, 2)
+  cumulativeSellin Decimal  @default(0) @map("cumulative_sellin") @db.Decimal(18, 2)
+  cumulativeTarget Decimal  @default(0) @map("cumulative_target") @db.Decimal(18, 2)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([saleDate, channel], map: "uq_std_daily_sales")
+  @@index([saleDate, channel], name: "idx_std_daily_date_chan")
+  @@map("fact_daily_sales")
+  @@schema("datamart")
+}
+
+model FactStockDoi {
+  id            Int      @id @default(autoincrement())
+  reportMonth   String   @map("report_month") @db.VarChar(7)
+  channel       String   @default("GT") @db.VarChar(50)
+  region        String   @db.VarChar(50)
+  area          String   @db.VarChar(50)
+  nppCode       String   @map("npp_code") @db.VarChar(50)
+  nppName       String   @map("npp_name") @db.VarChar(150)
+  stockAmt      Decimal  @default(0) @map("stock_amt") @db.Decimal(18, 2)
+  l3mAvgMonthly Decimal  @default(0) @map("l3m_avg_monthly") @db.Decimal(18, 2)
+  doiDays       Decimal  @default(0) @map("doi_days") @db.Decimal(6, 1)
+  doiStatus     String   @default("Normal") @map("doi_status") @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([reportMonth, nppCode], map: "uq_std_stock_doi")
+  @@index([reportMonth, region, area], name: "idx_std_stock_region_area")
+  @@map("fact_stock_doi")
+  @@schema("datamart")
+}
+
+model DimGeoHierarchy {
+  id         Int      @id @default(autoincrement())
+  regionCode String   @map("region_code") @db.VarChar(20)
+  regionName String   @map("region_name") @db.VarChar(50)
+  vungCode   String   @map("vung_code") @db.VarChar(50)
+  areaCode   String   @map("area_code") @db.VarChar(50)
+  officeName String?  @map("office_name") @db.VarChar(100)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@unique([regionCode, vungCode, areaCode], map: "uq_std_geo")
+  @@map("dim_geo_hierarchy")
+  @@schema("datamart")
+}
+
+model DimProductHierarchy {
+  skuCode     String   @id @map("sku_code") @db.VarChar(50)
+  skuName     String   @map("sku_name") @db.VarChar(200)
+  storageType String   @map("storage_type") @db.VarChar(50)
+  category    String   @db.VarChar(100)
+  ph1         String?  @db.VarChar(100)
+  ph2         String?  @db.VarChar(100)
+  unit        String   @default("EA") @db.VarChar(20)
+  priceLayer1 Decimal  @default(0) @map("price_layer1") @db.Decimal(15, 2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("dim_product_hierarchy")
+  @@schema("datamart")
+}
+

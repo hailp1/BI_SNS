@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -6,17 +7,18 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
 
-  constructor() {
+  constructor(private readonly configService: ConfigService) {
     this.initTransporter();
   }
 
   private initTransporter() {
-    const host = process.env.SMTP_HOST;
-    const port = Number(process.env.SMTP_PORT) || 587;
-    const user = process.env.SMTP_USER;
-    const pass = process.env.SMTP_PASS;
+    const host = this.configService.get<string>('SMTP_HOST');
+    const port = this.configService.get<number>('SMTP_PORT', 587);
+    const user = this.configService.get<string>('SMTP_USER');
+    const pass = this.configService.get<string>('SMTP_PASS');
     const cleanPass = (pass || '').replace(/\s+/g, '');
-    const secure = process.env.SMTP_SECURE === 'true' || port === 465;
+    const secure = this.configService.get<string>('SMTP_SECURE') === 'true' || port === 465;
+    const rejectUnauthorized = this.configService.get<string>('SMTP_TLS_REJECT_UNAUTHORIZED') !== 'false';
 
     if (host && user && cleanPass) {
       this.transporter = nodemailer.createTransport({
@@ -24,12 +26,10 @@ export class EmailService {
         port,
         secure,
         auth: { user, pass: cleanPass },
-        tls: {
-          rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== 'false',
-        },
+        tls: { rejectUnauthorized },
       });
       this.logger.log(`Đang kết nối SMTP Server: ${host}:${port} (SSL: ${secure})`);
-      this.transporter.verify((error, success) => {
+      this.transporter.verify((error) => {
         if (error) {
           this.logger.error(`❌ Xác thực kết nối SMTP thất bại: ${error.message}`);
         } else {

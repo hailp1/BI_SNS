@@ -1,29 +1,37 @@
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import { ProblemDetailsFilter } from './shared/filters/http-exception.filter';
 
 async function bootstrap() {
-  const logger = new Logger('EnterpriseBootstrap');
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const logger = app.get(Logger);
+  app.useLogger(logger);
 
-  // 1. Phân tích HttpOnly Cookie an toàn
+  const configService = app.get(ConfigService);
+
+  app.enableShutdownHooks();
+  app.use(helmet());
   app.use(cookieParser());
 
-  // 2. Cấu hình CORS chuẩn Zero-Trust (Whitelist Origins)
-  const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:8090')
+  const allowedOrigins = configService
+    .get<string>('CORS_ORIGINS', 'http://localhost:8090')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
 
   app.enableCors({
     origin: allowedOrigins,
-    credentials: true, // Bắt buộc cho phép truyền HttpOnly Cookie an toàn
+    credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type,Accept,Authorization,X-Requested-With',
   });
 
-  // 3. Validation Pipe tự động làm sạch Input & chống Mass Assignment
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -32,12 +40,20 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT || 3000;
+  app.useGlobalFilters(new ProblemDetailsFilter());
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('CJ Enterprise SNS API')
+    .setDescription('CJ Foods Vietnam - Enterprise Sales Network System API (Clean Architecture)')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addCookieAuth('cj_auth_token')
+    .build();
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  SwaggerModule.setup('api/docs', app, document);
+
+  const port = configService.get<number>('PORT', 3000);
   await app.listen(port);
-  logger.log(`=======================================================`);
-  logger.log(`  CJ FOODS ENTERPRISE API - INTERNATIONAL STANDARD     `);
-  logger.log(`  Status: Running on port ${port}                      `);
-  logger.log(`  Security: Bcrypt + JWT in HttpOnly Cookie + 2FA TOTP `);
-  logger.log(`=======================================================`);
+  logger.log(`CJ Foods Enterprise API running on port ${port} (Swagger: /api/docs, Health: /api/v1/health)`);
 }
 bootstrap();
