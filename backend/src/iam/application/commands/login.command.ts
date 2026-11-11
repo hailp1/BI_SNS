@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { AuditService } from '../../../audit/audit.service';
+import { AuditService } from '../../../shared/audit/audit.service';
 import { NetworkContextService } from '../../infrastructure/adapters/network-context.service';
 import { OTP_SERVICE_PORT, OtpServicePort } from '../ports/otp.service.port';
 import { TOKEN_SERVICE_PORT, TokenServicePort } from '../ports/token.service.port';

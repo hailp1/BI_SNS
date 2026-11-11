@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
-import { EmailService } from '../../../email/email.service';
+import { EmailService } from '../../../shared/email/email.service';
 import { RedisService } from '../../../shared/redis/redis.service';
 import { OtpDispatchResult, OtpServicePort } from '../../application/ports/otp.service.port';
 

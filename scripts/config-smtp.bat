@@ -10,13 +10,13 @@ echo Đang mở file cấu hình .env bằng Notepad...
 echo Vui lòng điền thông tin SMTP của bạn, bấm Ctrl + S để LƯU, rồi ĐÓNG Notepad.
 echo.
 
-start /wait notepad "D:\CJ_Enterprise_Standard\.env"
+start /wait notepad "%~dp0..\.env"
 
 echo.
 echo ==============================================================================
 echo Đang áp dụng cấu hình mới vào hệ thống máy chủ...
 echo ==============================================================================
-cd /d "D:\CJ_Enterprise_Standard"
+cd /d "%~dp0.."
 docker compose up -d standard_backend
 
 echo.
@@ -28,3 +28,4 @@ echo ---------------------------------------------------------------------------
 echo.
 echo Hoàn tất! Bấm phím bất kỳ để thoát.
 pause >nul
+

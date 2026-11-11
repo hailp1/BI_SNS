@@ -1,6 +1,6 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuditService } from '../../../audit/audit.service';
+import { AuditService } from '../../../shared/audit/audit.service';
 import { UserEntity } from '../../domain/model/user.entity';
 import { TotpService } from '../../infrastructure/adapters/totp.service';
 import { OtpServicePort } from '../ports/otp.service.port';

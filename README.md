@@ -35,7 +35,7 @@ The system is delivered as a containerized **Docker Compose** ecosystem running 
    ```bash
    docker compose up -d
    ```
-   *(On Windows Server, you can simply double-click `START_SYSTEM.bat`).*
+   *(On Windows Server, you can simply double-click `scripts\start-system.bat`).*
 4. Access the web application:
    ```
    http://localhost:8090
@@ -62,6 +62,7 @@ The system is delivered as a containerized **Docker Compose** ecosystem running 
 ---
 
 ### 4. INCLUDED DOCUMENTATION
-- `SECURITY_ARCHITECTURE.md`: Complete system architecture specification, flowcharts, and sequence diagrams.
-- `IT_SECURITY_CHECKLIST.md`: Verification checklist for corporate IT auditors.
-- `LEGAL_NOTICE_AND_IP.md`: Proprietary License, Intellectual Property Rights & Terms of Evaluation.
+- `docs/SECURITY_ARCHITECTURE.md`: Complete system architecture specification, flowcharts, and sequence diagrams.
+- `docs/IT_SECURITY_CHECKLIST.md`: Verification checklist for corporate IT auditors.
+- `docs/LEGAL_NOTICE_AND_IP.md`: Proprietary License, Intellectual Property Rights & Terms of Evaluation.
+- `docs/HUONG_DAN_CAU_HINH_SMTP.md`: SMTP & email OTP configuration guide (`scripts/config-smtp.bat`).

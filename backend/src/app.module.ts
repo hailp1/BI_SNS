@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { AuditModule } from './audit/audit.module';
-import { EmailModule } from './email/email.module';
+import { AuditModule } from './shared/audit/audit.module';
+import { EmailModule } from './shared/email/email.module';
 import { HealthModule } from './health/health.module';
 import { IamModule } from './iam/iam.module';
 import { SalesModule } from './sales/sales.module';

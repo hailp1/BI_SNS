@@ -1,5 +1,5 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
-import { AuditService } from '../../../audit/audit.service';
+import { AuditService } from '../../../shared/audit/audit.service';
 import { UserEntity } from '../../domain/model/user.entity';
 import { UserRepositoryPort } from '../ports/user.repository.port';
 import { ManageUsersUseCase } from './manage-users.command';

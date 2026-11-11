@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { AuditService } from '../../../audit/audit.service';
+import { AuditService } from '../../../shared/audit/audit.service';
 import { Email } from '../../domain/model/value-objects/email.vo';
 import { PasswordPolicy } from '../../domain/model/value-objects/password.vo';
 import { Username } from '../../domain/model/value-objects/username.vo';

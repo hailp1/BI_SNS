@@ -6,12 +6,10 @@ RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
 RUN npm run build
 
-# Stage 2: Nginx Gateway serving React SPA + Legacy fallback + Reverse Proxy
+# Stage 2: Nginx Gateway serving React SPA + Reverse Proxy
 FROM nginx:1.27-alpine
 
 COPY --from=frontend_builder /app/frontend/dist /usr/share/nginx/html/frontend
-COPY ./web_app /usr/share/nginx/html/web_app
-COPY ./client /usr/share/nginx/html/client
 COPY ./nginx/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80 443

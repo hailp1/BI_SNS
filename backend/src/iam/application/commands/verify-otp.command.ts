@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AuditService } from '../../../audit/audit.service';
+import { AuditService } from '../../../shared/audit/audit.service';
 import { TempTokenPayload } from '../../../shared/interfaces/jwt-payload.interface';
 import { TotpService } from '../../infrastructure/adapters/totp.service';
 import { OTP_SERVICE_PORT, OtpServicePort } from '../ports/otp.service.port';

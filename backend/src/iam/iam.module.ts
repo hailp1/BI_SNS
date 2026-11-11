@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { EmailModule } from '../email/email.module';
+import { EmailModule } from '../shared/email/email.module';
 import { LoginUseCase } from './application/commands/login.command';
 import { ManageUsersUseCase } from './application/commands/manage-users.command';
 import { VerifyOtpUseCase } from './application/commands/verify-otp.command';
