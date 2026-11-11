@@ -1,0 +1,21 @@
+{
+  "name": "cj-enterprise-sns",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CJ Foods Enterprise - Sales Network System Monorepo Root",
+  "scripts": {
+    "prepare": "husky",
+    "lint:backend": "npm --prefix backend run lint",
+    "build:backend": "npm --prefix backend run build"
+  },
+  "lint-staged": {
+    "backend/src/**/*.ts": [
+      "./backend/node_modules/.bin/eslint --config backend/.eslintrc.js --fix",
+      "./backend/node_modules/.bin/prettier --config backend/.prettierrc --write"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0"
+  }
+}

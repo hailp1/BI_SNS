@@ -1,0 +1,12964 @@
+
+
+
+
+
+
+
+        /* ========================================================================= */
+
+
+
+        /* FMCG PERFORMANCE COLORING ENGINE (GUARANTEED APPLIED WITH !IMPORTANT)     */
+
+
+
+        /* ========================================================================= */
+
+
+
+        .text-rose-600, .text-red-600, .kpi-red {
+
+
+
+            color: #e11d48 !important;
+
+
+
+        }
+
+
+
+        .text-rose-700, .text-red-700 {
+
+
+
+            color: #be123c !important;
+
+
+
+        }
+
+
+
+        .text-rose-800, .text-red-800 {
+
+
+
+            color: #9f1239 !important;
+
+
+
+        }
+
+
+
+        .text-emerald-700, .text-green-700, .text-green-800, .kpi-green-dark {
+
+
+
+            color: #15803d !important; /* Xanh lá đậm chuẩn FMCG */
+
+
+
+        }
+
+
+
+        .text-emerald-600, .text-green-600 {
+
+
+
+            color: #15803d !important; /* Xanh lá đậm chuẩn FMCG */
+
+
+
+        }
+
+
+
+        .text-emerald-800 {
+
+
+
+            color: #065f46 !important;
+
+
+
+        }
+
+
+
+        .bg-rose-50, .bg-red-50 {
+
+
+
+            background-color: #fff1f2 !important;
+
+
+
+        }
+
+
+
+        .bg-rose-100 {
+
+
+
+            background-color: #ffe4e6 !important;
+
+
+
+        }
+
+
+
+        .bg-rose-600 {
+
+
+
+            background-color: #e11d48 !important;
+
+
+
+        }
+
+
+
+        .bg-rose-700 {
+
+
+
+            background-color: #be123c !important;
+
+
+
+        }
+
+
+
+        .border-rose-200, .border-red-200 {
+
+
+
+            border-color: #fecdd3 !important;
+
+
+
+        }
+
+
+
+        .border-rose-300 {
+
+
+
+            border-color: #fda4af !important;
+
+
+
+        }
+
+
+
+        .border-rose-400 {
+
+
+
+            border-color: #fb7185 !important;
+
+
+
+        }
+
+
+
+        .bg-emerald-50, .bg-green-50 {
+
+
+
+            background-color: #f0fdf4 !important;
+
+
+
+        }
+
+
+
+        .bg-emerald-100 {
+
+
+
+            background-color: #dcfce7 !important;
+
+
+
+        }
+
+
+
+        .bg-emerald-600 {
+
+
+
+            background-color: #059669 !important;
+
+
+
+        }
+
+
+
+        .bg-emerald-700 {
+
+
+
+            background-color: #047857 !important;
+
+
+
+        }
+
+
+
+        .border-emerald-200, .border-green-200 {
+
+
+
+            border-color: #bbf7d0 !important;
+
+
+
+        }
+
+
+
+        .border-emerald-300 {
+
+
+
+            border-color: #86efac !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Missing Tailwind Palette Fallbacks (Sky, Amber, Teal, Slate) */
+
+
+
+        .bg-sky-50 { background-color: #f0f9ff !important; }
+
+
+
+        .bg-sky-100 { background-color: #e0f2fe !important; }
+
+
+
+        .bg-sky-200 { background-color: #bae6fd !important; }
+
+
+
+        .bg-sky-600 { background-color: #0284c7 !important; }
+
+
+
+        .bg-sky-700 { background-color: #0369a1 !important; }
+
+
+
+        .text-sky-700 { color: #0369a1 !important; }
+
+
+
+        .text-sky-800 { color: #075985 !important; }
+
+
+
+        .text-sky-900 { color: #0c4a6e !important; }
+
+
+
+        .text-sky-950 { color: #082f49 !important; }
+
+
+
+        .border-sky-200 { border-color: #bae6fd !important; }
+
+
+
+        .border-sky-300 { border-color: #7dd3fc !important; }
+
+
+
+        .border-sky-600 { border-color: #0284c7 !important; }
+
+
+
+
+
+
+
+        .bg-amber-50 { background-color: #fffbeb !important; }
+
+
+
+        .bg-amber-100 { background-color: #fef3c7 !important; }
+
+
+
+        .bg-amber-600 { background-color: #d97706 !important; }
+
+
+
+        .bg-amber-700 { background-color: #b45309 !important; }
+
+
+
+        .text-amber-700 { color: #b45309 !important; }
+
+
+
+        .text-amber-800 { color: #92400e !important; }
+
+
+
+        .border-amber-200 { border-color: #fde68a !important; }
+
+
+
+        .border-amber-300 { border-color: #fcd34d !important; }
+
+
+
+        .border-amber-400 { border-color: #fbbf24 !important; }
+
+
+
+        .border-amber-600 { border-color: #d97706 !important; }
+
+
+
+
+
+
+
+        .bg-teal-50 { background-color: #f0fdfa !important; }
+
+
+
+        .bg-teal-100 { background-color: #ccfbf1 !important; }
+
+
+
+        .bg-teal-600 { background-color: #0d9488 !important; }
+
+
+
+        .bg-teal-700 { background-color: #0f766e !important; }
+
+
+
+        .text-teal-800 { color: #115e59 !important; }
+
+
+
+        .text-teal-900 { color: #134e4a !important; }
+
+
+
+        .border-teal-200 { border-color: #99f6e4 !important; }
+
+
+
+        .border-teal-300 { border-color: #5eead4 !important; }
+
+
+
+
+
+
+
+        .bg-slate-50 { background-color: #f8fafc !important; }
+
+
+
+        .bg-slate-100 { background-color: #f1f5f9 !important; }
+
+
+
+        .bg-slate-200 { background-color: #e2e8f0 !important; }
+
+
+
+        .text-slate-500 { color: #64748b !important; }
+
+
+
+        .text-slate-600 { color: #475569 !important; }
+
+
+
+        .text-slate-700 { color: #334155 !important; }
+
+
+
+        .text-slate-800 { color: #1e293b !important; }
+
+
+
+        .text-slate-900 { color: #0f172a !important; }
+
+
+
+        .border-slate-200 { border-color: #e2e8f0 !important; }
+
+
+
+        .border-slate-300 { border-color: #cbd5e1 !important; }
+
+
+
+
+
+
+
+        /* ========================================================================= */
+
+
+
+        /* ROUTE TAB BULLETPROOF UNIFORM BUTTON & PILL SYSTEM (ĐỒNG DẠNG FORM)     */
+
+
+
+        /* ========================================================================= */
+
+
+
+        .btn-route-action {
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: center !important;
+
+
+
+            gap: 0.375rem !important;
+
+
+
+            padding: 0.35rem 0.75rem !important;
+
+
+
+            border-radius: 0.5rem !important;
+
+
+
+            font-size: 0.75rem !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            line-height: 1rem !important;
+
+
+
+            height: 32px !important;
+
+
+
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            transition: all 0.15s ease-in-out !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            user-select: none !important;
+
+
+
+        }
+
+
+
+        .btn-route-action:hover {
+
+
+
+            transform: translateY(-1px) !important;
+
+
+
+            box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.12) !important;
+
+
+
+        }
+
+
+
+        .btn-route-action:active {
+
+
+
+            transform: translateY(0) !important;
+
+
+
+        }
+
+
+
+        .btn-route-green {
+
+
+
+            background-color: #059669 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            border: 1px solid #047857 !important;
+
+
+
+        }
+
+
+
+        .btn-route-green:hover {
+
+
+
+            background-color: #047857 !important;
+
+
+
+        }
+
+
+
+        .btn-route-red {
+
+
+
+            background-color: #e11d48 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            border: 1px solid #be123c !important;
+
+
+
+        }
+
+
+
+        .btn-route-red:hover {
+
+
+
+            background-color: #be123c !important;
+
+
+
+        }
+
+
+
+        .btn-route-amber {
+
+
+
+            background-color: #d97706 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            border: 1px solid #b45309 !important;
+
+
+
+        }
+
+
+
+        .btn-route-amber:hover {
+
+
+
+            background-color: #b45309 !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-blue {
+
+
+
+            background-color: #ffffff !important;
+
+
+
+            color: #0369a1 !important;
+
+
+
+            border: 1px solid #7dd3fc !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-blue:hover {
+
+
+
+            background-color: #e0f2fe !important;
+
+
+
+            color: #0284c7 !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-purple {
+
+
+
+            background-color: #ffffff !important;
+
+
+
+            color: #6b21a8 !important;
+
+
+
+            border: 1px solid #d8b4fe !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-purple:hover {
+
+
+
+            background-color: #f3e8ff !important;
+
+
+
+            color: #7e22ce !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-teal {
+
+
+
+            background-color: #ffffff !important;
+
+
+
+            color: #0f766e !important;
+
+
+
+            border: 1px solid #5eead4 !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-teal:hover {
+
+
+
+            background-color: #f0fdfa !important;
+
+
+
+            color: #115e59 !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-slate {
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+            color: #334155 !important;
+
+
+
+            border: 1px solid #cbd5e1 !important;
+
+
+
+        }
+
+
+
+        .btn-route-sub-slate:hover {
+
+
+
+            background-color: #e2e8f0 !important;
+
+
+
+            color: #0f172a !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Header Badges */
+
+
+
+        .route-badge-odd-header {
+
+
+
+            background-color: #0284c7 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 900 !important;
+
+
+
+            padding: 0.25rem 0.65rem !important;
+
+
+
+            border-radius: 0.375rem !important;
+
+
+
+            font-size: 0.7rem !important;
+
+
+
+            letter-spacing: 0.05em !important;
+
+
+
+            text-transform: uppercase !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 0.25rem !important;
+
+
+
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+
+
+
+        }
+
+
+
+        .route-badge-even-header {
+
+
+
+            background-color: #7e22ce !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 900 !important;
+
+
+
+            padding: 0.25rem 0.65rem !important;
+
+
+
+            border-radius: 0.375rem !important;
+
+
+
+            font-size: 0.7rem !important;
+
+
+
+            letter-spacing: 0.05em !important;
+
+
+
+            text-transform: uppercase !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 0.25rem !important;
+
+
+
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+
+
+
+        }
+
+
+
+        .route-badge-daily-header {
+
+
+
+            background-color: #0d9488 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 900 !important;
+
+
+
+            padding: 0.25rem 0.65rem !important;
+
+
+
+            border-radius: 0.375rem !important;
+
+
+
+            font-size: 0.7rem !important;
+
+
+
+            letter-spacing: 0.05em !important;
+
+
+
+            text-transform: uppercase !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 0.25rem !important;
+
+
+
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Uniform Route Filter Pills */
+
+
+
+        .route-pill {
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: center !important;
+
+
+
+            gap: 0.25rem !important;
+
+
+
+            padding: 0.25rem 0.65rem !important;
+
+
+
+            border-radius: 0.5rem !important;
+
+
+
+            font-size: 0.75rem !important;
+
+
+
+            font-weight: 600 !important;
+
+
+
+            line-height: 1rem !important;
+
+
+
+            height: 28px !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            transition: all 0.15s ease-in-out !important;
+
+
+
+            border-width: 1px !important;
+
+
+
+            border-style: solid !important;
+
+
+
+            user-select: none !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        .route-pill:hover {
+
+
+
+            transform: translateY(-1px) !important;
+
+
+
+            filter: brightness(0.96) !important;
+
+
+
+        }
+
+
+
+        .route-pill:active {
+
+
+
+            transform: translateY(0) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Segment pills */
+
+
+
+        .pill-seg-all-inactive { background-color: #f1f5f9 !important; color: #334155 !important; border-color: #cbd5e1 !important; }
+
+
+
+        .pill-seg-all-active   { background-color: #2563eb !important; color: #ffffff !important; border-color: #1d4ed8 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-seg-act-inactive { background-color: #ecfdf5 !important; color: #065f46 !important; border-color: #a7f3d0 !important; }
+
+
+
+        .pill-seg-act-active   { background-color: #059669 !important; color: #ffffff !important; border-color: #047857 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-seg-z1-inactive  { background-color: #fefce8 !important; color: #854d0e !important; border-color: #fef08a !important; }
+
+
+
+        .pill-seg-z1-active    { background-color: #ca8a04 !important; color: #ffffff !important; border-color: #a16207 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-seg-z3-inactive  { background-color: #fff1f2 !important; color: #9f1239 !important; border-color: #fecdd3 !important; }
+
+
+
+        .pill-seg-z3-active    { background-color: #e11d48 !important; color: #ffffff !important; border-color: #be123c !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        /* Freq pills */
+
+
+
+        .pill-freq-f1-inactive { background-color: #fffbeb !important; color: #92400e !important; border-color: #fde68a !important; }
+
+
+
+        .pill-freq-f1-active   { background-color: #d97706 !important; color: #ffffff !important; border-color: #b45309 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-freq-f2-inactive { background-color: #faf5ff !important; color: #6b21a8 !important; border-color: #e9d5ff !important; }
+
+
+
+        .pill-freq-f2-active   { background-color: #7e22ce !important; color: #ffffff !important; border-color: #6b21a8 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-freq-f4-inactive { background-color: #eff6ff !important; color: #1e40af !important; border-color: #bfdbfe !important; }
+
+
+
+        .pill-freq-f4-active   { background-color: #2563eb !important; color: #ffffff !important; border-color: #1d4ed8 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-freq-f8-inactive { background-color: #f0fdfa !important; color: #115e59 !important; border-color: #99f6e4 !important; }
+
+
+
+        .pill-freq-f8-active   { background-color: #0d9488 !important; color: #ffffff !important; border-color: #0f766e !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        /* Week pills */
+
+
+
+        .pill-week-odd-inactive { background-color: #f0f9ff !important; color: #0369a1 !important; border-color: #bae6fd !important; }
+
+
+
+        .pill-week-odd-active   { background-color: #0284c7 !important; color: #ffffff !important; border-color: #0369a1 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-week-even-inactive { background-color: #faf5ff !important; color: #6b21a8 !important; border-color: #e9d5ff !important; }
+
+
+
+        .pill-week-even-active   { background-color: #7e22ce !important; color: #ffffff !important; border-color: #6b21a8 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        /* Asset pills */
+
+
+
+        .pill-asset-frz-inactive { background-color: #ecfeff !important; color: #155e75 !important; border-color: #a5f3fc !important; }
+
+
+
+        .pill-asset-frz-active   { background-color: #0891b2 !important; color: #ffffff !important; border-color: #0e7490 !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        .pill-asset-std-inactive { background-color: #eef2ff !important; color: #3730a3 !important; border-color: #c7d2fe !important; }
+
+
+
+        .pill-asset-std-active   { background-color: #4f46e5 !important; color: #ffffff !important; border-color: #4338ca !important; font-weight: 800 !important; }
+
+
+
+
+
+
+
+        /* Daily filter pills */
+
+
+
+        .pill-daily-active   { background-color: #0d9488 !important; color: #ffffff !important; border-color: #0f766e !important; font-weight: 800 !important; }
+
+
+
+        .pill-daily-inactive { background-color: #f0fdfa !important; color: #0f766e !important; border-color: #99f6e4 !important; font-weight: 600 !important; }
+
+
+
+
+
+
+
+        /* ========================================================================= */
+
+
+
+        /* PROMINENT VISIBLE SCROLLBAR & ROBUST SIZING FOR ALL ROUTE TABLES        */
+
+
+
+        /* ========================================================================= */
+
+
+
+        .route-table-scroll-container {
+
+
+
+            overflow-x: auto !important;
+
+
+
+            overflow-y: auto !important;
+
+
+
+            -webkit-overflow-scrolling: touch !important;
+
+
+
+            overscroll-behavior-x: contain !important;
+
+
+
+            position: relative !important;
+
+
+
+            width: 100% !important;
+
+
+
+            max-width: 100% !important;
+
+
+
+            scrollbar-width: thin !important;
+
+
+
+            scrollbar-color: #64748b #f1f5f9 !important;
+
+
+
+            background-color: #ffffff !important;
+
+
+
+        }
+
+
+
+        .route-table-scroll-container::-webkit-scrollbar {
+
+
+
+            width: 10px !important;
+
+
+
+            height: 10px !important;
+
+
+
+        }
+
+
+
+        .route-table-scroll-container::-webkit-scrollbar-track {
+
+
+
+            background: #f1f5f9 !important;
+
+
+
+            border-radius: 6px !important;
+
+
+
+            border: 1px solid #e2e8f0 !important;
+
+
+
+        }
+
+
+
+        .route-table-scroll-container::-webkit-scrollbar-thumb {
+
+
+
+            background: #94a3b8 !important;
+
+
+
+            border-radius: 6px !important;
+
+
+
+            border: 2px solid #f1f5f9 !important;
+
+
+
+        }
+
+
+
+        .route-table-scroll-container::-webkit-scrollbar-thumb:hover {
+
+
+
+            background: #64748b !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Đảm bảo tất cả bảng tuyến RTM luôn có độ rộng tối thiểu an toàn, KHÔNG BAO GIỜ bị co rúm trên Mobile */
+
+
+
+        .route-data-table {
+
+
+
+            border-collapse: separate !important;
+
+
+
+            border-spacing: 0 !important;
+
+
+
+            width: max-content !important;
+
+
+
+        }
+
+
+
+        #table-gt-route-tree {
+
+
+
+            min-width: 1420px !important;
+
+
+
+            width: max-content !important;
+
+
+
+            table-layout: fixed !important;
+
+
+
+        }
+
+
+
+        .hide-odd-cols .col-odd-week {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        .hide-even-cols .col-even-week {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        #table-gt-route-tree-overview {
+
+
+
+            min-width: 1100px !important;
+
+
+
+            width: max-content !important;
+
+
+
+            table-layout: fixed !important;
+
+
+
+        }
+
+
+
+        #table-gt-route-daily {
+
+
+
+            min-width: 2100px !important;
+
+
+
+            width: max-content !important;
+
+
+
+            table-layout: fixed !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Cố định cột 1 (Phân cấp / GSBH / NVBH) trên cả Desktop và Mobile */
+
+
+
+        .route-first-col-cell,
+
+
+
+        th.route-sticky-th {
+
+
+
+            width: 270px;
+
+
+
+            min-width: 120px;
+
+
+
+        }
+
+
+
+        .route-sticky-th {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            top: 0 !important;
+
+
+
+            z-index: 40 !important;
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.12) !important;
+
+
+
+        }
+
+
+
+        .route-sticky-th-sub {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            top: 29px !important;
+
+
+
+            z-index: 40 !important;
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.12) !important;
+
+
+
+        }
+
+
+
+        .route-sticky-col {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 15 !important;
+
+
+
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.12) !important;
+
+
+
+        }
+
+
+
+        /* 100% Solid Opaque Backgrounds for Sticky Columns (Chống chồng lấn dữ liệu khi vuốt ngang) */
+
+
+
+        .sticky-cell-root             { background-color: #f0fdfa !important; }
+
+
+
+        .sticky-cell-root-odd         { background-color: #f0f9ff !important; }
+
+
+
+        .sticky-cell-root-even        { background-color: #faf5ff !important; }
+
+
+
+        .sticky-cell-root-overview    { background-color: #eef2ff !important; }
+
+
+
+        .sticky-cell-lvl1             { background-color: #f1f5f9 !important; }
+
+
+
+        .sticky-cell-lvl2             { background-color: #ecfdf5 !important; }
+
+
+
+        .sticky-cell-lvl3             { background-color: #faf5ff !important; }
+
+
+
+        .sticky-cell-lvl4             { background-color: #fffbeb !important; }
+
+
+
+        .sticky-cell-lvl5             { background-color: #ffffff !important; }
+
+
+
+        .sticky-cell-sel              { background-color: #dbeafe !important; }
+
+
+
+
+
+
+
+        :root {
+
+
+
+            --bg-page: #F0F2F5;
+
+
+
+            --sidebar-bg: #FFFFFF;
+
+
+
+            --card-bg: #FFFFFF;
+
+
+
+            --text-dark: #344767;
+
+
+
+            --text-muted: #7B809A;
+
+
+
+        }
+
+
+
+        body {
+
+
+
+            background-color: var(--bg-page);
+
+
+
+            color: var(--text-dark);
+
+
+
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+
+
+            -webkit-font-smoothing: antialiased;
+
+
+
+        }
+
+
+
+        .font-mono-num {
+
+
+
+            font-family: 'JetBrains Mono', 'Roboto', monospace;
+
+
+
+            font-variant-numeric: tabular-nums;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        .material-card {
+
+
+
+            background: var(--card-bg);
+
+
+
+            border-radius: 1rem;
+
+
+
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+
+
+
+            position: relative;
+
+
+
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+
+
+        }
+
+
+
+        .material-card:hover {
+
+
+
+            box-shadow: 0 6px 24px 0 rgba(0, 0, 0, 0.08);
+
+
+
+        }
+
+
+
+        .floating-icon-box {
+
+
+
+            position: absolute;
+
+
+
+            top: -12px;
+
+
+
+            left: 16px;
+
+
+
+            width: 3rem;
+
+
+
+            height: 3rem;
+
+
+
+            border-radius: 0.75rem;
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            color: #FFFFFF;
+
+
+
+            font-size: 1.25rem;
+
+
+
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.14);
+
+
+
+        }
+
+
+
+        .floating-chart-header {
+
+
+
+            margin-top: -16px;
+
+
+
+            margin-left: 12px;
+
+
+
+            margin-right: 12px;
+
+
+
+            border-radius: 0.75rem;
+
+
+
+            padding: 10px;
+
+
+
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.14);
+
+
+
+        }
+
+
+
+        .grad-primary { background: linear-gradient(195deg, #be185d, #9d174d); }
+
+
+
+        .grad-green   { background: linear-gradient(195deg, #15803d, #14532d); }
+
+
+
+        .grad-blue    { background: linear-gradient(195deg, #1e40af, #0f172a); }
+
+
+
+        .grad-purple  { background: linear-gradient(195deg, #6b21a8, #3b0764); }
+
+
+
+        .grad-orange  { background: linear-gradient(195deg, #c2410c, #7c2d12); }
+
+
+
+        .grad-red     { background: linear-gradient(195deg, #b91c1c, #7f1d1d); }
+
+
+
+
+
+
+
+        .gt-subtab-btn {
+
+
+
+            background-color: #f8fafc;
+
+
+
+            color: #475569;
+
+
+
+            border: 1px solid #e2e8f0;
+
+
+
+            cursor: pointer;
+
+
+
+            transition: all 0.2s ease;
+
+
+
+        }
+
+
+
+        .gt-subtab-btn:hover {
+
+
+
+            background-color: #f1f5f9;
+
+
+
+            color: #0f172a;
+
+
+
+        }
+
+
+
+        .gt-subtab-btn.active {
+
+
+
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            border-color: #6d28d9 !important;
+
+
+
+            box-shadow: 0 2px 8px rgba(109, 40, 217, 0.25) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        
+
+
+
+        .nav-item {
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            gap: 12px;
+
+
+
+            padding: 10px 16px;
+
+
+
+            border-radius: 0.5rem;
+
+
+
+            font-size: 0.85rem;
+
+
+
+            font-weight: 500;
+
+
+
+            color: var(--text-dark);
+
+
+
+            transition: all 0.2s;
+
+
+
+            cursor: pointer;
+
+
+
+        }
+
+
+
+        .nav-item:hover {
+
+
+
+            background-color: #F8F9FA;
+
+
+
+        }
+
+
+
+        .nav-item.active {
+
+
+
+            background: linear-gradient(195deg, #49a3f1, #1A73E8);
+
+
+
+            color: #FFFFFF;
+
+
+
+            font-weight: 700;
+
+
+
+            box-shadow: 0 4px 10px rgba(26, 115, 232, 0.3);
+
+
+
+        }
+
+
+
+        .nav-item.active #nav-gt-chevron {
+
+
+
+            color: #ffffff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* GT DIRECTORY TREE ACCORDION SUB-ITEMS */
+
+
+
+        .gt-tree-subitem {
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            gap: 8px;
+
+
+
+            padding: 7px 10px;
+
+
+
+            border-radius: 6px;
+
+
+
+            font-size: 0.78rem;
+
+
+
+            font-weight: 600;
+
+
+
+            color: #475569;
+
+
+
+            cursor: pointer;
+
+
+
+            transition: all 0.15s ease-in-out;
+
+
+
+            text-decoration: none;
+
+
+
+            position: relative;
+
+
+
+        }
+
+
+
+        .gt-tree-subitem:hover {
+
+
+
+            background-color: #f3e8ff;
+
+
+
+            color: #7e22ce;
+
+
+
+        }
+
+
+
+        .gt-tree-subitem.active {
+
+
+
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 700;
+
+
+
+            box-shadow: 0 2px 6px rgba(109, 40, 217, 0.3) !important;
+
+
+
+        }
+
+
+
+        /* Highlight nổi bật đặc biệt cho Tab chính Hiệu Quả POSM */
+
+
+
+        #gt-subnav-freezer.active,
+
+
+
+        #m-gt-subnav-freezer.active {
+
+
+
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45) !important;
+
+
+
+            border-left: 3.5px solid #38bdf8 !important;
+
+
+
+        }
+
+
+
+        #gt-subnav-freezer.active span,
+
+
+
+        #m-gt-subnav-freezer.active span {
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+        }
+
+
+
+        #gt-subnav-freezer:hover,
+
+
+
+        #m-gt-subnav-freezer:hover {
+
+
+
+            background: #ede9fe !important;
+
+
+
+            color: #5b21b6 !important;
+
+
+
+        }
+
+
+
+        .gt-tree-subitem .tree-icon {
+
+
+
+            font-size: 0.85rem;
+
+
+
+            flex-shrink: 0;
+
+
+
+        }
+
+
+
+        #nav-gt-chevron.rotate-180 {
+
+
+
+            transform: rotate(180deg);
+
+
+
+        }
+
+
+
+        .nav-item.active .gt-tree-badge {
+
+
+
+            background-color: rgba(255, 255, 255, 0.25) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+        }
+
+
+
+        
+
+
+
+        .month-strip-wrapper {
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            gap: 6px;
+
+
+
+            overflow-x: auto;
+
+
+
+            scrollbar-width: none;
+
+
+
+            -ms-overflow-style: none;
+
+
+
+            -webkit-overflow-scrolling: touch;
+
+
+
+            padding: 2px 1px;
+
+
+
+            width: 100%;
+
+
+
+        }
+
+
+
+        .month-strip-wrapper::-webkit-scrollbar {
+
+
+
+            display: none;
+
+
+
+        }
+
+
+
+
+
+
+
+        .month-chip {
+
+
+
+            padding: 0 10px;
+
+
+
+            height: 32px;
+
+
+
+            min-width: 38px;
+
+
+
+            border-radius: 8px;
+
+
+
+            font-size: 12px;
+
+
+
+            font-weight: 800;
+
+
+
+            cursor: pointer;
+
+
+
+            transition: all 0.15s ease-in-out;
+
+
+
+            border: 1.5px solid #CBD5E1;
+
+
+
+            background: #FFFFFF;
+
+
+
+            color: #1E293B;
+
+
+
+            user-select: none;
+
+
+
+            display: inline-flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            flex-shrink: 0;
+
+
+
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+
+
+
+        }
+
+
+
+        .month-chip:hover {
+
+
+
+            background: #F1F5F9;
+
+
+
+            border-color: #94A3B8;
+
+
+
+            color: #0F172A;
+
+
+
+        }
+
+
+
+        .month-chip.active {
+
+
+
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            border-color: #38BDF8 !important;
+
+
+
+            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45) !important;
+
+
+
+            transform: translateY(-1px);
+
+
+
+        }
+
+
+
+
+
+
+
+        .month-action-btn {
+
+
+
+            height: 32px;
+
+
+
+            padding: 0 10px;
+
+
+
+            font-size: 11px;
+
+
+
+            font-weight: 800;
+
+
+
+            border-radius: 8px;
+
+
+
+            cursor: pointer;
+
+
+
+            transition: all 0.15s ease;
+
+
+
+            white-space: nowrap;
+
+
+
+            flex-shrink: 0;
+
+
+
+            display: inline-flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+
+
+
+        }
+
+
+
+        .btn-all-months {
+
+
+
+            background: #ECFDF5;
+
+
+
+            color: #047857;
+
+
+
+            border: 1.5px solid #A7F3D0;
+
+
+
+        }
+
+
+
+        .btn-all-months:hover {
+
+
+
+            background: #D1FAE5;
+
+
+
+            border-color: #6EE7B7;
+
+
+
+        }
+
+
+
+        .btn-reset-month {
+
+
+
+            background: #FFFBEB;
+
+
+
+            color: #B45309;
+
+
+
+            border: 1.5px solid #FDE68A;
+
+
+
+        }
+
+
+
+        .btn-reset-month:hover {
+
+
+
+            background: #FEF3C7;
+
+
+
+            border-color: #FCD34D;
+
+
+
+        }
+
+
+
+
+
+
+
+        .period-status-bar {
+
+
+
+            background: #F0F9FF;
+
+
+
+            border: 1px solid #BAE6FD;
+
+
+
+            border-radius: 8px;
+
+
+
+            padding: 6px 12px;
+
+
+
+            font-size: 11.5px;
+
+
+
+            font-weight: 800;
+
+
+
+            color: #0369A1;
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            gap: 6px;
+
+
+
+            box-shadow: 0 1px 2px rgba(2, 132, 199, 0.05);
+
+
+
+            line-height: 1.4;
+
+
+
+            word-break: break-word;
+
+
+
+        }
+
+
+
+
+
+
+
+        .header-dropdown {
+
+
+
+            font-size: 11px;
+
+
+
+            font-weight: 600;
+
+
+
+            padding: 4px 7px;
+
+
+
+            border-radius: 6px;
+
+
+
+            border: 1px solid #CBD5E1;
+
+
+
+            background-color: #FFFFFF;
+
+
+
+            color: #334155;
+
+
+
+            outline: none;
+
+
+
+            cursor: pointer;
+
+
+
+            transition: border-color 0.2s;
+
+
+
+            max-width: 145px;
+
+
+
+            text-overflow: ellipsis;
+
+
+
+            white-space: nowrap;
+
+
+
+            overflow: hidden;
+
+
+
+            height: 28px;
+
+
+
+            line-height: 1.2;
+
+
+
+            flex-shrink: 0;
+
+
+
+        }
+
+
+
+        .header-dropdown:hover, .header-dropdown:focus {
+
+
+
+            border-color: #2563EB;
+
+
+
+        }
+
+
+
+        #main-filter-bar-wrapper {
+
+
+
+            flex-wrap: nowrap !important;
+
+
+
+            min-height: 44px !important;
+
+
+
+            max-height: 44px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            overflow-x: auto !important;
+
+
+
+            overflow-y: hidden !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #main-filter-bar-wrapper.mobile-expanded {
+
+
+
+            flex-wrap: wrap !important;
+
+
+
+            min-height: auto !important;
+
+
+
+            max-height: none !important;
+
+
+
+            white-space: normal !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* ENTERPRISE TABLE SCROLL & DUAL-AXIS FREEZE */
+
+
+
+        .table-scroll-container {
+
+
+
+            max-height: 520px;
+
+
+
+            overflow-y: auto !important;
+
+
+
+            overflow-x: auto !important;
+
+
+
+            -webkit-overflow-scrolling: touch !important;
+
+
+
+            position: relative !important;
+
+
+
+            border: 1px solid #E2E8F0;
+
+
+
+            border-radius: 8px;
+
+
+
+            scrollbar-width: thin;
+
+
+
+            scrollbar-color: #94A3B8 #F1F5F9;
+
+
+
+        }
+
+
+
+        .table-scroll-container::-webkit-scrollbar {
+
+
+
+            width: 6px !important;
+
+
+
+            height: 6px !important;
+
+
+
+            display: block !important;
+
+
+
+        }
+
+
+
+        .table-scroll-container::-webkit-scrollbar-track {
+
+
+
+            background: #F1F5F9 !important;
+
+
+
+            border-radius: 4px !important;
+
+
+
+        }
+
+
+
+        .table-scroll-container::-webkit-scrollbar-thumb {
+
+
+
+            background: #94A3B8 !important;
+
+
+
+            border-radius: 4px !important;
+
+
+
+        }
+
+
+
+        .table-scroll-container::-webkit-scrollbar-thumb:hover {
+
+
+
+            background: #64748B !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .mat-table {
+
+
+
+            width: 100%;
+
+
+
+            border-collapse: separate;
+
+
+
+            border-spacing: 0;
+
+
+
+            table-layout: auto;
+
+
+
+        }
+
+
+
+        .mat-table thead th {
+
+
+
+            text-transform: uppercase;
+
+
+
+            font-size: 10px;
+
+
+
+            font-weight: 700;
+
+
+
+            color: #475569;
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+            border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+            padding: 8px 10px;
+
+
+
+            text-align: left;
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            z-index: 20 !important;
+
+
+
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        /* GLOBAL ENFORCEMENT: ALL NUMERIC CELLS IN TABLES ALIGNED RIGHT */
+        .mat-table td.font-mono-num:not(.td-rank-col):not(.th-first-col):not([class*="tree-lvl-"]),
+        .mat-table th.th-num-col,
+        .table-tree td.font-mono-num:not(.td-rank-col):not(.th-first-col):not([class*="tree-lvl-"]),
+        .route-data-table td.col-odd-week,
+        .route-data-table td.col-even-week {
+            text-align: right !important;
+        }
+
+        .mat-table td {
+
+
+
+            font-size: 11px;
+
+
+
+            padding: 6px 10px;
+
+
+
+            border-bottom: 1px solid #F0F2F5;
+
+
+
+            color: #344767;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            vertical-align: middle;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* STICKY FIRST COLUMN (Freeze Column horizontally) */
+
+
+
+        .mat-table th:first-child,
+
+
+
+        .mat-table td:first-child {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 15 !important;
+
+
+
+            box-shadow: 2px 0 6px rgba(0, 0, 0, 0.08) !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* STICKY CORNER CELL (Top-Left intersection of header & first column) */
+
+
+
+        .mat-table thead th:first-child {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 35 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* FIRST COLUMN DESKTOP WIDTH & INDENTATION */
+
+
+
+        .th-first-col {
+
+
+
+            min-width: 175px;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* COMPACT RANK / STT COLUMN (Strictly 48px - 52px, never balloons out) */
+
+
+
+        .th-rank-col,
+
+
+
+        .td-rank-col,
+
+
+
+        .mat-table th.th-rank-col,
+
+
+
+        .mat-table td.td-rank-col,
+
+
+
+        .mat-table th:first-child.th-rank-col,
+
+
+
+        .mat-table td:first-child.td-rank-col {
+
+
+
+            width: 48px;
+
+
+
+            min-width: 24px;
+
+
+
+            text-align: center !important;
+
+
+
+            padding-left: 2px !important;
+
+
+
+            padding-right: 2px !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* TREE FIRST COLUMN (Strictly bounded 230px - 245px so it NEVER masks numeric columns when expanded to NPP/Account) */
+
+
+
+        .th-tree-col,
+
+
+
+        .td-tree-col,
+
+
+
+        .mat-table th.th-tree-col,
+
+
+
+        .mat-table td.td-tree-col,
+
+
+
+        .mat-table th:first-child.th-tree-col,
+
+
+
+        .mat-table td:first-child.td-tree-col,
+
+
+
+        #table-tree-chan th:first-child,
+
+
+
+        #table-tree-chan td:first-child,
+
+
+
+        #table-tree-prod th:first-child,
+
+
+
+        #table-tree-prod td:first-child,
+
+
+
+        #table-tree-prod-gt th:first-child,
+
+
+
+        #table-tree-prod-gt td:first-child,
+
+
+
+        #table-tree-gt th:first-child,
+
+
+
+        #table-tree-gt td:first-child,
+
+
+
+        #table-tree-prod-mt th:first-child,
+
+
+
+        #table-tree-prod-mt td:first-child,
+
+
+
+        #table-tree-mt th:first-child,
+
+
+
+        #table-tree-mt td:first-child,
+
+
+
+        #table-tree-prod-b2b th:first-child,
+
+
+
+        #table-tree-prod-b2b td:first-child,
+
+
+
+        #table-tree-b2b th:first-child,
+
+
+
+        #table-tree-b2b td:first-child,
+
+
+
+        #table-tree-prod-kr th:first-child,
+
+
+
+        #table-tree-prod-kr td:first-child,
+
+
+
+        #table-tree-kr th:first-child,
+
+
+
+        #table-tree-kr td:first-child,
+
+
+
+        .mat-table td[class*="tree-lvl-"] {
+
+
+
+            width: 235px;
+
+
+
+            min-width: 100px;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+            text-overflow: ellipsis !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* TREE TABLES NUMERIC DATA COLUMNS (Ensure proper min-widths for clear visibility) */
+
+
+
+        #table-tree-chan th:nth-child(2), #table-tree-chan td:nth-child(2),
+
+
+
+        #table-tree-prod th:nth-child(2), #table-tree-prod td:nth-child(2),
+
+
+
+        #table-tree-prod-gt th:nth-child(2), #table-tree-prod-gt td:nth-child(2),
+
+
+
+        #table-tree-prod-mt th:nth-child(2), #table-tree-prod-mt td:nth-child(2),
+
+
+
+        #table-tree-mt th:nth-child(2), #table-tree-mt td:nth-child(2),
+
+
+
+        #table-tree-prod-b2b th:nth-child(2), #table-tree-prod-b2b td:nth-child(2),
+
+
+
+        #table-tree-b2b th:nth-child(2), #table-tree-b2b td:nth-child(2),
+
+
+
+        #table-tree-prod-kr th:nth-child(2), #table-tree-prod-kr td:nth-child(2),
+
+
+
+        #table-tree-kr th:nth-child(2), #table-tree-kr td:nth-child(2) {
+
+
+
+            min-width: 95px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-tree-chan th:nth-child(3), #table-tree-chan td:nth-child(3),
+
+
+
+        #table-tree-prod th:nth-child(3), #table-tree-prod td:nth-child(3),
+
+
+
+        #table-tree-prod-gt th:nth-child(3), #table-tree-prod-gt td:nth-child(3),
+
+
+
+        #table-tree-prod-mt th:nth-child(3), #table-tree-prod-mt td:nth-child(3),
+
+
+
+        #table-tree-mt th:nth-child(3), #table-tree-mt td:nth-child(3),
+
+
+
+        #table-tree-prod-b2b th:nth-child(3), #table-tree-prod-b2b td:nth-child(3),
+
+
+
+        #table-tree-b2b th:nth-child(3), #table-tree-b2b td:nth-child(3),
+
+
+
+        #table-tree-prod-kr th:nth-child(3), #table-tree-prod-kr td:nth-child(3),
+
+
+
+        #table-tree-kr th:nth-child(3), #table-tree-kr td:nth-child(3) {
+
+
+
+            min-width: 80px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-tree-chan th:nth-child(4), #table-tree-chan td:nth-child(4),
+
+
+
+        #table-tree-prod th:nth-child(4), #table-tree-prod td:nth-child(4),
+
+
+
+        #table-tree-prod-gt th:nth-child(4), #table-tree-prod-gt td:nth-child(4),
+
+
+
+        #table-tree-prod-mt th:nth-child(4), #table-tree-prod-mt td:nth-child(4),
+
+
+
+        #table-tree-mt th:nth-child(4), #table-tree-mt td:nth-child(4),
+
+
+
+        #table-tree-prod-b2b th:nth-child(4), #table-tree-prod-b2b td:nth-child(4),
+
+
+
+        #table-tree-b2b th:nth-child(4), #table-tree-b2b td:nth-child(4),
+
+
+
+        #table-tree-prod-kr th:nth-child(4), #table-tree-prod-kr td:nth-child(4),
+
+
+
+        #table-tree-kr th:nth-child(4), #table-tree-kr td:nth-child(4) {
+
+
+
+            min-width: 60px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-tree-chan th:nth-child(5), #table-tree-chan td:nth-child(5),
+
+
+
+        #table-tree-prod th:nth-child(5), #table-tree-prod td:nth-child(5),
+
+
+
+        #table-tree-prod-gt th:nth-child(5), #table-tree-prod-gt td:nth-child(5),
+
+
+
+        #table-tree-prod-mt th:nth-child(5), #table-tree-prod-mt td:nth-child(5),
+
+
+
+        #table-tree-mt th:nth-child(5), #table-tree-mt td:nth-child(5),
+
+
+
+        #table-tree-prod-b2b th:nth-child(5), #table-tree-prod-b2b td:nth-child(5),
+
+
+
+        #table-tree-b2b th:nth-child(5), #table-tree-b2b td:nth-child(5),
+
+
+
+        #table-tree-prod-kr th:nth-child(5), #table-tree-prod-kr td:nth-child(5),
+
+
+
+        #table-tree-kr th:nth-child(5), #table-tree-kr td:nth-child(5) {
+
+
+
+            min-width: 65px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-tree-chan th:nth-child(6), #table-tree-chan td:nth-child(6),
+
+
+
+        #table-tree-prod th:nth-child(6), #table-tree-prod td:nth-child(6),
+
+
+
+        #table-tree-prod-gt th:nth-child(6), #table-tree-prod-gt td:nth-child(6),
+
+
+
+        #table-tree-prod-mt th:nth-child(6), #table-tree-prod-mt td:nth-child(6),
+
+
+
+        #table-tree-mt th:nth-child(6), #table-tree-mt td:nth-child(6),
+
+
+
+        #table-tree-prod-b2b th:nth-child(6), #table-tree-prod-b2b td:nth-child(6),
+
+
+
+        #table-tree-b2b th:nth-child(6), #table-tree-b2b td:nth-child(6),
+
+
+
+        #table-tree-prod-kr th:nth-child(6), #table-tree-prod-kr td:nth-child(6),
+
+
+
+        #table-tree-kr th:nth-child(6), #table-tree-kr td:nth-child(6) {
+
+
+
+            min-width: 85px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-tree-prod-gt th:nth-child(7), #table-tree-prod-gt td:nth-child(7) {
+
+
+
+            min-width: 85px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* STICKY SECOND COLUMN (Freezes entity name on horizontal scroll) */
+
+
+
+        .mat-table th.sticky-col-2,
+
+
+
+        .mat-table td.sticky-col-2 {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 48px !important;
+
+
+
+            z-index: 14 !important;
+
+
+
+            box-shadow: 3px 0 6px rgba(0, 0, 0, 0.06) !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        .mat-table thead th.sticky-col-2 {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 48px !important;
+
+
+
+            z-index: 34 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-gt-fund-tree th,
+
+
+
+        #table-gt-fund-tree td:not(:first-child),
+
+
+
+        #table-gt-prod-matrix th,
+
+
+
+        #table-gt-prod-matrix td:not(:first-child):not(.sticky-col-2),
+
+
+
+        #table-gt-cust-routes th,
+
+
+
+        #table-gt-cust-routes td:not(:first-child):not(.sticky-col-2) {
+
+
+
+            white-space: nowrap !important;
+
+
+
+            vertical-align: middle;
+
+
+
+        }
+
+
+
+        .tree-lvl-1 { padding-left: 8px !important; }
+
+
+
+        .tree-lvl-2 { padding-left: 22px !important; }
+
+
+
+        .tree-lvl-3 { padding-left: 38px !important; }
+
+
+
+        .tree-lvl-4 { padding-left: 54px !important; }
+
+
+
+        .tree-lvl-5 { padding-left: 70px !important; }
+
+
+
+
+
+
+
+        /* OPAQUE BACKGROUNDS FOR STICKY TD:FIRST-CHILD & STICKY-COL-2 */
+
+
+
+        .tree-row-total,
+
+
+
+        .mat-table tr.tree-row-total,
+
+
+
+        .mat-table tr[data-level="0"] {
+
+
+
+            font-weight: 800 !important;
+
+
+
+        }
+
+
+
+        .tree-row-total td,
+
+
+
+        .mat-table tr.tree-row-total td,
+
+
+
+        .mat-table tr[data-level="0"] td {
+
+
+
+            font-weight: 800 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+                /* SUMMARY ROW ENTIRE-ROW STYLING & BOLDING (ALL COLUMNS IN ROW) */
+
+
+
+        /* AMBIENT (Storage cấp 0): Tô màu & in đậm toàn bộ dòng tất cả các cột */
+
+
+
+        .mat-table tr.tree-row-ambient td,
+
+
+
+        .mat-table tr[class*="tree-row-ambient"] td,
+
+
+
+        tr.tree-row-ambient td {
+
+
+
+            background-color: #fef3c7 !important;
+
+
+
+            border-top: 2px solid #f59e0b !important;
+
+
+
+            border-bottom: 2px solid #f59e0b !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #78350f !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-ambient:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-ambient"]:hover td,
+
+
+
+        tr.tree-row-ambient:hover td {
+
+
+
+            background-color: #fde68a !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-ambient td:first-child,
+
+
+
+        .mat-table tr.tree-row-ambient td.sticky-col-2,
+
+
+
+        .mat-table tr[class*="tree-row-ambient"] td:first-child,
+
+
+
+        .mat-table tr[class*="tree-row-ambient"] td.sticky-col-2 {
+
+
+
+            background-color: #fef3c7 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* CHILLED (Storage cấp 0): Tô màu & in đậm toàn bộ dòng tất cả các cột */
+
+
+
+        .mat-table tr.tree-row-chilled td,
+
+
+
+        .mat-table tr[class*="tree-row-chilled"] td,
+
+
+
+        tr.tree-row-chilled td {
+
+
+
+            background-color: #cffafe !important;
+
+
+
+            border-top: 2px solid #06b6d4 !important;
+
+
+
+            border-bottom: 2px solid #06b6d4 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #164e63 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-chilled:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-chilled"]:hover td,
+
+
+
+        tr.tree-row-chilled:hover td {
+
+
+
+            background-color: #a5f3fc !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-chilled td:first-child,
+
+
+
+        .mat-table tr.tree-row-chilled td.sticky-col-2,
+
+
+
+        .mat-table tr[class*="tree-row-chilled"] td:first-child,
+
+
+
+        .mat-table tr[class*="tree-row-chilled"] td.sticky-col-2 {
+
+
+
+            background-color: #cffafe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* FROZEN (Storage cấp 0): Tô màu & in đậm toàn bộ dòng tất cả các cột */
+
+
+
+        .mat-table tr.tree-row-frozen td,
+
+
+
+        .mat-table tr[class*="tree-row-frozen"] td,
+
+
+
+        tr.tree-row-frozen td {
+
+
+
+            background-color: #dbeafe !important;
+
+
+
+            border-top: 2px solid #3b82f6 !important;
+
+
+
+            border-bottom: 2px solid #3b82f6 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #1e3a8a !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-frozen:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-frozen"]:hover td,
+
+
+
+        tr.tree-row-frozen:hover td {
+
+
+
+            background-color: #bfdbfe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-frozen td:first-child,
+
+
+
+        .mat-table tr.tree-row-frozen td.sticky-col-2,
+
+
+
+        .mat-table tr[class*="tree-row-frozen"] td:first-child,
+
+
+
+        .mat-table tr[class*="tree-row-frozen"] td.sticky-col-2 {
+
+
+
+            background-color: #dbeafe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* STORAGE OTHER */
+
+
+
+        .mat-table tr.tree-row-storage-other td,
+
+
+
+        .mat-table tr[class*="tree-row-storage-other"] td,
+
+
+
+        tr.tree-row-storage-other td {
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+            border-top: 2px solid #94a3b8 !important;
+
+
+
+            border-bottom: 2px solid #94a3b8 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #0f172a !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-storage-other:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-storage-other"]:hover td,
+
+
+
+        tr.tree-row-storage-other:hover td {
+
+
+
+            background-color: #e2e8f0 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-storage-other td:first-child,
+
+
+
+        .mat-table tr.tree-row-storage-other td.sticky-col-2 {
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* MIỀN KÊNH GT (Cấp 0 - Miền Bắc, Miền Nam): Tô màu tím & in đậm toàn bộ dòng tất cả 19 cột */
+
+
+
+        .mat-table tr.tree-row-mien-gt td,
+
+
+
+        .mat-table tr[class*="tree-row-mien-gt"] td,
+
+
+
+        tr.tree-row-mien-gt td {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+            border-top: 2px solid #a855f7 !important;
+
+
+
+            border-bottom: 2px solid #a855f7 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #3b0764 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mien-gt:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-mien-gt"]:hover td,
+
+
+
+        tr.tree-row-mien-gt:hover td {
+
+
+
+            background-color: #ddd6fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mien-gt td:first-child,
+
+
+
+        .mat-table tr.tree-row-mien-gt td.sticky-col-2,
+
+
+
+        .mat-table tr[class*="tree-row-mien-gt"] td:first-child,
+
+
+
+        .mat-table tr[class*="tree-row-mien-gt"] td.sticky-col-2 {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* VÙNG KÊNH GT (Cấp 1 - Vùng 1, Vùng 2...): Tô màu indigo & in đậm toàn bộ dòng tất cả các cột */
+
+
+
+        .mat-table tr.tree-row-vung-gt td,
+
+
+
+        .mat-table tr[class*="tree-row-vung-gt"] td,
+
+
+
+        tr.tree-row-vung-gt td {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+            border-top: 1px solid #c7d2fe !important;
+
+
+
+            border-bottom: 1.5px solid #818cf8 !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            color: #312e81 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-vung-gt:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-vung-gt"]:hover td,
+
+
+
+        tr.tree-row-vung-gt:hover td {
+
+
+
+            background-color: #c7d2fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-vung-gt td:first-child,
+
+
+
+        .mat-table tr.tree-row-vung-gt td.sticky-col-2,
+
+
+
+        .mat-table tr[class*="tree-row-vung-gt"] td:first-child,
+
+
+
+        .mat-table tr[class*="tree-row-vung-gt"] td.sticky-col-2 {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* CHANNEL TREE (Cấp 0 Kênh - GT, MT, B2B, KR): Tô màu chàm & in đậm toàn bộ dòng tất cả các cột */
+
+
+
+        .mat-table tr.tree-row-channel td,
+
+
+
+        .mat-table tr[class*="tree-row-channel"] td,
+
+
+
+        tr.tree-row-channel td {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+            border-top: 2px solid #818cf8 !important;
+
+
+
+            border-bottom: 2px solid #818cf8 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #312e81 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-channel:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-channel"]:hover td,
+
+
+
+        tr.tree-row-channel:hover td {
+
+
+
+            background-color: #ddd6fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-channel td:first-child,
+
+
+
+        .mat-table tr.tree-row-channel td.sticky-col-2 {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* MT SUB-CHANNEL (Cấp 0 Kênh phụ MT): Tô màu xanh & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-mt-subchan td,
+
+
+
+        .mat-table tr[class*="tree-row-mt-subchan"] td,
+
+
+
+        tr.tree-row-mt-subchan td {
+
+
+
+            background-color: #dbeafe !important;
+
+
+
+            border-top: 2px solid #60a5fa !important;
+
+
+
+            border-bottom: 2px solid #60a5fa !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #1e3a8a !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mt-subchan:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-mt-subchan"]:hover td,
+
+
+
+        tr.tree-row-mt-subchan:hover td {
+
+
+
+            background-color: #bfdbfe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mt-subchan td:first-child,
+
+
+
+        .mat-table tr.tree-row-mt-subchan td.sticky-col-2 {
+
+
+
+            background-color: #dbeafe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* B2B ACCOUNT GROUP (Cấp 0 Phân nhóm B2B): Tô màu tím & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-b2b-acc td,
+
+
+
+        .mat-table tr[class*="tree-row-b2b-acc"] td,
+
+
+
+        tr.tree-row-b2b-acc td {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+            border-top: 2px solid #a855f7 !important;
+
+
+
+            border-bottom: 2px solid #a855f7 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #3b0764 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-b2b-acc:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-b2b-acc"]:hover td,
+
+
+
+        tr.tree-row-b2b-acc:hover td {
+
+
+
+            background-color: #ddd6fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-b2b-acc td:first-child {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* POSM TỦ ĐÔNG TOÀN QUỐC (Cấp 0): Tô màu & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-root-fzn td,
+
+
+
+        .mat-table tr[class*="tree-row-root-fzn"] td,
+
+
+
+        tr.tree-row-root-fzn td {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+            border-top: 2px solid #6366f1 !important;
+
+
+
+            border-bottom: 2px solid #6366f1 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #312e81 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-root-fzn:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-root-fzn"]:hover td,
+
+
+
+        tr.tree-row-root-fzn:hover td {
+
+
+
+            background-color: #c7d2fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-root-fzn td:first-child {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* POSM TỦ ĐÔNG MIỀN (Cấp 1): Tô màu & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-mien-fzn td,
+
+
+
+        .mat-table tr[class*="tree-row-mien-fzn"] td,
+
+
+
+        tr.tree-row-mien-fzn td {
+
+
+
+            background-color: #dbeafe !important;
+
+
+
+            border-bottom: 2px solid #60a5fa !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            color: #1e3a8a !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mien-fzn:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-mien-fzn"]:hover td,
+
+
+
+        tr.tree-row-mien-fzn:hover td {
+
+
+
+            background-color: #bfdbfe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mien-fzn td:first-child {
+
+
+
+            background-color: #dbeafe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* POSM STANDEE TOÀN QUỐC (Cấp 0): Tô màu & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-root-stnd td,
+
+
+
+        .mat-table tr[class*="tree-row-root-stnd"] td,
+
+
+
+        tr.tree-row-root-stnd td {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+            border-top: 2px solid #a855f7 !important;
+
+
+
+            border-bottom: 2px solid #a855f7 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #3b0764 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-root-stnd:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-root-stnd"]:hover td,
+
+
+
+        tr.tree-row-root-stnd:hover td {
+
+
+
+            background-color: #ddd6fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-root-stnd td:first-child {
+
+
+
+            background-color: #ede9fe !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* POSM STANDEE MIỀN (Cấp 1): Tô màu & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-mien-stnd td,
+
+
+
+        .mat-table tr[class*="tree-row-mien-stnd"] td,
+
+
+
+        tr.tree-row-mien-stnd td {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+            border-bottom: 2px solid #818cf8 !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            color: #312e81 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mien-stnd:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-mien-stnd"]:hover td,
+
+
+
+        tr.tree-row-mien-stnd:hover td {
+
+
+
+            background-color: #c7d2fe !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-mien-stnd td:first-child {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* ROUTE TREE ROOT (TOÀN QUỐC - Cấp 0): Tô màu & in đậm toàn bộ dòng */
+
+
+
+        .mat-table tr.tree-row-route-root td,
+
+
+
+        .mat-table tr[class*="tree-row-route-root"] td,
+
+
+
+        tr.tree-row-route-root td {
+
+
+
+            background-color: #eef2ff !important;
+
+
+
+            border-top: 2px solid #818cf8 !important;
+
+
+
+            border-bottom: 2px solid #818cf8 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            color: #312e81 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-route-root:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-route-root"]:hover td,
+
+
+
+        tr.tree-row-route-root:hover td {
+
+
+
+            background-color: #e0e7ff !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-route-root td:first-child {
+
+
+
+            background-color: #eef2ff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* CẤP 1 CATEGORY / SUB-CHANNEL / PHÂN NHÓM: Tô nền xám sáng nhẹ & in đậm */
+
+
+
+        .mat-table tr.tree-row-cate td,
+
+
+
+        .mat-table tr[class*="tree-row-cate"] td,
+
+
+
+        .mat-table tr[data-level="1"] td {
+
+
+
+            background-color: #f8fafc !important;
+
+
+
+            border-bottom: 1px solid #cbd5e1 !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+        }
+
+
+
+        .mat-table tr.tree-row-cate:hover td,
+
+
+
+        .mat-table tr[class*="tree-row-cate"]:hover td,
+
+
+
+        .mat-table tr[data-level="1"]:hover td {
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .mat-table tr[class*="bg-purple-200"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-purple-200"] td.sticky-col-2 { background-color: #ede9fe !important; }
+
+
+
+        .mat-table tr[class*="bg-blue-100"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-blue-100"] td.sticky-col-2 { background-color: #dbeafe !important; }
+
+
+
+        .mat-table tr[class*="bg-amber-100"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-amber-100"] td.sticky-col-2 { background-color: #fef3c7 !important; }
+
+
+
+        .mat-table tr[class*="bg-cyan-100"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-cyan-100"] td.sticky-col-2 { background-color: #cffafe !important; }
+
+
+
+        .mat-table tr[class*="bg-purple-100"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-purple-100"] td.sticky-col-2 { background-color: #f3e8ff !important; }
+
+
+
+        .mat-table tr[class*="bg-purple-50"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-purple-50"] td.sticky-col-2 { background-color: #faf5ff !important; }
+
+
+
+        .mat-table tr[class*="bg-sky-50"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-sky-50"] td.sticky-col-2 { background-color: #f0f9ff !important; }
+
+
+
+        .mat-table tr[class*="bg-indigo-50"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-indigo-50"] td.sticky-col-2 { background-color: #eef2ff !important; }
+
+
+
+        .mat-table tr[class*="bg-amber-50"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-amber-50"] td.sticky-col-2 { background-color: #fffbeb !important; }
+
+
+
+        .mat-table tr[class*="bg-emerald-50"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-emerald-50"] td.sticky-col-2 { background-color: #ecfdf5 !important; }
+
+
+
+        .mat-table tr[class*="bg-slate-50"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-slate-50"] td.sticky-col-2 { background-color: #f8fafc !important; }
+
+
+
+        .mat-table tr[class*="bg-slate-100"] td:first-child,
+
+
+
+        .mat-table tr[class*="bg-slate-100"] td.sticky-col-2 { background-color: #f1f5f9 !important; }
+
+
+
+        .mat-table tr td:first-child,
+
+
+
+        .mat-table tr td.sticky-col-2 { background-color: #ffffff !important; }
+
+
+
+        .mat-table tr:hover td:first-child,
+
+
+
+        .mat-table tr:hover td.sticky-col-2 { background-color: #faf5ff !important; }
+
+
+
+
+
+
+
+        .tree-toggle {
+
+
+
+            cursor: pointer;
+
+
+
+            display: inline-flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            width: 16px;
+
+
+
+            height: 16px;
+
+
+
+            border-radius: 4px;
+
+
+
+            background-color: #E2E8F0;
+
+
+
+            color: #475569;
+
+
+
+            font-size: 10px;
+
+
+
+            font-weight: bold;
+
+
+
+            margin-right: 6px;
+
+
+
+            user-select: none;
+
+
+
+            transition: background-color 0.15s;
+
+
+
+        }
+
+
+
+        .tree-toggle:hover {
+
+
+
+            background-color: #CBD5E1;
+
+
+
+        }
+
+
+
+        .badge-pill {
+
+
+
+            display: inline-block;
+
+
+
+            padding: 2px 6px;
+
+
+
+            border-radius: 9999px;
+
+
+
+            font-size: 9px;
+
+
+
+            font-weight: 700;
+
+
+
+            text-transform: uppercase;
+
+
+
+        }
+
+
+
+        .badge-pill-green { background-color: #DEF7EC; color: #03543F; }
+
+
+
+        .badge-pill-red { background-color: #FDE8E8; color: #9B1C1C; }
+
+
+
+        .badge-pill-purple { background-color: #EDEBFE; color: #5521B5; }
+
+
+
+        .badge-pill-orange { background-color: #FEECDC; color: #8A2C0D; }
+
+
+
+
+
+
+
+        /* TOP BAR HEADER CONTROLS (SOLID WHITE, NO TRANSPARENCY, Z-INDEX 50) */
+
+
+
+        .top-header-filter {
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+            margin-bottom: 0 !important;
+
+
+
+            padding: 10px 24px !important;
+
+
+
+            position: relative !important;
+
+
+
+            top: auto !important;
+
+
+
+            z-index: 40 !important;
+
+
+
+            border-bottom: none !important;
+
+
+
+            box-shadow: none !important;
+
+
+
+        }
+
+
+
+    
+
+
+
+        /* =========================================================================
+
+
+
+           SOLID CORPORATE BLUE TOP BANNER & HIGH Z-INDEX MODALS (100% INDEPENDENT OF TAILWIND JIT)
+
+
+
+           ========================================================================= */
+
+
+
+        /* UNIFIED STICKY HEADER DOWN TO MONTH SELECTOR ROW (CIRCLED IN USER SCREENSHOT media_1788601417832.png) */
+
+
+
+        .cj-sticky-header-container {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            z-index: 45 !important;
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+
+
+
+            border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-top-header-banner {
+
+
+
+            background-color: #004B91 !important;
+
+
+
+            border-bottom: 4px solid #E31837 !important;
+
+
+
+            padding: 8px 24px !important;
+
+
+
+            display: flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: flex-end !important;
+
+
+
+            gap: 12px !important;
+
+
+
+            position: relative !important;
+
+
+
+            top: auto !important;
+
+
+
+            z-index: 45 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-profile-pill {
+
+
+
+            display: flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 10px !important;
+
+
+
+            background-color: #00386D !important;
+
+
+
+            border: 1px solid rgba(147, 197, 253, 0.45) !important;
+
+
+
+            border-radius: 12px !important;
+
+
+
+            padding: 4px 14px !important;
+
+
+
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-btn-admin {
+
+
+
+            background-color: #F59E0B !important;
+
+
+
+            color: #0F172A !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            border: none !important;
+
+
+
+            transition: all 0.2s ease !important;
+
+
+
+            display: none; /* Strictly hidden for non-admin */
+
+
+
+        }
+
+
+
+        .cj-btn-admin:hover {
+
+
+
+            background-color: #D97706 !important;
+
+
+
+            color: #000000 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-btn-avatar {
+
+
+
+            background-color: #0284C7 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            border: none !important;
+
+
+
+            transition: all 0.2s ease !important;
+
+
+
+        }
+
+
+
+        .cj-btn-avatar:hover {
+
+
+
+            background-color: #0369A1 !important;
+
+
+
+        }
+
+
+
+        .avatar-preset-item {
+
+
+
+            cursor: pointer;
+
+
+
+            transition: all 0.2s ease;
+
+
+
+            border: 2.5px solid transparent;
+
+
+
+            border-radius: 1rem;
+
+
+
+            padding: 4px;
+
+
+
+        }
+
+
+
+        .avatar-preset-item:hover {
+
+
+
+            transform: scale(1.06);
+
+
+
+            border-color: #93C5FD;
+
+
+
+            background-color: #F0F9FF;
+
+
+
+        }
+
+
+
+        .avatar-preset-item.active {
+
+
+
+            border-color: #2563EB !important;
+
+
+
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35) !important;
+
+
+
+            background-color: #EFF6FF !important;
+
+
+
+            transform: scale(1.08);
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-btn-password {
+
+
+
+            background-color: #2563EB !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            border: none !important;
+
+
+
+            transition: all 0.2s ease !important;
+
+
+
+        }
+
+
+
+        .cj-btn-password:hover {
+
+
+
+            background-color: #1D4ED8 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-btn-logout {
+
+
+
+            background-color: #B91C1C !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            border: none !important;
+
+
+
+            transition: all 0.2s ease !important;
+
+
+
+        }
+
+
+
+        .cj-btn-logout:hover {
+
+
+
+            background-color: #991B1B !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* MODAL OVERLAYS (Z-INDEX 999999 - GUARANTEED FOREGROUND ABOVE ALL CARDS & CHARTS) */
+
+
+
+        .cj-modal-backdrop {
+
+
+
+            position: fixed !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 0 !important;
+
+
+
+            right: 0 !important;
+
+
+
+            bottom: 0 !important;
+
+
+
+            width: 100vw !important;
+
+
+
+            height: 100vh !important;
+
+
+
+            background-color: rgba(15, 23, 42, 0.8) !important;
+
+
+
+            z-index: 999999 !important;
+
+
+
+            display: none !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: center !important;
+
+
+
+            padding: 20px !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+        }
+
+
+
+        .cj-modal-backdrop.active {
+
+
+
+            display: flex !important;
+
+
+
+        }
+
+
+
+        
+
+
+
+        /* SOLID MODAL BUTTONS (NO TAILWIND DEPENDENCY) */
+
+
+
+        /* UNIFIED TABLE EXPORT EXCEL BUTTON */
+
+
+
+        .btn-table-export-excel {
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: center !important;
+
+
+
+            gap: 0.35rem !important;
+
+
+
+            padding: 0.35rem 0.75rem !important;
+
+
+
+            height: 32px !important;
+
+
+
+            border-radius: 0.5rem !important;
+
+
+
+            background-color: #059669 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-size: 0.75rem !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            line-height: 1rem !important;
+
+
+
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1) !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            transition: all 0.15s ease-in-out !important;
+
+
+
+            border: 1px solid #047857 !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            user-select: none !important;
+
+
+
+        }
+
+
+
+        .btn-table-export-excel:hover {
+
+
+
+            background-color: #047857 !important;
+
+
+
+            border-color: #065f46 !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            transform: translateY(-1px) !important;
+
+
+
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1) !important;
+
+
+
+        }
+
+
+
+        .btn-table-export-excel:active {
+
+
+
+            transform: translateY(0) !important;
+
+
+
+        }
+
+
+
+        .btn-table-export-excel:disabled {
+
+
+
+            opacity: 0.65 !important;
+
+
+
+            cursor: not-allowed !important;
+
+
+
+            transform: none !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Specific variant for buttons placed on dark/purple gradient headers */
+
+
+
+        .btn-table-export-excel.btn-export-white {
+
+
+
+            background-color: #ffffff !important;
+
+
+
+            color: #581c87 !important;
+
+
+
+            border: 1px solid #ffffff !important;
+
+
+
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.15) !important;
+
+
+
+        }
+
+
+
+        .btn-table-export-excel.btn-export-white:hover {
+
+
+
+            background-color: #f5f3ff !important;
+
+
+
+            color: #3b0764 !important;
+
+
+
+            border-color: #f5f3ff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .btn-modal-export {
+
+
+
+            background-color: #059669 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: none !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+        }
+
+
+
+        .btn-modal-export:hover { background-color: #047857 !important; }
+
+
+
+
+
+
+
+        .btn-modal-reset {
+
+
+
+            background-color: #D97706 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: none !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+        }
+
+
+
+        .btn-modal-reset:hover { background-color: #B45309 !important; }
+
+
+
+
+
+
+
+        .btn-modal-close {
+
+
+
+            background-color: #E2E8F0 !important;
+
+
+
+            color: #334155 !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 6px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: none !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+        }
+
+
+
+        .btn-modal-close:hover { background-color: #CBD5E1 !important; }
+
+
+
+
+
+
+
+        .btn-modal-save {
+
+
+
+            background-color: #004B91 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 8px 18px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: none !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15) !important;
+
+
+
+        }
+
+
+
+        .btn-modal-save:hover { background-color: #00386D !important; }
+
+
+
+
+
+
+
+        /* DEDICATED ADMIN RBAC & ACTION BUTTONS (SOLID ZERO-TAILWIND STYLES) */
+
+
+
+        .btn-admin-action-import {
+
+
+
+            background-color: #059669 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 7px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: 1px solid #047857 !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15) !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            transition: all 0.15s ease !important;
+
+
+
+        }
+
+
+
+        .btn-admin-action-import:hover { background-color: #047857 !important; transform: translateY(-1px) !important; }
+
+
+
+
+
+
+
+        .btn-admin-action-export {
+
+
+
+            background-color: #4F46E5 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 7px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: 1px solid #4338CA !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15) !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            transition: all 0.15s ease !important;
+
+
+
+        }
+
+
+
+        .btn-admin-action-export:hover { background-color: #4338CA !important; transform: translateY(-1px) !important; }
+
+
+
+
+
+
+
+        .btn-admin-action-cloud {
+
+
+
+            background-color: #0284C7 !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 7px 14px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: 1px solid #0369A1 !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15) !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            transition: all 0.15s ease !important;
+
+
+
+        }
+
+
+
+        .btn-admin-action-cloud:hover { background-color: #0369A1 !important; transform: translateY(-1px) !important; }
+
+
+
+
+
+
+
+        .btn-admin-action-more {
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+            color: #1E293B !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            padding: 7px 12px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: 1px solid #CBD5E1 !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 4px !important;
+
+
+
+            transition: all 0.15s ease !important;
+
+
+
+        }
+
+
+
+        .btn-admin-action-more:hover { background-color: #E2E8F0 !important; }
+
+
+
+
+
+
+
+        .btn-admin-action-close {
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+            color: #475569 !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            font-size: 14px !important;
+
+
+
+            width: 34px !important;
+
+
+
+            height: 34px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            border: 1px solid #CBD5E1 !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: center !important;
+
+
+
+            transition: all 0.15s ease !important;
+
+
+
+        }
+
+
+
+        .btn-admin-action-close:hover { background-color: #EF4444 !important; color: #FFFFFF !important; border-color: #DC2626 !important; }
+
+
+
+
+
+
+
+        /* GUARANTEED RESPONSIVE DISPLAY FOR USER MANAGEMENT */
+
+
+
+        .user-mgmt-table-desktop {
+
+
+
+            display: block !important;
+
+
+
+        }
+
+
+
+        .user-mgmt-cards-mobile {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        @media (max-width: 767px) {
+
+
+
+            .user-mgmt-table-desktop {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            .user-mgmt-cards-mobile {
+
+
+
+                display: block !important;
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        .cj-modal-window {
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+            color: #1E293B !important;
+
+
+
+            border: 1px solid #CBD5E1 !important;
+
+
+
+            border-radius: 16px !important;
+
+
+
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55) !important;
+
+
+
+            position: relative !important;
+
+
+
+            z-index: 1000000 !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* =========================================================================
+
+
+
+           RESPONSIVE MOBILE WEB APP STYLES & DEDICATED MOBILE UI
+
+
+
+           ========================================================================= */
+
+
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+
+
+
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+
+
+
+
+
+
+        .cj-mobile-top-bar {
+
+
+
+            display: none;
+
+
+
+            background: linear-gradient(135deg, #003366 0%, #001f3f 100%);
+
+
+
+            border-bottom: 3px solid #E31837;
+
+
+
+            padding: 8px 12px;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: space-between;
+
+
+
+            position: relative;
+
+
+
+            top: auto;
+
+
+
+            z-index: 45;
+
+
+
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+
+
+
+        }
+
+
+
+        .mobile-top-btn {
+
+
+
+            display: inline-flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            width: 34px;
+
+
+
+            height: 34px;
+
+
+
+            border-radius: 8px;
+
+
+
+            background: rgba(255, 255, 255, 0.15);
+
+
+
+            border: 1px solid rgba(255, 255, 255, 0.25);
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-size: 15px;
+
+
+
+            transition: all 0.2s ease;
+
+
+
+            cursor: pointer;
+
+
+
+            flex-shrink: 0;
+
+
+
+        }
+
+
+
+        .mobile-top-btn:active, .mobile-top-btn:hover {
+
+
+
+            background: rgba(255, 255, 255, 0.28);
+
+
+
+            transform: scale(0.96);
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-mobile-avatar-pill {
+
+
+
+            width: 30px;
+
+
+
+            height: 30px;
+
+
+
+            border-radius: 50%;
+
+
+
+            background-color: #00386D;
+
+
+
+            border: 1.5px solid rgba(147, 197, 253, 0.6);
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: center;
+
+
+
+            color: #fff;
+
+
+
+            cursor: pointer;
+
+
+
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+        .hidden {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-drawer-overlay {
+
+
+
+            position: fixed !important;
+
+
+
+            inset: 0 !important;
+
+
+
+            background: rgba(15, 23, 42, 0.65) !important;
+
+
+
+            backdrop-filter: blur(4px) !important;
+
+
+
+            z-index: 99999 !important;
+
+
+
+            display: flex !important;
+
+
+
+        }
+
+
+
+        .cj-drawer-overlay.hidden,
+
+
+
+        #cj-mobile-drawer.hidden {
+
+
+
+            display: none !important;
+
+
+
+            visibility: hidden !important;
+
+
+
+            opacity: 0 !important;
+
+
+
+            pointer-events: none !important;
+
+
+
+        }
+
+
+
+        #cj-mobile-drawer.hidden .cj-drawer-content {
+
+
+
+            display: none !important;
+
+
+
+            visibility: hidden !important;
+
+
+
+            transform: translateX(-100%) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-drawer-content {
+
+
+
+            width: 310px;
+
+
+
+            max-width: 88vw;
+
+
+
+            height: 100%;
+
+
+
+            background-color: #FFFFFF;
+
+
+
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.35);
+
+
+
+            display: flex;
+
+
+
+            flex-direction: column;
+
+
+
+            position: fixed;
+
+
+
+            top: 0;
+
+
+
+            left: 0;
+
+
+
+            bottom: 0;
+
+
+
+            z-index: 100000;
+
+
+
+            animation: drawerSlideIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-drawer-header {
+
+
+
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%) !important;
+
+
+
+            padding: 16px 14px !important;
+
+
+
+            display: flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: space-between !important;
+
+
+
+            color: #FFFFFF !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .cj-drawer-body {
+
+
+
+            padding: 14px 12px !important;
+
+
+
+            display: flex !important;
+
+
+
+            flex-direction: column !important;
+
+
+
+            gap: 8px !important;
+
+
+
+            overflow-y: auto !important;
+
+
+
+            flex: 1 !important;
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* MOBILE DRAWER NAVIGATION TREE */
+
+
+
+        .m-nav-item {
+
+
+
+            display: flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: space-between !important;
+
+
+
+            padding: 9px 12px !important;
+
+
+
+            border-radius: 10px !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            font-weight: 600 !important;
+
+
+
+            color: #1e293b !important;
+
+
+
+            background-color: #f8fafc !important;
+
+
+
+            border: 1px solid #e2e8f0 !important;
+
+
+
+            transition: all 0.15s ease-in-out !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            text-decoration: none !important;
+
+
+
+            user-select: none !important;
+
+
+
+        }
+
+
+
+        .m-nav-item:hover, .m-nav-item:active {
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+            border-color: #cbd5e1 !important;
+
+
+
+        }
+
+
+
+        .m-nav-item.active {
+
+
+
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            border-color: #1d4ed8 !important;
+
+
+
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.25) !important;
+
+
+
+        }
+
+
+
+        .m-nav-item.active .m-nav-text {
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+        }
+
+
+
+        .m-nav-item.active .m-nav-chevron {
+
+
+
+            color: #ffffff !important;
+
+
+
+        }
+
+
+
+        .m-nav-item.active .m-gt-badge {
+
+
+
+            background-color: rgba(255, 255, 255, 0.25) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* GT MOBILE TREE DIRECTORY & SUB-ITEMS */
+
+
+
+        #m-nav-gt-tree {
+
+
+
+            margin-left: 14px !important;
+
+
+
+            padding-left: 12px !important;
+
+
+
+            border-left: 2px solid #cbd5e1 !important;
+
+
+
+            display: flex !important;
+
+
+
+            flex-direction: column !important;
+
+
+
+            gap: 6px !important;
+
+
+
+            padding-top: 6px !important;
+
+
+
+            padding-bottom: 6px !important;
+
+
+
+        }
+
+
+
+        #m-nav-gt-tree.hidden {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem {
+
+
+
+            position: relative !important;
+
+
+
+            display: flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 8px !important;
+
+
+
+            padding: 8px 12px !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            font-size: 11.5px !important;
+
+
+
+            font-weight: 600 !important;
+
+
+
+            color: #475569 !important;
+
+
+
+            background-color: #f8fafc !important;
+
+
+
+            border: 1px solid #e2e8f0 !important;
+
+
+
+            transition: all 0.15s ease-in-out !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+            text-decoration: none !important;
+
+
+
+            user-select: none !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem::before {
+
+
+
+            content: "" !important;
+
+
+
+            position: absolute !important;
+
+
+
+            left: -14px !important;
+
+
+
+            top: 50% !important;
+
+
+
+            width: 12px !important;
+
+
+
+            height: 2px !important;
+
+
+
+            background-color: #cbd5e1 !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem:hover, .m-tree-subitem:active {
+
+
+
+            background-color: #eff6ff !important;
+
+
+
+            color: #1d4ed8 !important;
+
+
+
+            border-color: #bfdbfe !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem.active {
+
+
+
+            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+
+
+
+            color: #ffffff !important;
+
+
+
+            font-weight: 700 !important;
+
+
+
+            border-color: #1d4ed8 !important;
+
+
+
+            box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25) !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem.active::before {
+
+
+
+            background-color: #2563eb !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem.active .m-tree-icon {
+
+
+
+            color: #ffffff !important;
+
+
+
+        }
+
+
+
+        .m-tree-subitem .m-tree-icon {
+
+
+
+            font-size: 13px !important;
+
+
+
+            flex-shrink: 0 !important;
+
+
+
+        }
+
+
+
+        #m-nav-gt-chevron.rotate-180 {
+
+
+
+            transform: rotate(180deg) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .drawer-action-btn {
+
+
+
+            display: flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            gap: 10px !important;
+
+
+
+            width: 100% !important;
+
+
+
+            padding: 8px 12px !important;
+
+
+
+            border-radius: 10px !important;
+
+
+
+            font-size: 11.5px !important;
+
+
+
+            font-weight: 600 !important;
+
+
+
+            text-align: left !important;
+
+
+
+            border: 1px solid #e2e8f0 !important;
+
+
+
+            transition: all 0.15s ease-in-out !important;
+
+
+
+            cursor: pointer !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .mobile-filter-toggle-row {
+
+
+
+            display: none;
+
+
+
+            width: 100%;
+
+
+
+            margin-bottom: 4px;
+
+
+
+        }
+
+
+
+
+
+
+
+        .mobile-filter-btn {
+
+
+
+            width: 100%;
+
+
+
+            background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+
+
+
+            border: 1px solid #cbd5e1;
+
+
+
+            padding: 7px 12px;
+
+
+
+            border-radius: 8px;
+
+
+
+            font-size: 11px;
+
+
+
+            font-weight: 700;
+
+
+
+            color: #1e293b;
+
+
+
+            display: flex;
+
+
+
+            align-items: center;
+
+
+
+            justify-content: space-between;
+
+
+
+            cursor: pointer;
+
+
+
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+
+
+
+        }
+
+
+
+
+
+
+
+        @keyframes drawerSlideIn {
+
+
+
+            from { transform: translateX(-100%); }
+
+
+
+            to { transform: translateX(0); }
+
+
+
+        }
+
+
+
+
+
+
+
+        /* ========================================================================= */
+
+
+
+        /* GLOBAL RESPONSIVE CONTAINMENT & LAPTOP SCREEN FIT */
+
+
+
+        /* ========================================================================= */
+
+
+
+        html, body {
+
+
+
+            overflow-x: clip !important;
+
+
+
+            max-width: 100vw !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #app-container,
+
+
+
+        #authenticated-app-container {
+
+
+
+            max-width: 100vw !important;
+
+
+
+            overflow-x: clip !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        .main-content-wrapper {
+
+
+
+            min-width: 0 !important;
+
+
+
+            max-width: calc(100vw - 15rem) !important;
+
+
+
+            overflow-x: clip !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+
+
+        }
+
+
+
+
+
+
+
+        #sidebar-nav {
+
+
+
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+
+
+        }
+
+
+
+
+
+
+
+        body.sidebar-collapsed #sidebar-nav {
+
+
+
+            transform: translateX(-100%) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        body.sidebar-collapsed .main-content-wrapper {
+
+
+
+            margin-left: 0 !important;
+
+
+
+            max-width: 100vw !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* All Tab Views and Panels: Must never expand beyond parent */
+
+
+
+        #tab-overview-view,
+
+
+
+        #tab-gt-view,
+
+
+
+        #tab-mt-view,
+
+
+
+        #tab-b2b-view,
+
+
+
+        #tab-kr-view,
+
+
+
+        #tab-reports-view,
+
+
+
+        .gt-subview-panel,
+
+
+
+        .material-card {
+
+
+
+            min-width: 0 !important;
+
+
+
+            max-width: 100% !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* All table containers must strictly scroll horizontally within their card */
+
+
+
+        .table-scroll-container,
+
+
+
+        .overflow-x-auto {
+
+
+
+            width: 100% !important;
+
+
+
+            max-width: 100% !important;
+
+
+
+            min-width: 0 !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* RESPONSIVE MEDIA QUERIES (MOBILE SCREENS <= 768px) */
+
+
+
+        @media (max-width: 768px) {
+
+
+
+            html, body {
+
+
+
+                overflow-x: clip !important;
+
+
+
+                max-width: 100vw !important;
+
+
+
+            }
+
+
+
+            #app-container,
+
+
+
+            #authenticated-app-container {
+
+
+
+                max-width: 100vw !important;
+
+
+
+                overflow-x: clip !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #sidebar-nav {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .main-content-wrapper {
+
+
+
+                margin-left: 0 !important;
+
+
+
+                width: 100% !important;
+
+
+
+                max-width: 100vw !important;
+
+
+
+                overflow-x: clip !important;
+
+
+
+                padding-bottom: 24px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .cj-top-header-banner {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .cj-mobile-top-bar {
+
+
+
+                display: flex !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-5"] > div,
+
+
+
+            body.mobile-mode [class*="grid-cols-5"] > div,
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-4"] > div,
+
+
+
+            body.mobile-mode [class*="grid-cols-4"] > div,
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-2"] > div,
+
+
+
+            body.mobile-mode [class*="grid-cols-2"] > div {
+
+
+
+                border: 1px solid #E2E8F0 !important;
+
+
+
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+
+
+
+                border-radius: 12px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .top-header-filter {
+
+
+
+                padding: 6px 12px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) main {
+
+
+
+                padding-left: 10px !important;
+
+
+
+                padding-right: 10px !important;
+
+
+
+                padding-top: 6px !important;
+
+
+
+                padding-bottom: 20px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .mobile-filter-toggle-row {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #main-filter-bar-wrapper {
+
+
+
+                display: flex !important;
+
+
+
+                flex-wrap: nowrap !important;
+
+
+
+                overflow-x: auto !important;
+
+
+
+                -webkit-overflow-scrolling: touch !important;
+
+
+
+                scrollbar-width: thin !important;
+
+
+
+                scrollbar-color: #94a3b8 #f1f5f9 !important;
+
+
+
+                padding: 4px 6px !important;
+
+
+
+                gap: 6px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #main-filter-bar-wrapper::-webkit-scrollbar {
+
+
+
+                height: 4px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #main-filter-bar-wrapper::-webkit-scrollbar-thumb {
+
+
+
+                background: #94a3b8 !important;
+
+
+
+                border-radius: 4px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .header-dropdown {
+
+
+
+                font-size: 11px !important;
+
+
+
+                height: 30px !important;
+
+
+
+                padding: 2px 6px !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 1. Core Primary KPI Cards (Full-width, perfectly uniform, no broken numbers) */
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-5"],
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-4"] {
+
+
+
+                grid-template-columns: 1fr !important;
+
+
+
+                gap: 10px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-5"] > div:last-child {
+
+
+
+                grid-column: span 1 !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 2. Secondary Productivity & Efficiency Metric Bar (3 compact tiles side by side) */
+
+
+
+            body:not(.desktop-mode-override) .kpi-productivity-grid {
+
+
+
+                display: grid !important;
+
+
+
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+
+
+                gap: 6px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .kpi-productivity-grid > div {
+
+
+
+                padding: 8px 4px !important;
+
+
+
+                min-width: 0 !important;
+
+
+
+                border-radius: 10px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .kpi-productivity-grid span[data-i18n] {
+
+
+
+                font-size: 9px !important;
+
+
+
+                line-height: 1.15 !important;
+
+
+
+                text-align: center !important;
+
+
+
+                display: -webkit-box !important;
+
+
+
+                -webkit-line-clamp: 2 !important;
+
+
+
+                -webkit-box-orient: vertical !important;
+
+
+
+                overflow: hidden !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .kpi-productivity-grid .font-mono-num {
+
+
+
+                font-size: 16px !important;
+
+
+
+                line-height: 1.2 !important;
+
+
+
+                margin-top: 2px !important;
+
+
+
+                margin-bottom: 2px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .kpi-productivity-grid span:last-child {
+
+
+
+                font-size: 8.5px !important;
+
+
+
+                line-height: 1.15 !important;
+
+
+
+                text-align: center !important;
+
+
+
+                white-space: nowrap !important;
+
+
+
+                overflow: hidden !important;
+
+
+
+                text-overflow: ellipsis !important;
+
+
+
+                max-width: 100% !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 3. General 3-cols and 2-cols containers (Reports, Charts, Dialogs) */
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-3"]:not(.kpi-productivity-grid):not(#adm-scope-options-container *):not(#mobile-drawer-view *),
+
+
+
+            body:not(.desktop-mode-override) [class*="md:grid-cols-3"]:not(.kpi-productivity-grid) {
+
+
+
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+
+
+
+                gap: 8px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) [class*="grid-cols-2"],
+
+
+
+            body:not(.desktop-mode-override) [class*="lg:grid-cols-2"] {
+
+
+
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+
+
+
+                gap: 8px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .font-mono-num {
+
+
+
+                white-space: nowrap !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .text-2xl {
+
+
+
+                font-size: 1.25rem !important;
+
+
+
+                line-height: 1.5rem !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .top-header-filter {
+
+
+
+                padding: 8px 10px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #top-title {
+
+
+
+                font-size: 13.5px !important;
+
+
+
+                line-height: 1.35 !important;
+
+
+
+                color: #0F172A !important;
+
+
+
+                font-weight: 900 !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .month-chip {
+
+
+
+                padding: 0 8px !important;
+
+
+
+                height: 32px !important;
+
+
+
+                min-width: 36px !important;
+
+
+
+                font-size: 12px !important;
+
+
+
+                font-weight: 800 !important;
+
+
+
+                border-radius: 8px !important;
+
+
+
+                flex-shrink: 0 !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .period-status-bar {
+
+
+
+                font-size: 11px !important;
+
+
+
+                padding: 5px 8px !important;
+
+
+
+                border-radius: 6px !important;
+
+
+
+            }
+
+
+
+            /* =========================================================================
+
+
+
+               MOBILE TABLE STYLES: OPTIMIZED STICKY HIERARCHY & TEXT DISPLAY
+
+
+
+               ========================================================================= */
+
+
+
+            body:not(.desktop-mode-override) .table-scroll-container,
+
+
+
+            body:not(.desktop-mode-override) .route-table-scroll-container {
+
+
+
+                max-height: 65vh !important;
+
+
+
+                -webkit-overflow-scrolling: touch !important;
+
+
+
+                overscroll-behavior-x: contain !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 1. HIERARCHY TREE / FIRST COLUMN (Miền, Vùng, GSBH, NPP, NVBH, Sản Phẩm)
+
+
+
+               Cho bảng không có cột STT: Cột 1 cố định bên trái, độ rộng 215px,
+
+
+
+               hiển thị text đầy đủ, thụt đầu dòng gọn gàng, nền mờ đục 100% che số bên dưới */
+
+
+
+            body:not(.desktop-mode-override) .th-first-col:not(.th-rank-col),
+
+
+
+            body:not(.desktop-mode-override) .th-tree-col,
+
+
+
+            body:not(.desktop-mode-override) .route-first-col-cell,
+
+
+
+            body:not(.desktop-mode-override) th.route-sticky-th,
+
+
+
+            body:not(.desktop-mode-override) th.route-sticky-th-sub,
+
+
+
+            body:not(.desktop-mode-override) td.route-sticky-col,
+
+
+
+            body:not(.desktop-mode-override) .mat-table th:first-child:not(.th-rank-col),
+
+
+
+            body:not(.desktop-mode-override) .mat-table td:first-child:not(.td-rank-col) {
+
+
+
+                position: sticky !important;
+
+
+
+                left: 0 !important;
+
+
+
+                z-index: 15 !important;
+
+
+
+                width: 215px;
+
+
+
+                min-width: 100px;
+
+
+
+                white-space: normal !important;
+
+
+
+                word-break: normal !important;
+
+
+
+                overflow-wrap: break-word !important;
+
+
+
+                padding: 6px 6px !important;
+
+
+
+                font-size: 11px !important;
+
+
+
+                line-height: 1.3 !important;
+
+
+
+                box-shadow: 3px 0 8px rgba(0, 0, 0, 0.12) !important;
+
+
+
+                box-sizing: border-box !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            body:not(.desktop-mode-override) .mat-table thead th:first-child:not(.th-rank-col),
+
+
+
+            body:not(.desktop-mode-override) thead th.route-sticky-th {
+
+
+
+                position: sticky !important;
+
+
+
+                top: 0 !important;
+
+
+
+                left: 0 !important;
+
+
+
+                z-index: 35 !important;
+
+
+
+                background-color: #F1F5F9 !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 2. BẢNG CÓ CỘT STT / HẠNG (Col 1 = STT 38px, Col 2 = Tên NVBH / Khách Hàng 145px)
+
+
+
+               CỐ ĐỊNH CHUẨN CẢ 2 CỘT: STT cố định tại left: 0, Tên cố định tại left: 38px */
+
+
+
+            body:not(.desktop-mode-override) .th-rank-col,
+
+
+
+            body:not(.desktop-mode-override) .td-rank-col,
+
+
+
+            body:not(.desktop-mode-override) .mat-table th.th-rank-col,
+
+
+
+            body:not(.desktop-mode-override) .mat-table td.td-rank-col,
+
+
+
+            body:not(.desktop-mode-override) .mat-table th:first-child.th-rank-col,
+
+
+
+            body:not(.desktop-mode-override) .mat-table td:first-child.td-rank-col {
+
+
+
+                position: sticky !important;
+
+
+
+                left: 0 !important;
+
+
+
+                z-index: 18 !important;
+
+
+
+                width: 38px;
+
+
+
+                min-width: 24px;
+
+
+
+                text-align: center !important;
+
+
+
+                padding-left: 2px !important;
+
+
+
+                padding-right: 2px !important;
+
+
+
+                box-sizing: border-box !important;
+
+
+
+                white-space: nowrap !important;
+
+
+
+                background-color: #FFFFFF !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            body:not(.desktop-mode-override) .mat-table tr:nth-child(even) td.td-rank-col,
+
+
+
+            body:not(.desktop-mode-override) tr:nth-child(even) .td-rank-col {
+
+
+
+                background-color: #F8FAFC !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            body:not(.desktop-mode-override) .mat-table thead th.th-rank-col,
+
+
+
+            body:not(.desktop-mode-override) .mat-table thead th:first-child.th-rank-col {
+
+
+
+                position: sticky !important;
+
+
+
+                top: 0 !important;
+
+
+
+                left: 0 !important;
+
+
+
+                z-index: 38 !important;
+
+
+
+                background-color: #F1F5F9 !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* CỘT THỨ 2 CỐ ĐỊNH: STICKY-COL-2 (TÊN NVBH / KHÁCH HÀNG) */
+
+
+
+            body:not(.desktop-mode-override) .mat-table th.sticky-col-2,
+
+
+
+            body:not(.desktop-mode-override) .mat-table td.sticky-col-2 {
+
+
+
+                position: sticky !important;
+
+
+
+                left: 38px !important;
+
+
+
+                z-index: 16 !important;
+
+
+
+                width: 145px !important;
+
+
+
+                min-width: 135px !important;
+
+
+
+                max-width: 165px !important;
+
+
+
+                white-space: normal !important;
+
+
+
+                word-break: normal !important;
+
+
+
+                overflow-wrap: break-word !important;
+
+
+
+                padding: 6px 8px !important;
+
+
+
+                font-size: 11px !important;
+
+
+
+                line-height: 1.25 !important;
+
+
+
+                box-shadow: 3px 0 8px rgba(0, 0, 0, 0.12) !important;
+
+
+
+                box-sizing: border-box !important;
+
+
+
+                background-color: #FFFFFF !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            body:not(.desktop-mode-override) .mat-table tr:nth-child(even) td.sticky-col-2 {
+
+
+
+                background-color: #F8FAFC !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            body:not(.desktop-mode-override) .mat-table thead th.sticky-col-2 {
+
+
+
+                position: sticky !important;
+
+
+
+                top: 0 !important;
+
+
+
+                left: 38px !important;
+
+
+
+                z-index: 36 !important;
+
+
+
+                background-color: #F1F5F9 !important;
+
+
+
+            }
+
+
+
+
+
+
+
+                                    /* 2 BẢNG DANH SÁCH NV TẬP TRUNG: KHÓA CHUẨN HEADER VÀ CỐ ĐỊNH CỘT STT + HỌ TÊN NVBH */
+
+
+
+            #table-gt-nv-under-50m,
+
+
+
+            #table-gt-nv-fail-tgt {
+
+
+
+                min-width: 1320px !important;
+
+
+
+                width: max-content !important;
+
+
+
+                border-collapse: separate !important;
+
+
+
+                border-spacing: 0 !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* Toàn bộ ô Header trong thead: Cố định chuẩn xác top: 0px */
+
+
+
+            #table-gt-nv-under-50m thead th,
+
+
+
+            #table-gt-nv-fail-tgt thead th {
+
+
+
+                position: sticky !important;
+
+
+
+                top: 0 !important;
+
+
+
+                z-index: 25 !important;
+
+
+
+                height: 44px !important;
+
+
+
+                padding: 4px 6px !important;
+
+
+
+                border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+                box-sizing: border-box !important;
+
+
+
+                background-color: #F8FAFC !important;
+
+
+
+                vertical-align: middle !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* Cột 1 (STT) trong thead: Cố định tại góc trái (top: 0, left: 0) */
+
+
+
+            #table-gt-nv-under-50m thead th.th-rank-col,
+
+
+
+            #table-gt-nv-fail-tgt thead th.th-rank-col {
+
+
+
+                position: sticky !important;
+
+
+
+                left: 0 !important;
+
+
+
+                top: 0 !important;
+
+
+
+                z-index: 45 !important;
+
+
+
+                background-color: #F1F5F9 !important;
+
+
+
+                width: 44px;
+
+
+
+                min-width: 24px;
+
+
+
+                text-align: center !important;
+
+
+
+                border-right: 1px solid #CBD5E1 !important;
+
+
+
+                border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* Cột 2 (Họ Tên NVBH) trong thead: Cố định tại left: 44px (rộng 175px, mờ đục 100%, có bóng đổ và viền phải rõ ràng) */
+
+
+
+            #table-gt-nv-under-50m thead th.sticky-col-2,
+
+
+
+            #table-gt-nv-fail-tgt thead th.sticky-col-2 {
+
+
+
+                position: sticky !important;
+
+
+
+                left: 44px !important;
+
+
+
+                top: 0 !important;
+
+
+
+                z-index: 44 !important;
+
+
+
+                background-color: #F1F5F9 !important;
+
+
+
+                width: 175px !important;
+
+
+
+                min-width: 175px !important;
+
+
+
+                max-width: 185px !important;
+
+
+
+                border-right: 1px solid #CBD5E1 !important;
+
+
+
+                border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+                padding-left: 10px !important;
+
+
+
+                text-align: left !important;
+
+
+
+                box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* Cột STT trong thân bảng (Tbody) */
+
+
+
+            #table-gt-nv-under-50m td.td-rank-col,
+
+
+
+            #table-gt-nv-fail-tgt td.td-rank-col {
+
+
+
+                width: 44px;
+
+
+
+                min-width: 24px;
+
+
+
+                position: sticky !important;
+
+
+
+                left: 0 !important;
+
+
+
+                z-index: 15 !important;
+
+
+
+                background-color: #FFFFFF !important;
+
+
+
+                text-align: center !important;
+
+
+
+                border-right: 1px solid #CBD5E1 !important;
+
+
+
+            }
+
+
+
+            #table-gt-nv-under-50m tr:nth-child(even) td.td-rank-col,
+
+
+
+            #table-gt-nv-fail-tgt tr:nth-child(even) td.td-rank-col {
+
+
+
+                background-color: #F8FAFC !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* Cột Họ Tên NVBH trong thân bảng (Tbody): Rộng 175px, cố định tại left: 44px */
+
+
+
+            #table-gt-nv-under-50m td.sticky-col-2,
+
+
+
+            #table-gt-nv-fail-tgt td.sticky-col-2 {
+
+
+
+                width: 175px !important;
+
+
+
+                min-width: 175px !important;
+
+
+
+                max-width: 185px !important;
+
+
+
+                position: sticky !important;
+
+
+
+                left: 44px !important;
+
+
+
+                z-index: 14 !important;
+
+
+
+                background-color: #FFFFFF !important;
+
+
+
+                border-right: 1px solid #CBD5E1 !important;
+
+
+
+                box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
+
+
+
+                padding-left: 10px !important;
+
+
+
+                white-space: nowrap !important;
+
+
+
+                overflow: hidden !important;
+
+
+
+                text-overflow: ellipsis !important;
+
+
+
+            }
+
+
+
+            #table-gt-nv-under-50m tr:nth-child(even) td.sticky-col-2,
+
+
+
+            #table-gt-nv-fail-tgt tr:nth-child(even) td.sticky-col-2 {
+
+
+
+                background-color: #F8FAFC !important;
+
+
+
+            }
+
+
+
+            #table-gt-nv-under-50m tr:hover td.td-rank-col,
+
+
+
+            #table-gt-nv-under-50m tr:hover td.sticky-col-2 {
+
+
+
+                background-color: #FFF1F2 !important;
+
+
+
+            }
+
+
+
+            #table-gt-nv-fail-tgt tr:hover td.td-rank-col,
+
+
+
+            #table-gt-nv-fail-tgt tr:hover td.sticky-col-2 {
+
+
+
+                background-color: #FFFBEB !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 3. ĐỘ THỤT CÂY PHÂN CẤP TRÊN MOBILE (GỌN GÀNG, ĐỦ CHỖ HIỂN THỊ TÊN) */
+
+
+
+            body:not(.desktop-mode-override) .tree-lvl-1 { padding-left: 3px !important; }
+
+
+
+            body:not(.desktop-mode-override) .tree-lvl-2 { padding-left: 10px !important; }
+
+
+
+            body:not(.desktop-mode-override) .tree-lvl-3 { padding-left: 17px !important; }
+
+
+
+            body:not(.desktop-mode-override) .tree-lvl-4 { padding-left: 24px !important; }
+
+
+
+            body:not(.desktop-mode-override) .tree-lvl-5 { padding-left: 31px !important; }
+
+
+
+            body:not(.desktop-mode-override) .tree-toggle {
+
+
+
+                width: 14px !important;
+
+
+
+                height: 14px !important;
+
+
+
+                font-size: 9px !important;
+
+
+
+                margin-right: 4px !important;
+
+
+
+                border-radius: 3px !important;
+
+
+
+                flex-shrink: 0 !important;
+
+
+
+                display: inline-flex !important;
+
+
+
+                align-items: center !important;
+
+
+
+                justify-content: center !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 4. CÂN CHỈNH ĐỘ RỘNG VÀ PADDING CHO CÁC CỘT CHỈ SỐ */
+
+
+
+            body:not(.desktop-mode-override) .mat-table td:not(:first-child):not(.sticky-col-2) {
+
+
+
+                padding: 6px 6px !important;
+
+
+
+                font-size: 10.5px !important;
+
+
+
+                white-space: nowrap !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) .mat-table thead th:not(:first-child):not(.sticky-col-2) {
+
+
+
+                padding: 7px 6px !important;
+
+
+
+                font-size: 9.5px !important;
+
+
+
+                white-space: nowrap !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 5. MÀU NỀN MỜ ĐỤC 100% CHO CÁC Ô STICKY (CHỐNG LỘ CHỮ KHI CUỘN) */
+
+
+
+                        body:not(.desktop-mode-override) tr.tree-row-ambient td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-ambient"] td { background-color: #fef3c7 !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-chilled td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-chilled"] td { background-color: #cffafe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-frozen td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-frozen"] td { background-color: #dbeafe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-mien-gt td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-mien-gt"] td { background-color: #ede9fe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-vung-gt td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-vung-gt"] td { background-color: #e0e7ff !important; font-weight: 700 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-channel td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-channel"] td { background-color: #ede9fe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-mt-subchan td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-mt-subchan"] td { background-color: #dbeafe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-b2b-acc td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-b2b-acc"] td { background-color: #ede9fe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-root-fzn td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-root-fzn"] td { background-color: #e0e7ff !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-mien-fzn td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-mien-fzn"] td { background-color: #dbeafe !important; font-weight: 700 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-root-stnd td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-root-stnd"] td { background-color: #ede9fe !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-mien-stnd td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-mien-stnd"] td { background-color: #e0e7ff !important; font-weight: 700 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr.tree-row-route-root td,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="tree-row-route-root"] td { background-color: #eef2ff !important; font-weight: 800 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-purple-200"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-purple-200"] td.sticky-col-2 { background-color: #ede9fe !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-blue-100"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-blue-100"] td.sticky-col-2 { background-color: #dbeafe !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-amber-100"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-amber-100"] td.sticky-col-2 { background-color: #fef3c7 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-cyan-100"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-cyan-100"] td.sticky-col-2 { background-color: #cffafe !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-purple-100"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-purple-100"] td.sticky-col-2 { background-color: #f3e8ff !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-purple-50"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-purple-50"] td.sticky-col-2 { background-color: #faf5ff !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-sky-50"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-sky-50"] td.sticky-col-2 { background-color: #f0f9ff !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-indigo-50"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-indigo-50"] td.sticky-col-2 { background-color: #eef2ff !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-amber-50"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-amber-50"] td.sticky-col-2 { background-color: #fffbeb !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-emerald-50"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-emerald-50"] td.sticky-col-2 { background-color: #ecfdf5 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-slate-50"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-slate-50"] td.sticky-col-2 { background-color: #f8fafc !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-slate-100"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-slate-100"] td.sticky-col-2 { background-color: #f1f5f9 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-slate-200"] td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr[class*="bg-slate-200"] td.sticky-col-2 { background-color: #e2e8f0 !important; }
+
+
+
+            body:not(.desktop-mode-override) tr td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr td.sticky-col-2 { background-color: #ffffff !important; }
+
+
+
+            body:not(.desktop-mode-override) tr:hover td:first-child,
+
+
+
+            body:not(.desktop-mode-override) tr:hover td.sticky-col-2 { background-color: #f1f5f9 !important; }
+
+
+
+
+
+
+
+            /* 6. FLOATING CHART HEADER COMPACT PADDING TRÊN MOBILE */
+
+
+
+            body:not(.desktop-mode-override) .floating-chart-header {
+
+
+
+                margin-left: 2px !important;
+
+
+
+                margin-right: 2px !important;
+
+
+
+                padding: 6px 4px !important;
+
+
+
+                border-radius: 10px !important;
+
+
+
+            }
+
+
+
+
+
+
+
+            /* 7. GT ROUTE MAP VIEW (BẢN ĐỒ SỐ & GOLDEN STORE) TRÊN MOBILE */
+
+
+
+            body:not(.desktop-mode-override) #gt-routemap-header-title {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #btn-toggle-dash-sidebar {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #gt-routemap-toolbar {
+
+
+
+                padding: 6px 8px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #gt-routemap-actions {
+
+
+
+                width: 100% !important;
+
+
+
+                display: flex !important;
+
+
+
+                justify-content: space-between !important;
+
+
+
+                gap: 6px !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #gt-routemap-actions > button,
+
+
+
+            body:not(.desktop-mode-override) #gt-routemap-actions > a {
+
+
+
+                flex: 1 1 0 !important;
+
+
+
+                justify-content: center !important;
+
+
+
+                padding: 6px 4px !important;
+
+
+
+                font-size: 11px !important;
+
+
+
+                text-align: center !important;
+
+
+
+                white-space: nowrap !important;
+
+
+
+            }
+
+
+
+            body:not(.desktop-mode-override) #gt-routemap-card {
+
+
+
+                height: calc(100vh - 100px) !important;
+
+
+
+                min-height: 540px !important;
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+        /* ========================================================================= */
+
+
+
+        /* KPI CARD GROWTH FOOTER (RESPONSIVE 2-COLUMN YOY/YTD & MOM MTD LAYOUT)     */
+
+
+
+        /* ========================================================================= */
+
+
+
+        .kpi-growth-footer {
+
+
+
+            display: flex;
+
+
+
+            justify-content: space-between;
+
+
+
+            align-items: flex-start;
+
+
+
+            padding-top: 6px;
+
+
+
+            margin-top: auto;
+
+
+
+            border-top: 1px solid rgba(241, 245, 249, 0.9);
+
+
+
+            font-size: 11px;
+
+
+
+            gap: 4px;
+
+
+
+        }
+
+
+
+        .kpi-growth-col-left {
+
+
+
+            flex: 1 1 0%;
+
+
+
+            min-width: 0;
+
+
+
+            padding-right: 4px;
+
+
+
+            display: flex;
+
+
+
+            flex-direction: column;
+
+
+
+            gap: 4px;
+
+
+
+        }
+
+
+
+        .kpi-growth-col-right {
+
+
+
+            flex-shrink: 0;
+
+
+
+            min-width: 76px;
+
+
+
+            text-align: right;
+
+
+
+            padding-left: 8px;
+
+
+
+            border-left: 1px solid #f1f5f9;
+
+
+
+            display: flex;
+
+
+
+            flex-direction: column;
+
+
+
+            justify-content: space-between;
+
+
+
+        }
+
+
+
+        .kpi-growth-item {
+
+
+
+            line-height: 1.25;
+
+
+
+            min-width: 0;
+
+
+
+        }
+
+
+
+        .kpi-growth-subtext {
+
+
+
+            font-size: 9.5px;
+
+
+
+            color: #94a3b8;
+
+
+
+            font-weight: 400;
+
+
+
+            line-height: 1.2;
+
+
+
+            white-space: normal;
+
+
+
+            word-break: break-word;
+
+
+
+            margin-top: 1px;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* MANUAL MOBILE VIEW MODE CLASS (.mobile-mode ACTIVATED MANUALLY ON DESKTOP) */
+
+
+
+        body.mobile-mode {
+
+
+
+            justify-content: center;
+
+
+
+            background-color: #CBD5E1 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #sidebar-nav {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .main-content-wrapper {
+
+
+
+            margin-left: 0 !important;
+
+
+
+            width: 100% !important;
+
+
+
+            max-width: 480px !important;
+
+
+
+            margin-left: auto !important;
+
+
+
+            margin-right: auto !important;
+
+
+
+            box-shadow: 0 0 35px rgba(0,0,0,0.25) !important;
+
+
+
+            padding-bottom: 24px !important;
+
+
+
+            background-color: #F0F2F5 !important;
+
+
+
+            border-left: 1px solid #CBD5E1;
+
+
+
+            border-right: 1px solid #CBD5E1;
+
+
+
+        }
+
+
+
+        body.mobile-mode .cj-top-header-banner {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .cj-mobile-top-bar {
+
+
+
+            display: flex !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .top-header-filter {
+
+
+
+            padding: 6px 12px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode main {
+
+
+
+            padding-left: 10px !important;
+
+
+
+            padding-right: 10px !important;
+
+
+
+            padding-top: 6px !important;
+
+
+
+            padding-bottom: 20px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .mobile-filter-toggle-row {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #main-filter-bar-wrapper {
+
+
+
+            display: flex !important;
+
+
+
+        }
+
+
+
+        /* 1. Core Primary KPI Cards (Full-width, perfectly uniform, no broken numbers) */
+
+
+
+        body.mobile-mode [class*="grid-cols-5"],
+
+
+
+        body.mobile-mode [class*="grid-cols-4"] {
+
+
+
+            grid-template-columns: 1fr !important;
+
+
+
+            gap: 10px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode [class*="grid-cols-5"] > div:last-child {
+
+
+
+            grid-column: span 1 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 2. Secondary Productivity & Efficiency Metric Bar (3 compact tiles side by side) */
+
+
+
+        body.mobile-mode .kpi-productivity-grid {
+
+
+
+            display: grid !important;
+
+
+
+            grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+
+
+            gap: 6px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .kpi-productivity-grid > div {
+
+
+
+            padding: 8px 4px !important;
+
+
+
+            min-width: 0 !important;
+
+
+
+            border-radius: 10px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .kpi-productivity-grid span[data-i18n] {
+
+
+
+            font-size: 9px !important;
+
+
+
+            line-height: 1.15 !important;
+
+
+
+            text-align: center !important;
+
+
+
+            display: -webkit-box !important;
+
+
+
+            -webkit-line-clamp: 2 !important;
+
+
+
+            -webkit-box-orient: vertical !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .kpi-productivity-grid .font-mono-num {
+
+
+
+            font-size: 16px !important;
+
+
+
+            line-height: 1.2 !important;
+
+
+
+            margin-top: 2px !important;
+
+
+
+            margin-bottom: 2px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .kpi-productivity-grid span:last-child {
+
+
+
+            font-size: 8.5px !important;
+
+
+
+            line-height: 1.15 !important;
+
+
+
+            text-align: center !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+            text-overflow: ellipsis !important;
+
+
+
+            max-width: 100% !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 3. General 3-cols and 2-cols containers (Reports, Charts, Dialogs) */
+
+
+
+        body.mobile-mode [class*="grid-cols-3"]:not(.kpi-productivity-grid):not(#adm-scope-options-container *):not(#mobile-drawer-view *),
+
+
+
+        body.mobile-mode [class*="md:grid-cols-3"]:not(.kpi-productivity-grid) {
+
+
+
+            grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+
+
+
+            gap: 8px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode [class*="grid-cols-2"],
+
+
+
+        body.mobile-mode [class*="lg:grid-cols-2"] {
+
+
+
+            grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+
+
+
+            gap: 8px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .font-mono-num {
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .text-2xl {
+
+
+
+            font-size: 1.25rem !important;
+
+
+
+            line-height: 1.5rem !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .top-header-filter {
+
+
+
+            padding: 8px 10px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #top-title {
+
+
+
+            font-size: 13.5px !important;
+
+
+
+            line-height: 1.35 !important;
+
+
+
+            color: #0F172A !important;
+
+
+
+            font-weight: 900 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .month-chip {
+
+
+
+            padding: 0 8px !important;
+
+
+
+            height: 32px !important;
+
+
+
+            min-width: 36px !important;
+
+
+
+            font-size: 12px !important;
+
+
+
+            font-weight: 800 !important;
+
+
+
+            border-radius: 8px !important;
+
+
+
+            flex-shrink: 0 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .period-status-bar {
+
+
+
+            font-size: 11px !important;
+
+
+
+            padding: 5px 8px !important;
+
+
+
+            border-radius: 6px !important;
+
+
+
+        }
+
+
+
+        /* MOBILE TABLE OPTIMIZATION FOR MANUAL MOBILE-MODE */
+
+
+
+        body.mobile-mode .table-scroll-container {
+
+
+
+            max-height: 62vh !important;
+
+
+
+            -webkit-overflow-scrolling: touch !important;
+
+
+
+            overscroll-behavior-x: contain !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 1. HIERARCHY TREE / FIRST COLUMN (Miền, Vùng, GSBH, NPP, NVBH, Sản Phẩm)
+
+
+
+           Cột 1 cố định bên trái, độ rộng 215px, text wrap đầy đủ, thụt đầu dòng gọn gàng, nền mờ đục 100% */
+
+
+
+        body.mobile-mode .th-first-col:not(.th-rank-col),
+
+
+
+        body.mobile-mode .th-tree-col,
+
+
+
+        body.mobile-mode .mat-table th:first-child:not(.th-rank-col),
+
+
+
+        body.mobile-mode .mat-table td:first-child:not(.td-rank-col) {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 15 !important;
+
+
+
+            width: 215px !important;
+
+
+
+            min-width: 200px !important;
+
+
+
+            max-width: 245px !important;
+
+
+
+            white-space: normal !important;
+
+
+
+            word-break: normal !important;
+
+
+
+            overflow-wrap: break-word !important;
+
+
+
+            padding: 6px 6px !important;
+
+
+
+            font-size: 11px !important;
+
+
+
+            line-height: 1.3 !important;
+
+
+
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.12) !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        body.mobile-mode .mat-table thead th:first-child:not(.th-rank-col) {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 35 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 2. BẢNG CÓ CỘT STT / HẠNG (Col 1 = STT 38px, Col 2 = Tên NVBH / Khách Hàng 145px)
+
+
+
+           CỐ ĐỊNH CHUẨN CẢ 2 CỘT: STT cố định tại left: 0, Tên cố định tại left: 38px */
+
+
+
+        body.mobile-mode .th-rank-col,
+
+
+
+        body.mobile-mode .td-rank-col,
+
+
+
+        body.mobile-mode .mat-table th.th-rank-col,
+
+
+
+        body.mobile-mode .mat-table td.td-rank-col,
+
+
+
+        body.mobile-mode .mat-table th:first-child.th-rank-col,
+
+
+
+        body.mobile-mode .mat-table td:first-child.td-rank-col {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 18 !important;
+
+
+
+            width: 38px !important;
+
+
+
+            min-width: 38px !important;
+
+
+
+            max-width: 42px !important;
+
+
+
+            text-align: center !important;
+
+
+
+            padding-left: 2px !important;
+
+
+
+            padding-right: 2px !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        body.mobile-mode .mat-table tr:nth-child(even) td.td-rank-col,
+
+
+
+        body.mobile-mode tr:nth-child(even) .td-rank-col {
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        body.mobile-mode .mat-table thead th.th-rank-col,
+
+
+
+        body.mobile-mode .mat-table thead th:first-child.th-rank-col {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 38 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* CỘT THỨ 2 CỐ ĐỊNH: STICKY-COL-2 (TÊN NVBH / KHÁCH HÀNG) */
+
+
+
+        body.mobile-mode .mat-table th.sticky-col-2,
+
+
+
+        body.mobile-mode .mat-table td.sticky-col-2 {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 38px !important;
+
+
+
+            z-index: 16 !important;
+
+
+
+            width: 145px !important;
+
+
+
+            min-width: 135px !important;
+
+
+
+            max-width: 165px !important;
+
+
+
+            white-space: normal !important;
+
+
+
+            word-break: normal !important;
+
+
+
+            overflow-wrap: break-word !important;
+
+
+
+            padding: 6px 8px !important;
+
+
+
+            font-size: 11px !important;
+
+
+
+            line-height: 1.25 !important;
+
+
+
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.12) !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        body.mobile-mode .mat-table tr:nth-child(even) td.sticky-col-2 {
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        body.mobile-mode .mat-table thead th.sticky-col-2 {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 38px !important;
+
+
+
+            z-index: 36 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+                /* 2 BẢNG DANH SÁCH NV TẬP TRUNG: KHÓA CHUẨN 2 TẦNG HEADER & CỐ ĐỊNH CỘT STT + HỌ TÊN NVBH */
+
+
+
+                body.mobile-mode #table-gt-nv-under-50m,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt {
+
+
+
+            min-width: 1320px !important;
+
+
+
+            width: max-content !important;
+
+
+
+            border-collapse: separate !important;
+
+
+
+            border-spacing: 0 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m thead th,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt thead th {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            z-index: 25 !important;
+
+
+
+            height: 44px !important;
+
+
+
+            padding: 4px 6px !important;
+
+
+
+            border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+            vertical-align: middle !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m thead th.th-rank-col,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt thead th.th-rank-col {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            top: 0 !important;
+
+
+
+            z-index: 45 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+            width: 44px !important;
+
+
+
+            min-width: 44px !important;
+
+
+
+            max-width: 44px !important;
+
+
+
+            text-align: center !important;
+
+
+
+            border-right: 1px solid #CBD5E1 !important;
+
+
+
+            border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m thead th.sticky-col-2,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt thead th.sticky-col-2 {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 44px !important;
+
+
+
+            top: 0 !important;
+
+
+
+            z-index: 44 !important;
+
+
+
+            background-color: #F1F5F9 !important;
+
+
+
+            width: 175px !important;
+
+
+
+            min-width: 175px !important;
+
+
+
+            max-width: 185px !important;
+
+
+
+            border-right: 1px solid #CBD5E1 !important;
+
+
+
+            border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+            padding-left: 10px !important;
+
+
+
+            text-align: left !important;
+
+
+
+            box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m td.td-rank-col,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt td.td-rank-col {
+
+
+
+            width: 44px !important;
+
+
+
+            min-width: 44px !important;
+
+
+
+            max-width: 44px !important;
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 15 !important;
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+            text-align: center !important;
+
+
+
+            border-right: 1px solid #CBD5E1 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m tr:nth-child(even) td.td-rank-col,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt tr:nth-child(even) td.td-rank-col {
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m td.sticky-col-2,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt td.sticky-col-2 {
+
+
+
+            width: 175px !important;
+
+
+
+            min-width: 175px !important;
+
+
+
+            max-width: 185px !important;
+
+
+
+            position: sticky !important;
+
+
+
+            left: 44px !important;
+
+
+
+            z-index: 14 !important;
+
+
+
+            background-color: #FFFFFF !important;
+
+
+
+            border-right: 1px solid #CBD5E1 !important;
+
+
+
+            box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
+
+
+
+            padding-left: 10px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+            text-overflow: ellipsis !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m tr:nth-child(even) td.sticky-col-2,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt tr:nth-child(even) td.sticky-col-2 {
+
+
+
+            background-color: #F8FAFC !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m tr:hover td.td-rank-col,
+
+
+
+        body.mobile-mode #table-gt-nv-under-50m tr:hover td.sticky-col-2 {
+
+
+
+            background-color: #FFF1F2 !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt tr:hover td.td-rank-col,
+
+
+
+        body.mobile-mode #table-gt-nv-fail-tgt tr:hover td.sticky-col-2 {
+
+
+
+            background-color: #FFFBEB !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 3. ĐỘ THỤT CÂY PHÂN CẤP TRÊN MOBILE (GỌN GÀNG, ĐỦ CHỖ HIỂN THỊ TÊN) */
+
+
+
+        body.mobile-mode .tree-lvl-1 { padding-left: 3px !important; }
+
+
+
+        body.mobile-mode .tree-lvl-2 { padding-left: 10px !important; }
+
+
+
+        body.mobile-mode .tree-lvl-3 { padding-left: 17px !important; }
+
+
+
+        body.mobile-mode .tree-lvl-4 { padding-left: 24px !important; }
+
+
+
+        body.mobile-mode .tree-lvl-5 { padding-left: 31px !important; }
+
+
+
+        body.mobile-mode .tree-toggle {
+
+
+
+            width: 14px !important;
+
+
+
+            height: 14px !important;
+
+
+
+            font-size: 9px !important;
+
+
+
+            margin-right: 4px !important;
+
+
+
+            border-radius: 3px !important;
+
+
+
+            flex-shrink: 0 !important;
+
+
+
+            display: inline-flex !important;
+
+
+
+            align-items: center !important;
+
+
+
+            justify-content: center !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 4. CÂN CHỈNH ĐỘ RỘNG VÀ PADDING CHO CÁC CỘT CHỈ SỐ */
+
+
+
+        body.mobile-mode .mat-table td:not(:first-child):not(.sticky-col-2) {
+
+
+
+            padding: 6px 6px !important;
+
+
+
+            font-size: 10.5px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode .mat-table thead th:not(:first-child):not(.sticky-col-2) {
+
+
+
+            padding: 7px 6px !important;
+
+
+
+            font-size: 9.5px !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 5. MÀU NỀN MỜ ĐỤC 100% CHO CÁC Ô STICKY (CHỐNG LỘ CHỮ KHI CUỘN) */
+
+
+
+        body.mobile-mode tr[class*="bg-purple-100"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-purple-100"] td.sticky-col-2 { background-color: #f3e8ff !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-purple-50"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-purple-50"] td.sticky-col-2 { background-color: #faf5ff !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-sky-50"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-sky-50"] td.sticky-col-2 { background-color: #f0f9ff !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-indigo-50"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-indigo-50"] td.sticky-col-2 { background-color: #eef2ff !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-amber-50"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-amber-50"] td.sticky-col-2 { background-color: #fffbeb !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-emerald-50"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-emerald-50"] td.sticky-col-2 { background-color: #ecfdf5 !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-slate-50"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-slate-50"] td.sticky-col-2 { background-color: #f8fafc !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-slate-100"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-slate-100"] td.sticky-col-2 { background-color: #f1f5f9 !important; }
+
+
+
+        body.mobile-mode tr[class*="bg-slate-200"] td:first-child,
+
+
+
+        body.mobile-mode tr[class*="bg-slate-200"] td.sticky-col-2 { background-color: #e2e8f0 !important; }
+
+
+
+        body.mobile-mode tr td:first-child,
+
+
+
+        body.mobile-mode tr td.sticky-col-2 { background-color: #ffffff !important; }
+
+
+
+        body.mobile-mode tr:hover td:first-child,
+
+
+
+        body.mobile-mode tr:hover td.sticky-col-2 { background-color: #f1f5f9 !important; }
+
+
+
+
+
+
+
+        /* 6. FLOATING CHART HEADER COMPACT PADDING */
+
+
+
+        body.mobile-mode .floating-chart-header {
+
+
+
+            margin-left: 2px !important;
+
+
+
+            margin-right: 2px !important;
+
+
+
+            padding: 6px 4px !important;
+
+
+
+            border-radius: 10px !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* 7. GT ROUTE MAP VIEW (BẢN ĐỒ SỐ & GOLDEN STORE) TRÊN MOBILE-MODE */
+
+
+
+        body.mobile-mode #gt-routemap-header-title {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #btn-toggle-dash-sidebar {
+
+
+
+            display: none !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #gt-routemap-toolbar {
+
+
+
+            padding: 6px 8px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #gt-routemap-actions {
+
+
+
+            width: 100% !important;
+
+
+
+            display: flex !important;
+
+
+
+            justify-content: space-between !important;
+
+
+
+            gap: 6px !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #gt-routemap-actions > button,
+
+
+
+        body.mobile-mode #gt-routemap-actions > a {
+
+
+
+            flex: 1 1 0 !important;
+
+
+
+            justify-content: center !important;
+
+
+
+            padding: 6px 4px !important;
+
+
+
+            font-size: 11px !important;
+
+
+
+            text-align: center !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+        }
+
+
+
+        body.mobile-mode #gt-routemap-card {
+
+
+
+            height: calc(100vh - 100px) !important;
+
+
+
+            min-height: 540px !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* PRINT & PDF EXPORT OPTIMIZATION */
+
+
+
+        @media print {
+
+
+
+            #sidebar-nav, .mobile-bottom-nav, #mobile-header-bar, .mobile-drawer-overlay, 
+
+
+
+            .cj-modal-backdrop, #main-filter-bar-wrapper, .mobile-filter-toggle-row,
+
+
+
+            #top-header-wrapper button, .btn-modal-export, .tree-toggle,
+
+
+
+            #btn-mobile-drawer, #m-btn-admin, .mobile-header-bar {
+
+
+
+                display: none !important;
+
+
+
+            }
+
+
+
+            body {
+
+
+
+                background-color: #FFFFFF !important;
+
+
+
+                color: #000000 !important;
+
+
+
+                margin: 0 !important;
+
+
+
+                padding: 0 !important;
+
+
+
+            }
+
+
+
+            main {
+
+
+
+                margin-left: 0 !important;
+
+
+
+                padding: 8px !important;
+
+
+
+                width: 100% !important;
+
+
+
+                max-width: 100% !important;
+
+
+
+            }
+
+
+
+            .tab-view:not(.hidden) {
+
+
+
+                display: block !important;
+
+
+
+                width: 100% !important;
+
+
+
+            }
+
+
+
+            .material-card {
+
+
+
+                box-shadow: none !important;
+
+
+
+                border: 1px solid #CBD5E1 !important;
+
+
+
+                break-inside: avoid;
+
+
+
+                page-break-inside: avoid;
+
+
+
+                margin-bottom: 14px !important;
+
+
+
+            }
+
+
+
+            table {
+
+
+
+                width: 100% !important;
+
+
+
+                border-collapse: collapse !important;
+
+
+
+            }
+
+
+
+            th, td {
+
+
+
+                border: 1px solid #CBD5E1 !important;
+
+
+
+                font-size: 8.5pt !important;
+
+
+
+                padding: 4px 6px !important;
+
+
+
+            }
+
+
+
+            @page {
+
+
+
+                size: A4 landscape;
+
+
+
+                margin: 8mm;
+
+
+
+            }
+
+
+
+        }
+
+
+
+    
+
+
+
+/* ==========================================================================
+
+
+
+   ENTERPRISE MT TABLES ENHANCEMENTS: TOTAL ROWS & STORE DIRECTORY TABLE
+
+
+
+   ========================================================================== */
+
+
+
+
+
+
+
+/* 1. HIGHLIGHTED SUMMARY / TOTAL ROWS (LEVEL 0) - MAXIMUM SPECIFICITY */
+
+
+
+/* Table 1: MT Product Storage Summary (Ambient, Chilled, Frozen) */
+
+
+
+tr.total-row-prod,
+
+
+
+tr.total-row-prod td,
+
+
+
+.mat-table tr.total-row-prod td,
+
+
+
+body tr.total-row-prod td:first-child,
+
+
+
+body:not(.desktop-mode-override) tr.total-row-prod td:first-child,
+
+
+
+body.mobile-mode tr.total-row-prod td:first-child {
+
+
+
+    background-color: #E0F2FE !important; /* Sky-100 */
+
+
+
+    color: #0369A1 !important;
+
+
+
+    font-weight: 800 !important;
+
+
+
+    border-top: 1.5px solid #BAE6FD !important;
+
+
+
+    border-bottom: 1.5px solid #BAE6FD !important;
+
+
+
+}
+
+
+
+
+
+
+
+tr.total-row-prod:hover td,
+
+
+
+.mat-table tr.total-row-prod:hover td,
+
+
+
+body tr.total-row-prod:hover td:first-child,
+
+
+
+body:not(.desktop-mode-override) tr.total-row-prod:hover td:first-child,
+
+
+
+body.mobile-mode tr.total-row-prod:hover td:first-child {
+
+
+
+    background-color: #BAE6FD !important; /* Sky-200 */
+
+
+
+}
+
+
+
+
+
+
+
+/* Table 2: MT Subchannel Summary (MT)CS, MT)CVS, MT)Hyper, MT)Middle, MT)Other) */
+
+
+
+tr.total-row-chan,
+
+
+
+tr.total-row-chan td,
+
+
+
+.mat-table tr.total-row-chan td,
+
+
+
+body tr.total-row-chan td:first-child,
+
+
+
+body:not(.desktop-mode-override) tr.total-row-chan td:first-child,
+
+
+
+body.mobile-mode tr.total-row-chan td:first-child {
+
+
+
+    background-color: #EEF2FF !important; /* Indigo-50/100 */
+
+
+
+    color: #3730A3 !important;
+
+
+
+    font-weight: 800 !important;
+
+
+
+    border-top: 1.5px solid #C7D2FE !important;
+
+
+
+    border-bottom: 1.5px solid #C7D2FE !important;
+
+
+
+}
+
+
+
+
+
+
+
+tr.total-row-chan:hover td,
+
+
+
+.mat-table tr.total-row-chan:hover td,
+
+
+
+body tr.total-row-chan:hover td:first-child,
+
+
+
+body:not(.desktop-mode-override) tr.total-row-chan:hover td:first-child,
+
+
+
+body.mobile-mode tr.total-row-chan:hover td:first-child {
+
+
+
+    background-color: #E0E7FF !important; /* Indigo-100 */
+
+
+
+}
+
+
+
+
+
+
+
+/* 2. STORE DIRECTORY TABLE COMPACT STYLING (#table-mt-stores) */
+
+
+
+#table-mt-stores {
+
+
+
+    width: 100% !important;
+
+
+
+    min-width: 980px !important;
+
+
+
+    border-collapse: collapse !important;
+
+
+
+    table-layout: fixed !important;
+
+
+
+    font-size: 10px !important;
+
+
+
+}
+
+
+
+#table-mt-stores th,
+
+
+
+#table-mt-stores td {
+
+
+
+    position: static !important;
+
+
+
+    box-sizing: border-box !important;
+
+
+
+    vertical-align: middle !important;
+
+
+
+    overflow: hidden !important;
+
+
+
+    text-overflow: ellipsis !important;
+
+
+
+}
+
+
+
+#table-mt-stores thead tr th {
+
+
+
+    position: sticky !important;
+
+
+
+    top: 0 !important;
+
+
+
+    z-index: 20 !important;
+
+
+
+    background-color: #F8FAFC !important;
+
+
+
+    border-bottom: 2px solid #CBD5E1 !important;
+
+
+
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+
+
+
+    font-size: 9.5px !important;
+
+
+
+    padding: 6px 4px !important;
+
+
+
+    color: #475569 !important;
+
+
+
+    font-weight: 700 !important;
+
+
+
+}
+
+
+
+#table-mt-stores td {
+
+
+
+    padding: 4.5px 4px !important;
+
+
+
+    border-bottom: 1px solid #F1F5F9 !important;
+
+
+
+    font-size: 10px !important;
+
+
+
+}
+
+
+
+#table-mt-stores th:nth-child(1), #table-mt-stores td:nth-child(1) { width: 34px; min-width: 24px; text-align: center !important; }
+
+
+
+#table-mt-stores th:nth-child(2), #table-mt-stores td:nth-child(2) { width: 66px; min-width: 40px; }
+
+
+
+#table-mt-stores th:nth-child(3), #table-mt-stores td:nth-child(3) { width: 165px; min-width: 80px; }
+
+
+
+#table-mt-stores th:nth-child(4), #table-mt-stores td:nth-child(4) { width: 68px; min-width: 40px; }
+
+
+
+#table-mt-stores th:nth-child(5), #table-mt-stores td:nth-child(5) { width: 52px; min-width: 30px; text-align: center !important; }
+
+
+
+#table-mt-stores th:nth-child(6), #table-mt-stores td:nth-child(6) { width: 52px; min-width: 30px; text-align: center !important; }
+
+
+
+#table-mt-stores th:nth-child(7), #table-mt-stores td:nth-child(7) { width: 190px; min-width: 80px; }
+
+
+
+#table-mt-stores th:nth-child(8), #table-mt-stores td:nth-child(8) { width: 82px; min-width: 50px; text-align: right !important; }
+
+
+
+#table-mt-stores th:nth-child(9), #table-mt-stores td:nth-child(9) { width: 74px; min-width: 50px; text-align: right !important; }
+
+
+
+#table-mt-stores th:nth-child(10), #table-mt-stores td:nth-child(10) { width: 56px; min-width: 35px; text-align: center !important; }
+
+
+
+#table-mt-stores th:nth-child(11), #table-mt-stores td:nth-child(11) { width: 74px; min-width: 50px; text-align: right !important; }
+
+
+
+#table-mt-stores th:nth-child(12), #table-mt-stores td:nth-child(12) { width: 56px; min-width: 35px; text-align: center !important; }
+
+
+
+#table-mt-stores th:nth-child(13), #table-mt-stores td:nth-child(13) { width: 36px; min-width: 24px; text-align: center !important; }
+
+
+
+#table-mt-stores th:nth-child(14), #table-mt-stores td:nth-child(14) { width: 50px; min-width: 35px; text-align: right !important; }
+
+
+
+
+
+
+
+        /* ========================================================================= */
+
+
+
+                /* CANH GIỮA HOÀN HẢO & ĐỘ RỘNG CỐ ĐỊNH CHO TỦ ĐÔNG & KỆ STANDEE */
+        #table-gt-freezer,
+        #table-gt-standee {
+            table-layout: fixed !important;
+            width: 100% !important;
+        }
+        #table-gt-freezer thead th,
+        #table-gt-standee thead th {
+            vertical-align: middle !important;
+        }
+        #table-gt-freezer thead th.text-center,
+        #table-gt-standee thead th.text-center,
+        #table-gt-freezer thead th[data-group-key],
+        #table-gt-standee thead th[data-group-key],
+        .mat-table thead th.text-center,
+        .mat-table th.text-center {
+            text-align: center !important;
+        }
+        .th-text {
+            display: inline-block;
+            width: 100%;
+            text-align: inherit;
+        }
+
+        /* FREEZER & STANDEE MOBILE STICKY FIRST COLUMN & UX ENHANCEMENTS            */
+
+
+
+        /* ========================================================================= */
+
+
+
+        #table-gt-freezer th:first-child,
+
+
+
+        #table-gt-freezer td:first-child,
+
+
+
+        #table-gt-standee th:first-child,
+
+
+
+        #table-gt-standee td:first-child {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 15 !important;
+
+
+
+            width: 220px;
+
+
+
+            min-width: 100px;
+
+
+
+            box-shadow: 3px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            text-overflow: ellipsis !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-gt-freezer thead th:first-child,
+
+
+
+        #table-gt-standee thead th:first-child {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 35 !important;
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        /* Opaque backgrounds for sticky td so text behind does NOT bleed through */
+
+
+
+        #table-gt-freezer tr.tree-row-root-fzn td:first-child { background-color: #e0e7ff !important; }
+
+
+
+        #table-gt-freezer tr.tree-row-mien-fzn td:first-child { background-color: #dbeafe !important; }
+
+
+
+        #table-gt-freezer tr[data-level="2"] td:first-child { background-color: #eef2ff !important; }
+
+
+
+        #table-gt-freezer tr[data-level="3"] td:first-child { background-color: #fffbeb !important; }
+
+
+
+        #table-gt-freezer tr[data-level="4"] td:first-child { background-color: #ecfdf5 !important; }
+
+
+
+        #table-gt-freezer tr[data-level="5"] td:first-child { background-color: #ffffff !important; }
+
+
+
+        #table-gt-freezer tr:hover td:first-child { background-color: #f8fafc !important; }
+
+
+
+
+
+
+
+        #table-gt-standee tr.tree-row-root-stnd td:first-child { background-color: #f3e8ff !important; }
+
+
+
+        #table-gt-standee tr.tree-row-mien-stnd td:first-child { background-color: #e0e7ff !important; }
+
+
+
+        #table-gt-standee tr[data-level="2"] td:first-child { background-color: #f0f9ff !important; }
+
+
+
+        #table-gt-standee tr[data-level="3"] td:first-child { background-color: #fffbeb !important; }
+
+
+
+        #table-gt-standee tr[data-level="4"] td:first-child { background-color: #f5f3ff !important; }
+
+
+
+        #table-gt-standee tr[data-level="5"] td:first-child { background-color: #ffffff !important; }
+
+
+
+        #table-gt-standee tr:hover td:first-child { background-color: #faf5ff !important; }
+
+
+
+
+
+
+
+        /* Sticky rank / customer for Detail tables (STT column strictly compact) */
+
+
+
+        #table-gt-freezer-detail th:first-child,
+
+
+
+        #table-gt-freezer-detail td:first-child,
+
+
+
+        #table-gt-standee-detail th:first-child,
+
+
+
+        #table-gt-standee-detail td:first-child {
+
+
+
+            position: sticky !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 18 !important;
+
+
+
+            width: 40px;
+
+
+
+            min-width: 24px;
+
+
+
+            text-align: center !important;
+
+
+
+            padding-left: 2px !important;
+
+
+
+            padding-right: 2px !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+            background-color: #ffffff !important;
+
+
+
+            box-shadow: 2px 0 4px -1px rgba(0, 0, 0, 0.08) !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #table-gt-freezer-detail thead th:first-child,
+
+
+
+        #table-gt-standee-detail thead th:first-child {
+
+
+
+            position: sticky !important;
+
+
+
+            top: 0 !important;
+
+
+
+            left: 0 !important;
+
+
+
+            z-index: 38 !important;
+
+
+
+            background-color: #f1f5f9 !important;
+
+
+
+            width: 40px;
+
+
+
+            min-width: 24px;
+
+
+
+            text-align: center !important;
+
+
+
+            padding-left: 2px !important;
+
+
+
+            padding-right: 2px !important;
+
+
+
+            box-sizing: border-box !important;
+
+
+
+            white-space: nowrap !important;
+
+
+
+            overflow: hidden !important;
+
+
+
+        }
+
+
+
+
+
+
+
+        #modal-chart-zoom {
+
+
+
+            transition: opacity 0.2s ease-in-out;
+
+
+
+        }
+
+
+
+
+
+
+
+
+        /* Table Column Resizer & Customizer */
+        .col-resizer {
+            position: absolute;
+            right: -5px;
+            top: 0;
+            width: 10px;
+            height: 100%;
+            cursor: col-resize;
+            user-select: none;
+            z-index: 40;
+            transition: background-color 0.15s ease;
+        }
+        .col-resizer:hover, .col-resizer.resizing {
+            background-color: #2563eb !important;
+            opacity: 0.95;
+        }
+        .th-text-editable {
+            transition: all 0.15s ease;
+        }
+        .th-text-editable:hover {
+            outline: 1.5px dashed #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 3px;
+            cursor: text;
+        }
+
+        .btn-admin-action-reset {
+            background-color: #F8FAFC !important;
+            color: #475569 !important;
+            font-weight: 700 !important;
+            font-size: 12px !important;
+            padding: 7px 14px !important;
+            border-radius: 8px !important;
+            border: 1px solid #CBD5E1 !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+            white-space: nowrap !important;
+            transition: all 0.15s ease !important;
+        }
+        .btn-admin-action-reset:hover { background-color: #FEF2F2 !important; color: #DC2626 !important; border-color: #FECACA !important; transform: translateY(-1px) !important; }

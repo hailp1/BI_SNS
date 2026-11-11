@@ -1,0 +1,26 @@
+# Secrets & local environment
+.env
+*.env.local
+
+# Dependencies & builds
+node_modules/
+backend/node_modules/
+backend/dist/
+
+# Large data dumps & encrypted payloads
+data_payloads/*.enc
+web_app/apps/routemap/dms_data.js
+web_app/data/modules/ctkm_data.js
+database/real_database_dump.sql
+database/init/04_full_real_database.sql
+
+# Docker persistent volumes / backups
+standard_pg_data/
+standard_redis_data/
+backups/
+
+# IDE & OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
