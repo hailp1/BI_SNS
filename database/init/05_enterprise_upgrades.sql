@@ -52,12 +52,24 @@ CREATE INDEX IF NOT EXISTS idx_users_is_active
 CREATE INDEX IF NOT EXISTS idx_users_email
   ON iam.users (email) WHERE email IS NOT NULL;
 
+CREATE INDEX IF NOT EXISTS idx_users_username_lower
+  ON iam.users (LOWER(username));
+
 CREATE INDEX IF NOT EXISTS idx_trusted_networks_active
   ON iam.trusted_networks (is_active) WHERE is_active = TRUE;
+
+CREATE INDEX IF NOT EXISTS idx_audit_user_created
+  ON iam.audit_logs (user_id, created_at DESC) WHERE user_id IS NOT NULL;
 
 CREATE INDEX IF NOT EXISTS idx_stock_doi_npp
   ON datamart.fact_stock_doi (npp_code);
 
 CREATE INDEX IF NOT EXISTS idx_perf_year_month_chan
   ON datamart.fact_monthly_performance (year, month, channel);
+
+CREATE INDEX IF NOT EXISTS idx_std_daily_month_chan
+  ON datamart.fact_daily_sales (month, channel);
+
+-- Refresh query planner statistics
+ANALYZE;
 

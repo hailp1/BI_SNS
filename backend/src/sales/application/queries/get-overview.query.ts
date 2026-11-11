@@ -34,8 +34,10 @@ export class GetOverviewQuery {
     for (const row of rows) {
       const ch = row.channel.toUpperCase();
       if (ch === 'ALL') {
-        overallMetric = row;
-      } else {
+        if (!overallMetric || row.sub_channel.toUpperCase() === 'ALL') {
+          overallMetric = row;
+        }
+      } else if (!channelMap[ch] || row.sub_channel.toUpperCase() === 'ALL') {
         channelMap[ch] = row;
       }
     }

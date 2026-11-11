@@ -7,8 +7,8 @@
 #gt-subview-routemap {
   position: relative;
   width: 100%;
-  height: calc(100vh - 120px);
-  min-height: 720px;
+  height: clamp(500px, calc(100vh - 130px), 880px);
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   overflow: hidden;

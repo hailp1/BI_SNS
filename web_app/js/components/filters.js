@@ -4580,7 +4580,8 @@
 
 
 
-            setTimeout(resizeAllCharts, 150);
+            setTimeout(resizeAllCharts, 60);
+            setTimeout(resizeAllCharts, 280);
 
 
 
@@ -4731,12 +4732,14 @@
                     if (seq !== _renderTabSeq) return;
                     window._isStage1Render = false;
                     _executeActiveTabRenderNow();
-                    setTimeout(resizeAllCharts, 150);
+                    setTimeout(resizeAllCharts, 60);
+            setTimeout(resizeAllCharts, 280);
                 } else {
                     _hideFastLoader();
                     window._isStage1Render = false;
                     _executeActiveTabRenderNow();
-                    setTimeout(resizeAllCharts, 150);
+                    setTimeout(resizeAllCharts, 60);
+            setTimeout(resizeAllCharts, 280);
                 }
             })();
         }

@@ -75,51 +75,82 @@ export class PrismaUserRepository implements UserRepositoryPort {
       passwordHash: string;
     }>,
   ): Promise<{ imported: number; updated: number; total: number }> {
+    if (items.length === 0) {
+      return { imported: 0, updated: 0, total: 0 };
+    }
+
     return this.prisma.$transaction(async (tx) => {
-      const usernames = items.map((i) => i.username);
-      const existingRows = await tx.user.findMany({
-        where: { username: { in: usernames } },
-        select: { id: true, username: true },
-      });
+      const lowerNames = Array.from(new Set(items.map((i) => i.username.toLowerCase())));
+      const existingRows = await tx.$queryRaw<Array<{ id: string; username: string }>>`
+        SELECT id, username
+        FROM iam.users
+        WHERE LOWER(username) = ANY(${lowerNames}::text[])
+      `;
       const existingMap = new Map(existingRows.map((r) => [r.username.toLowerCase(), r.id]));
 
-      let imported = 0;
-      let updated = 0;
+      const toUpdate: Array<(typeof items)[number] & { id: string }> = [];
+      const toInsert: typeof items = [];
 
       for (const item of items) {
         const existingId = existingMap.get(item.username.toLowerCase());
         if (existingId) {
-          await tx.user.update({
-            where: { id: existingId },
-            data: {
-              fullName: item.fullName,
-              role: item.role,
-              channel: item.channel,
-              scopeLevel: item.scopeLevel,
-              scopeValue: item.scopeValue,
-              email: item.email,
-            },
-          });
-          updated++;
+          toUpdate.push({ ...item, id: existingId });
         } else {
-          await tx.user.create({
-            data: {
-              username: item.username,
-              fullName: item.fullName,
-              role: item.role,
-              channel: item.channel,
-              scopeLevel: item.scopeLevel,
-              scopeValue: item.scopeValue,
-              email: item.email,
-              passwordHash: item.passwordHash,
-              isActive: true,
-            },
-          });
-          imported++;
+          existingMap.set(item.username.toLowerCase(), '');
+          toInsert.push(item);
         }
       }
 
-      return { imported, updated, total: items.length };
+      if (toUpdate.length > 0) {
+        const ids = toUpdate.map((u) => u.id);
+        const fullNames = toUpdate.map((u) => u.fullName);
+        const roles = toUpdate.map((u) => u.role);
+        const channels = toUpdate.map((u) => u.channel);
+        const scopeLevels = toUpdate.map((u) => u.scopeLevel);
+        const scopeValues = toUpdate.map((u) => u.scopeValue);
+        const emails = toUpdate.map((u) => (u.email && u.email.trim() !== '' ? u.email.trim() : null));
+
+        await tx.$executeRaw`
+          UPDATE iam.users AS u
+          SET full_name = v.full_name,
+              role = v.role,
+              channel = v.channel,
+              scope_level = v.scope_level,
+              scope_value = v.scope_value,
+              email = COALESCE(v.email, u.email)
+          FROM UNNEST(
+            ${ids}::uuid[],
+            ${fullNames}::text[],
+            ${roles}::text[],
+            ${channels}::text[],
+            ${scopeLevels}::text[],
+            ${scopeValues}::text[],
+            ${emails}::text[]
+          ) AS v(id, full_name, role, channel, scope_level, scope_value, email)
+          WHERE u.id = v.id
+        `;
+      }
+
+      let imported = 0;
+      if (toInsert.length > 0) {
+        const res = await tx.user.createMany({
+          data: toInsert.map((item) => ({
+            username: item.username,
+            fullName: item.fullName,
+            role: item.role,
+            channel: item.channel,
+            scopeLevel: item.scopeLevel,
+            scopeValue: item.scopeValue,
+            email: item.email && item.email.trim() !== '' ? item.email.trim() : null,
+            passwordHash: item.passwordHash,
+            isActive: true,
+          })),
+          skipDuplicates: true,
+        });
+        imported = res.count;
+      }
+
+      return { imported, updated: toUpdate.length, total: items.length };
     });
   }
 }

@@ -22772,7 +22772,8 @@ const isLocked = (u.is_active === 0 || u.is_active === false || (u.failed_attemp
 
 
 
-            document.querySelectorAll('[id^="chart-"]').forEach(dom => {
+            const seen = new Set();
+            document.querySelectorAll('[id^="chart-"], [_echarts_instance_]').forEach(dom => {
 
 
 
@@ -22780,6 +22781,8 @@ const isLocked = (u.is_active === 0 || u.is_active === false || (u.failed_attemp
 
 
 
+                if (seen.has(dom) || dom.offsetParent === null) return;
+                seen.add(dom);
                 const chart = echarts.getInstanceByDom(dom);
 
 

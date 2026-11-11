@@ -60,6 +60,20 @@ describe('GetOverviewQuery', () => {
       },
       {
         channel: 'GT',
+        sub_channel: 'GT',
+        sellin_revenue: 44.22,
+        target_sellin: 47.68,
+        gap_sellin: -3.46,
+        achievement_rate: 92.74,
+        ly_sellin: 40.55,
+        yoy_growth_amt: 3.67,
+        yoy_growth_rate: 9.05,
+        mom_mtd_rate: 15.5,
+        ytd_revenue: 489.74,
+        channel_share: 21.1,
+      },
+      {
+        channel: 'GT',
         sub_channel: 'ALL',
         sellin_revenue: 120,
         target_sellin: 110,
@@ -76,12 +90,14 @@ describe('GetOverviewQuery', () => {
 
     const result = (await query.execute('2026-10', sampleUser)) as {
       overall: { sellin_revenue: number };
-      channels: Record<string, unknown>;
+      channels: Record<string, { sellin_revenue: number; sub_channel: string }>;
     };
 
     expect(performanceRepo.findMonthlyPerformance).toHaveBeenCalledWith('2026-10', 'GT');
     expect(result.overall.sellin_revenue).toBe(210);
     expect(result.channels.GT).toBeDefined();
+    expect(result.channels.GT.sub_channel).toBe('ALL');
+    expect(result.channels.GT.sellin_revenue).toBe(120);
     expect(redis.set).toHaveBeenCalledWith('cache:overview:2026-10:head_gt:GT', expect.any(String), 600);
   });
 });

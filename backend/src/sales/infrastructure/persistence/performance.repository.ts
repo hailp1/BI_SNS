@@ -13,7 +13,10 @@ export class PrismaPerformanceRepository implements PerformanceRepositoryPort {
   async findMonthlyPerformance(month: string, channel?: string): Promise<MonthlyPerformanceRecord[]> {
     const where = channel && channel !== 'all' ? { month, OR: [{ channel }, { channel: 'ALL' }] } : { month };
 
-    const rows = await this.prisma.factMonthlyPerformance.findMany({ where });
+    const rows = await this.prisma.factMonthlyPerformance.findMany({
+      where,
+      orderBy: [{ channel: 'asc' }, { subChannel: 'asc' }],
+    });
 
     return rows.map((r) => ({
       channel: r.channel,

@@ -1136,6 +1136,33 @@
 
 
 
+        let _cjChartResizeObserver = null;
+        function observeChartDom(dom) {
+            if (!dom || dom.__cjObserved || typeof ResizeObserver === 'undefined' || typeof echarts === 'undefined') return;
+            if (!_cjChartResizeObserver) {
+                _cjChartResizeObserver = new ResizeObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                            const inst = echarts.getInstanceByDom(entry.target);
+                            if (inst) requestAnimationFrame(() => inst.resize());
+                        }
+                    }
+                });
+            }
+            dom.__cjObserved = true;
+            _cjChartResizeObserver.observe(dom);
+        }
+
+        if (typeof echarts !== 'undefined' && !echarts.__cjInitWrapped) {
+            const _origEchartsInit = echarts.init.bind(echarts);
+            echarts.init = function(dom, theme, opts) {
+                const inst = _origEchartsInit(dom, theme, opts);
+                observeChartDom(dom);
+                return inst;
+            };
+            echarts.__cjInitWrapped = true;
+        }
+
         function getOrInitChart(domId) {
 
 
@@ -1157,6 +1184,14 @@
 
 
                 chart = echarts.init(dom);
+
+
+
+            } else {
+
+
+
+                observeChartDom(dom);
 
 
 

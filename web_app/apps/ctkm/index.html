@@ -13,6 +13,7 @@
     <!-- Tailwind CSS -->
 
     <link rel="stylesheet" href="tailwind.min.css">
+    <link rel="stylesheet" href="/css/tailwind-v3-compat.css?v=20261111">
 
     <!-- Pako Gzip Decompressor -->
 
@@ -96,7 +97,7 @@
 
             font-weight: 600;
 
-            padding: 3px 8px;
+            padding: 3px 20px 3px 8px;
 
             border-radius: 6px;
 
@@ -118,6 +119,10 @@
 
             flex-shrink: 0;
 
+            max-width: 165px;
+
+            text-overflow: ellipsis;
+
         }
 
         .header-dropdown:hover, .header-dropdown:focus {
@@ -130,20 +135,30 @@
 
         #main-filter-bar-wrapper {
 
-            flex-wrap: nowrap !important;
+            flex-wrap: wrap !important;
 
             min-height: 40px !important;
 
-            max-height: 44px !important;
+            max-height: none !important;
 
-            white-space: nowrap !important;
+            white-space: normal !important;
 
-            overflow-x: auto !important;
+            overflow-x: visible !important;
 
-            overflow-y: hidden !important;
+            overflow-y: visible !important;
+
+            row-gap: 6px !important;
+
+            column-gap: 6px !important;
 
             scrollbar-width: thin;
 
+        }
+
+        @media (max-width: 1279px) {
+            .kpi-grid-container {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
         }
 
         #main-filter-bar-wrapper::-webkit-scrollbar {
@@ -5582,7 +5597,19 @@
 
             if (elStorage) chartStorageInstance = echarts.init(elStorage);
 
-
+            if (typeof ResizeObserver !== 'undefined') {
+                const ctkmChartObserver = new ResizeObserver((entries) => {
+                    for (const entry of entries) {
+                        if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+                            const inst = echarts.getInstanceByDom(entry.target);
+                            if (inst) requestAnimationFrame(() => inst.resize());
+                        }
+                    }
+                });
+                [elReasons, elMonthly, elRegions, elStorage].forEach((el) => {
+                    if (el) ctkmChartObserver.observe(el);
+                });
+            }
 
             window.addEventListener('resize', () => {
 

@@ -11,11 +11,14 @@ generator client {
 }
 
 model Role {
-  id          Int              @id @default(autoincrement())
-  name        String           @unique @db.VarChar(50)
-  description String?
-  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz
-  permissions RolePermission[]
+  id           Int              @id @default(autoincrement())
+  name         String           @unique @db.VarChar(50)
+  description  String?
+  parentRoleId Int?             @map("parent_role_id")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  parentRole   Role?            @relation("RoleHierarchy", fields: [parentRoleId], references: [id], onDelete: SetNull)
+  childRoles   Role[]           @relation("RoleHierarchy")
+  permissions  RolePermission[]
 
   @@map("roles")
   @@schema("iam")
@@ -125,6 +128,7 @@ model FactMonthlyPerformance {
 
   @@unique([year, month, channel, subChannel], map: "uq_std_monthly_perf")
   @@index([month, channel], name: "idx_std_perf_month_chan")
+  @@index([year, month, channel], name: "idx_perf_year_month_chan")
   @@map("fact_monthly_performance")
   @@schema("datamart")
 }
@@ -143,6 +147,7 @@ model FactDailySales {
 
   @@unique([saleDate, channel], map: "uq_std_daily_sales")
   @@index([saleDate, channel], name: "idx_std_daily_date_chan")
+  @@index([month, channel], name: "idx_std_daily_month_chan")
   @@map("fact_daily_sales")
   @@schema("datamart")
 }
@@ -163,18 +168,22 @@ model FactStockDoi {
 
   @@unique([reportMonth, nppCode], map: "uq_std_stock_doi")
   @@index([reportMonth, region, area], name: "idx_std_stock_region_area")
+  @@index([nppCode], name: "idx_stock_doi_npp")
   @@map("fact_stock_doi")
   @@schema("datamart")
 }
 
 model DimGeoHierarchy {
-  id         Int      @id @default(autoincrement())
-  regionCode String   @map("region_code") @db.VarChar(20)
-  regionName String   @map("region_name") @db.VarChar(50)
-  vungCode   String   @map("vung_code") @db.VarChar(50)
-  areaCode   String   @map("area_code") @db.VarChar(50)
-  officeName String?  @map("office_name") @db.VarChar(100)
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  id            Int      @id @default(autoincrement())
+  regionCode    String   @map("region_code") @db.VarChar(20)
+  regionName    String   @map("region_name") @db.VarChar(50)
+  vungCode      String   @map("vung_code") @db.VarChar(50)
+  areaCode      String   @map("area_code") @db.VarChar(50)
+  officeName    String?  @map("office_name") @db.VarChar(100)
+  effectiveFrom DateTime @default(dbgenerated("CURRENT_DATE")) @map("effective_from") @db.Date
+  effectiveTo   DateTime @default(dbgenerated("'9999-12-31'::date")) @map("effective_to") @db.Date
+  isCurrent     Boolean  @default(true) @map("is_current")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@unique([regionCode, vungCode, areaCode], map: "uq_std_geo")
   @@map("dim_geo_hierarchy")
