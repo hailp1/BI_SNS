@@ -66,3 +66,10 @@ The system is delivered as a containerized **Docker Compose** ecosystem running 
 - `docs/IT_SECURITY_CHECKLIST.md`: Verification checklist for corporate IT auditors.
 - `docs/LEGAL_NOTICE_AND_IP.md`: Proprietary License, Intellectual Property Rights & Terms of Evaluation.
 - `docs/HUONG_DAN_CAU_HINH_SMTP.md`: SMTP & email OTP configuration guide (`scripts/config-smtp.bat`).
+
+---
+
+### 5. MULTI-MACHINE DATABASE SYNC (POSTGRESQL BACKUP & GOOGLE DRIVE)
+Because GitHub only tracks source code and SQL table definitions (`database/init/`), full business data (`33` datasets) must be transferred via PostgreSQL dump or re-ingested via `scripts/etl_load_postgres.js`:
+1. **Export on primary PC**: Run `scripts\export-db.bat` to create a compressed `backups\cj_enterprise_latest.dump` and automatically copy it (plus `dms_data.js` if present) to `G:\My Drive\BI_SNS_Sync\` when Google Drive Desktop is mounted.
+2. **Restore on target PC**: Clone the repo, copy `.env.example` to `.env`, run `docker compose up -d --build`, then run `scripts\restore-db.bat` (or drag & drop the `.dump` file onto `scripts\restore-db.bat`).
