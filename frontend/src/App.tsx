@@ -7,6 +7,7 @@ import { AppLayout } from './shared/components/AppLayout';
 import { useAuthStore } from './shared/stores/auth.store';
 
 const GtOverviewPage = lazy(() => import('./features/gt/GtOverviewPage').then((m) => ({ default: m.GtOverviewPage })));
+const GtFundamentalPage = lazy(() => import('./features/gt/GtFundamentalPage').then((m) => ({ default: m.GtFundamentalPage })));
 const GtProductivityPage = lazy(() => import('./features/gt/GtProductivityPage').then((m) => ({ default: m.GtProductivityPage })));
 const GtRouteExecPage = lazy(() => import('./features/gt/GtRouteExecPage').then((m) => ({ default: m.GtRouteExecPage })));
 const GtPosmPage = lazy(() => import('./features/gt/GtPosmPage').then((m) => ({ default: m.GtPosmPage })));
@@ -61,7 +62,7 @@ function AuthenticatedApp() {
         <Route element={<AppLayout />}>
           <Route index element={<OverviewPage />} />
           <Route path="gt" element={<GtOverviewPage />} />
-          <Route path="gt/fundamental" element={<GtOverviewPage />} />
+          <Route path="gt/fundamental" element={<GtFundamentalPage />} />
           <Route path="gt/productivity" element={<GtProductivityPage />} />
           <Route path="gt/route" element={<GtRouteExecPage />} />
           <Route path="gt/routemap" element={<GtRouteMapPage />} />

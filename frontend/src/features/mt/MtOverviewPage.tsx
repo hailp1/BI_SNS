@@ -253,6 +253,57 @@ export function MtOverviewPage() {
     };
   }, [chainRows]);
 
+  const monthlyTrendOption = useMemo(() => {
+    const lyYear = String(parseInt(year, 10) - 1);
+    const cyM = new Array<number>(12).fill(0);
+    const lyM = new Array<number>(12).fill(0);
+    for (const r of mtTree) {
+      if (mtSubChan !== 'ALL' && r.sub_channel !== mtSubChan) continue;
+      if (mtChain !== 'ALL' && r.key_account !== mtChain) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx < 0 || idx > 11) continue;
+      const valB = (Number(r.sellin_val) || 0) / 1e9;
+      if (String(r.year) === year) cyM[idx] += valB;
+      else if (String(r.year) === lyYear) lyM[idx] += valB;
+    }
+    const yoyM = cyM.map((c, i) => (lyM[i] > 0 ? Number((((c - lyM[i]) / lyM[i]) * 100).toFixed(1)) : 0));
+    return {
+      tooltip: { trigger: 'axis' as const },
+      legend: { data: [year, lyYear, '% YoY'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 48, right: 44, top: 36, bottom: 28 },
+      xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: [
+        { type: 'value' as const, name: 'Tỷ', nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, name: '%', nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+      ],
+      series: [
+        { name: lyYear, type: 'bar' as const, data: lyM.map((v) => Number(v.toFixed(2))), itemStyle: { color: 'rgba(255,255,255,0.45)', borderRadius: [3, 3, 0, 0] } },
+        { name: year, type: 'bar' as const, data: cyM.map((v) => Number(v.toFixed(2))), itemStyle: { color: 'rgba(255,255,255,0.92)', borderRadius: [3, 3, 0, 0] }, label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9 }, labelLayout: { hideOverlap: true } },
+        { name: '% YoY', type: 'line' as const, yAxisIndex: 1, smooth: true, data: yoyM, itemStyle: { color: '#fde047' }, lineStyle: { width: 2.5, color: '#fde047' }, label: { show: true, position: 'top' as const, color: '#fde047', fontSize: 9, formatter: '{c}%' }, labelLayout: { hideOverlap: true } },
+      ],
+    };
+  }, [mtTree, year, mtSubChan, mtChain]);
+
+  const subchanOption = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const r of chainRows) {
+      map.set(r.subChannel, (map.get(r.subChannel) || 0) + r.sellin);
+    }
+    const items = Array.from(map.entries()).map(([name, value]) => ({ name, value: Math.round(value / 1e6) }));
+    return {
+      tooltip: { trigger: 'item' as const, formatter: '{b}: {c} Tr ({d}%)' },
+      series: [
+        {
+          name: 'Phân kênh MT',
+          type: 'pie' as const,
+          radius: ['42%', '72%'],
+          data: items,
+          label: { color: '#ffffff', fontSize: 11, formatter: '{b}: {d}%' },
+        },
+      ],
+    };
+  }, [chainRows]);
+
   const columns: ColumnDef<ChainSummary>[] = [
     { key: 'subChannel', header: 'Phân kênh MT', sortValue: (r) => r.subChannel, render: (r) => r.subChannel },
     { key: 'keyAccount', header: 'Chuỗi Siêu thị (Key Account)', sortValue: (r) => r.keyAccount, render: (r) => <span className="font-semibold text-slate-900">{r.keyAccount}</span> },
@@ -370,6 +421,15 @@ export function MtOverviewPage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <EChartsCard
+          title="Xu Hướng Sell-in MT 12 Tháng (YoY)"
+          subtitle={`Đối sánh ${year} vs ${parseInt(year, 10) - 1} (Tỷ VNĐ)`}
+          option={monthlyTrendOption}
+          loading={loading}
+          gradientClass="grad-blue"
+          badgeText="Monthly YoY"
+          badgeClass="badge-pill badge-pill-blue"
+        />
+        <EChartsCard
           title="Top Chuỗi Siêu thị theo Doanh số (Triệu VNĐ)"
           subtitle="Đóng góp Sell-in theo Key Account MT"
           option={chartOption}
@@ -377,6 +437,15 @@ export function MtOverviewPage() {
           gradientClass="grad-purple"
           badgeText="MT Chains"
           badgeClass="badge-pill badge-pill-purple"
+        />
+        <EChartsCard
+          title="Cơ Cấu Doanh Số Theo Phân Kênh MT"
+          subtitle="Tỷ trọng Sub-channel (CVS, Hyper, Super...)"
+          option={subchanOption}
+          loading={loading}
+          gradientClass="grad-orange"
+          badgeText="Sub-channel"
+          badgeClass="badge-pill badge-pill-orange"
         />
         <EChartsCard
           title="Xu hướng Sell-in MT theo Ngày (Triệu VNĐ)"

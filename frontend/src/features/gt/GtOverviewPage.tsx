@@ -54,6 +54,26 @@ interface GtSiRow {
   sellin_val?: number;
 }
 
+interface GtDailySiRow {
+  month?: string;
+  date_val?: string;
+  npp_code?: string;
+  daily_si?: number;
+}
+
+interface GtDailySoRow {
+  month?: string;
+  date_val?: string;
+  npp_code?: string;
+  daily_so?: number;
+}
+
+interface GtStockRow {
+  month?: string;
+  npp_code?: string;
+  stock_val?: number;
+}
+
 interface NppSummaryRow {
   nppCode: string;
   nppName: string;
@@ -83,6 +103,9 @@ export function GtOverviewPage() {
   const [gtMcp, setGtMcp] = useState<GtMcpRow[]>([]);
   const [gtSi, setGtSi] = useState<GtSiRow[]>([]);
   const [targetSo, setTargetSo] = useState<TargetSoRow[]>([]);
+  const [gtDailySi, setGtDailySi] = useState<GtDailySiRow[]>([]);
+  const [gtDailySo, setGtDailySo] = useState<GtDailySoRow[]>([]);
+  const [gtStock, setGtStock] = useState<GtStockRow[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -92,13 +115,19 @@ export function GtOverviewPage() {
       loadPayload('GT_MCP_M', user),
       loadPayload('GT_SI', user),
       loadPayload('TARGET_SELLOUT', user),
-    ]).then(([tree, aso, mcp, si, tgt]) => {
+      loadPayload('GT_DAILY_SI', user),
+      loadPayload('GT_DAILY_SO', user),
+      loadPayload('GT_STOCK', user),
+    ]).then(([tree, aso, mcp, si, tgt, dSi, dSo, stk]) => {
       if (!active) return;
       if (Array.isArray(tree)) setGtTree(tree as GtTreeRow[]);
       if (Array.isArray(aso)) setGtAso(aso as GtAsoRow[]);
       if (Array.isArray(mcp)) setGtMcp(mcp as GtMcpRow[]);
       if (Array.isArray(si)) setGtSi(si as GtSiRow[]);
       if (Array.isArray(tgt)) setTargetSo(tgt as TargetSoRow[]);
+      if (Array.isArray(dSi)) setGtDailySi(dSi as GtDailySiRow[]);
+      if (Array.isArray(dSo)) setGtDailySo(dSo as GtDailySoRow[]);
+      if (Array.isArray(stk)) setGtStock(stk as GtStockRow[]);
     });
     return () => {
       active = false;
@@ -244,6 +273,129 @@ export function GtOverviewPage() {
       mcpCount: mcpTotal,
     };
   }, [gtTree, gtAso, gtMcp, gtSi, targetSo, year, selectedMonths, geoMien, geoVung, geoGsbh, geoNpp]);
+
+  const allowedNppSet = useMemo(() => {
+    const s = new Set<string>();
+    for (const r of gtTree) {
+      if (
+        (geoMien === 'ALL' || r.mien === geoMien) &&
+        (geoVung === 'ALL' || r.vung === geoVung || r.cluster === geoVung) &&
+        (geoGsbh === 'ALL' || String(r.office || r.gsbh || r.gsbh_name || '') === geoGsbh) &&
+        (geoNpp === 'ALL' || String(r.npp_code || '') === geoNpp)
+      ) {
+        if (r.npp_code) s.add(String(r.npp_code));
+      }
+    }
+    return s;
+  }, [gtTree, geoMien, geoVung, geoGsbh, geoNpp]);
+
+  const sisoDoiOption = useMemo(() => {
+    const siM = new Array<number>(12).fill(0);
+    const soM = new Array<number>(12).fill(0);
+    const stkM = new Array<number>(12).fill(0);
+
+    for (const r of gtTree) {
+      if (String(r.year) !== year) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) soM[idx] += (Number(r.sellout_val) || 0) / 1e9;
+    }
+    for (const r of gtSi) {
+      const mStr = String(r.month || '');
+      if (!mStr.startsWith(year)) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const idx = parseInt(mStr.slice(5, 7), 10) - 1;
+      if (idx >= 0 && idx < 12) siM[idx] += (Number(r.sellin_val) || 0) / 1e9;
+    }
+    for (const r of gtStock) {
+      const mStr = String(r.month || '');
+      if (!mStr.startsWith(year)) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const idx = parseInt(mStr.slice(5, 7), 10) - 1;
+      if (idx >= 0 && idx < 12) stkM[idx] += (Number(r.stock_val) || 0) / 1e9;
+    }
+    const doiM = soM.map((so, i) => (so > 0 ? Number(((stkM[i] / (so / 30))).toFixed(1)) : 0));
+    return {
+      tooltip: { trigger: 'axis' as const },
+      legend: { data: ['Sell-in (Tỷ)', 'Sell-out (Tỷ)', 'DOI (Ngày)'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 48, right: 44, top: 36, bottom: 28 },
+      xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: [
+        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, name: 'Ngày', nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+      ],
+      series: [
+        { name: 'Sell-in (Tỷ)', type: 'bar' as const, data: siM.map((v) => Number(v.toFixed(2))), itemStyle: { color: '#38BDF8', borderRadius: [3, 3, 0, 0] }, label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9 }, labelLayout: { hideOverlap: true } },
+        { name: 'Sell-out (Tỷ)', type: 'bar' as const, data: soM.map((v) => Number(v.toFixed(2))), itemStyle: { color: '#34D399', borderRadius: [3, 3, 0, 0] }, label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9 }, labelLayout: { hideOverlap: true } },
+        { name: 'DOI (Ngày)', type: 'line' as const, yAxisIndex: 1, smooth: true, data: doiM, itemStyle: { color: '#fde047' }, lineStyle: { width: 2.5, color: '#fde047' }, label: { show: true, position: 'top' as const, color: '#fde047', fontSize: 9 }, labelLayout: { hideOverlap: true } },
+      ],
+    };
+  }, [gtTree, gtSi, gtStock, year, allowedNppSet]);
+
+  const asoMcpTrendOption = useMemo(() => {
+    const asoM = new Array<number>(12).fill(0);
+    const mcpM = new Array<number>(12).fill(0);
+    for (const r of gtAso) {
+      if (String(r.year) !== year) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) asoM[idx] += Number(r.aso_count || 0);
+    }
+    for (const r of gtMcp) {
+      if (String(r.year) !== year) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) mcpM[idx] += Number(r.mcp_count || 0);
+    }
+    const activePctM = mcpM.map((m, i) => (m > 0 ? Number(((asoM[i] / m) * 100).toFixed(1)) : 0));
+    return {
+      tooltip: { trigger: 'axis' as const },
+      legend: { data: ['MCP', 'ASO', '% Active'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 52, right: 44, top: 36, bottom: 28 },
+      xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: [
+        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, name: '%', nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+      ],
+      series: [
+        { name: 'MCP', type: 'line' as const, smooth: true, data: mcpM, itemStyle: { color: '#C084FC' }, lineStyle: { width: 2.2, color: '#C084FC' }, label: { show: true, position: 'top' as const, color: '#F3E8FF', fontSize: 9 }, labelLayout: { hideOverlap: true } },
+        { name: 'ASO', type: 'line' as const, smooth: true, data: asoM, itemStyle: { color: '#34D399' }, lineStyle: { width: 2.5, color: '#34D399' }, label: { show: true, position: 'bottom' as const, color: '#D1FAE5', fontSize: 9 }, labelLayout: { hideOverlap: true } },
+        { name: '% Active', type: 'line' as const, yAxisIndex: 1, smooth: true, data: activePctM, itemStyle: { color: '#fde047' }, lineStyle: { width: 2, type: 'dashed' as const, color: '#fde047' } },
+      ],
+    };
+  }, [gtAso, gtMcp, year, allowedNppSet]);
+
+  const dailySisoOption = useMemo(() => {
+    const map = new Map<string, { si: number; so: number }>();
+    for (const r of gtDailySi) {
+      const dt = String(r.date_val || '');
+      if (!dt.startsWith(year) || !matchMonthNum(dt.slice(5, 7), selectedMonths)) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const e = map.get(dt) || { si: 0, so: 0 };
+      e.si += (Number(r.daily_si) || 0) / 1e9;
+      map.set(dt, e);
+    }
+    for (const r of gtDailySo) {
+      const dt = String(r.date_val || '');
+      if (!dt.startsWith(year) || !matchMonthNum(dt.slice(5, 7), selectedMonths)) continue;
+      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      const e = map.get(dt) || { si: 0, so: 0 };
+      e.so += (Number(r.daily_so) || 0) / 1e9;
+      map.set(dt, e);
+    }
+    const keys = Array.from(map.keys()).sort();
+    return {
+      tooltip: { trigger: 'axis' as const },
+      legend: { data: ['Daily Sell-in', 'Daily Sell-out'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 48, right: 16, top: 36, bottom: 28 },
+      xAxis: { type: 'category' as const, data: keys.map((k) => k.slice(5)), axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: { type: 'value' as const, name: 'Tỷ', nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+      series: [
+        { name: 'Daily Sell-in', type: 'line' as const, smooth: true, areaStyle: { color: 'rgba(56,189,248,0.18)' }, data: keys.map((k) => Number((map.get(k)?.si || 0).toFixed(2))), itemStyle: { color: '#38BDF8' }, lineStyle: { width: 2.2, color: '#38BDF8' }, label: { show: true, position: 'top' as const, color: '#E0F2FE', fontSize: 8.5 }, labelLayout: { hideOverlap: true } },
+        { name: 'Daily Sell-out', type: 'line' as const, smooth: true, areaStyle: { color: 'rgba(253,224,71,0.16)' }, data: keys.map((k) => Number((map.get(k)?.so || 0).toFixed(2))), itemStyle: { color: '#fde047' }, lineStyle: { width: 2.5, color: '#fde047' }, label: { show: true, position: 'bottom' as const, color: '#FEF08A', fontSize: 8.5 }, labelLayout: { hideOverlap: true } },
+      ],
+    };
+  }, [gtDailySi, gtDailySo, year, selectedMonths, allowedNppSet]);
 
   const regionChartOption = useMemo(
     () => ({
@@ -394,15 +546,51 @@ export function GtOverviewPage() {
         />
       </div>
 
-      <EChartsCard
-        title="Doanh số Sell-out GT theo Vùng"
-        subtitle="Đơn vị: Triệu VNĐ"
-        option={regionChartOption}
-        loading={loading}
-        gradientClass="grad-blue"
-        badgeText="GT Regional"
-        badgeClass="badge-pill badge-pill-blue"
-      />
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <EChartsCard
+          title="GT Sell-in vs Sell-out & DOI (Ngày Tồn Kho)"
+          subtitle="Đối sánh 12 tháng theo NPP đang lọc"
+          option={sisoDoiOption}
+          height={280}
+          loading={loading}
+          gradientClass="grad-blue"
+          badgeText="SI / SO / DOI"
+          badgeClass="badge-pill badge-pill-blue"
+        />
+        <EChartsCard
+          title="Xu Hướng Độ Phủ ASO vs MCP (12 Tháng)"
+          subtitle="Active Selling Outlets vs Master Call Plan"
+          option={asoMcpTrendOption}
+          height={280}
+          loading={loading}
+          gradientClass="grad-purple"
+          badgeText="ASO / MCP"
+          badgeClass="badge-pill badge-pill-purple"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        <EChartsCard
+          title="Nhịp Độ Daily Sell-in vs Daily Sell-out GT"
+          subtitle="Đơn vị: Tỷ VNĐ theo ngày"
+          option={dailySisoOption}
+          height={280}
+          loading={loading}
+          gradientClass="grad-green"
+          badgeText="Daily SI/SO"
+          badgeClass="badge-pill badge-pill-green"
+        />
+        <EChartsCard
+          title="Doanh số Sell-out GT theo Vùng"
+          subtitle="Đơn vị: Triệu VNĐ"
+          option={regionChartOption}
+          height={280}
+          loading={loading}
+          gradientClass="grad-orange"
+          badgeText="GT Regional"
+          badgeClass="badge-pill badge-pill-orange"
+        />
+      </div>
 
       <DataTable
         data={nppRows}

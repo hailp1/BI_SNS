@@ -28,12 +28,31 @@ interface GtNvbhMcpRow extends GeoRecord {
   mcp_count?: number;
 }
 
+interface GtActiveRow extends GeoRecord {
+  year?: string;
+  month_num?: number | string;
+  is_active_target?: number;
+  is_active_in_month?: string;
+}
+
+interface GtSubchanRow extends GeoRecord {
+  year?: string;
+  month_num?: number | string;
+  sub_chan?: string;
+  total_so?: number;
+  cold_so?: number;
+  dry_so?: number;
+  aso_count?: number;
+}
+
 interface SalesmanAgg {
   nvbh: string;
   nppName: string;
   vung: string;
   gsbh: string;
   sellout: number;
+  coldSellout: number;
+  drySellout: number;
   aso: number;
   orders: number;
   mcp: number;
@@ -54,13 +73,22 @@ export function GtProductivityPage() {
 
   const [nvbhRows, setNvbhRows] = useState<GtNvbhRow[]>([]);
   const [mcpRows, setMcpRows] = useState<GtNvbhMcpRow[]>([]);
+  const [activeRows, setActiveRows] = useState<GtActiveRow[]>([]);
+  const [subchanRows, setSubchanRows] = useState<GtSubchanRow[]>([]);
 
   useEffect(() => {
     let active = true;
-    Promise.all([loadPayload('GT_NVBH_M', user), loadPayload('GT_NVBH_MCP_M', user)]).then(([nvbh, mcp]) => {
+    Promise.all([
+      loadPayload('GT_NVBH_M', user),
+      loadPayload('GT_NVBH_MCP_M', user),
+      loadPayload('GT_SALESMAN_ACTIVE', user),
+      loadPayload('GT_SUBCHAN_M', user),
+    ]).then(([nvbh, mcp, act, sub]) => {
       if (!active) return;
       if (Array.isArray(nvbh)) setNvbhRows(nvbh as GtNvbhRow[]);
       if (Array.isArray(mcp)) setMcpRows(mcp as GtNvbhMcpRow[]);
+      if (Array.isArray(act)) setActiveRows(act as GtActiveRow[]);
+      if (Array.isArray(sub)) setSubchanRows(sub as GtSubchanRow[]);
     });
     return () => {
       active = false;
@@ -75,6 +103,154 @@ export function GtProductivityPage() {
       (geoNpp === 'ALL' || r.npp_code === geoNpp),
     [geoMien, geoVung, geoGsbh, geoNpp],
   );
+
+  const monthlyTrendOption = useMemo(() => {
+    const soM = new Array<number>(12).fill(0);
+    const ordM = new Array<number>(12).fill(0);
+    for (const r of nvbhRows) {
+      if (String(r.year) !== year || !matchGeo(r)) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) {
+        soM[idx] += (Number(r.sellout_val) || 0) / 1e9;
+        ordM[idx] += Number(r.order_count || 0);
+      }
+    }
+    return {
+      tooltip: { trigger: 'axis' as const },
+      legend: { data: ['Sell-out (Tỷ)', 'Đơn hàng'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 48, right: 48, top: 38, bottom: 28 },
+      xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: [
+        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+      ],
+      series: [
+        {
+          name: 'Sell-out (Tỷ)',
+          type: 'bar' as const,
+          data: soM.map((v) => Number(v.toFixed(2))),
+          itemStyle: { color: 'rgba(255,255,255,0.9)', borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(1)}B` : '') },
+          labelLayout: { hideOverlap: true },
+        },
+        {
+          name: 'Đơn hàng',
+          type: 'line' as const,
+          yAxisIndex: 1,
+          smooth: true,
+          data: ordM,
+          itemStyle: { color: '#fde047' },
+          lineStyle: { width: 2.5, color: '#fde047' },
+          label: { show: true, position: 'top' as const, color: '#fde047', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toLocaleString('en-US') : '') },
+          labelLayout: { hideOverlap: true },
+        },
+      ],
+    };
+  }, [nvbhRows, year, matchGeo]);
+
+  const activeTrendOption = useMemo(() => {
+    const tgtM = new Array<number>(12).fill(0);
+    const actM = new Array<number>(12).fill(0);
+    for (const r of activeRows) {
+      if (String(r.year) !== year || !matchGeo(r)) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) {
+        tgtM[idx] += Number(r.is_active_target || 0);
+        if (String(r.is_active_in_month || '').toLowerCase() === 'true' || r.is_active_in_month === '1') actM[idx] += 1;
+      }
+    }
+    return {
+      tooltip: { trigger: 'axis' as const },
+      legend: { data: ['Chỉ tiêu Active', 'Thực tế Active'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 48, right: 16, top: 38, bottom: 28 },
+      xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+      series: [
+        {
+          name: 'Chỉ tiêu Active',
+          type: 'bar' as const,
+          data: tgtM,
+          itemStyle: { color: 'rgba(255,255,255,0.45)', borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? String(p.value) : '') },
+          labelLayout: { hideOverlap: true },
+        },
+        {
+          name: 'Thực tế Active',
+          type: 'line' as const,
+          smooth: true,
+          data: actM,
+          itemStyle: { color: '#fde047' },
+          lineStyle: { width: 2.5, color: '#fde047' },
+          label: { show: true, position: 'top' as const, color: '#fde047', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? String(p.value) : '') },
+          labelLayout: { hideOverlap: true },
+        },
+      ],
+    };
+  }, [activeRows, year, matchGeo]);
+
+  const subchanOption = useMemo(() => {
+    const map = new Map<string, { total: number; cold: number; dry: number; aso: number }>();
+    for (const r of subchanRows) {
+      if (String(r.year) !== year || !matchMonthNum(r.month_num, selectedMonths) || !matchGeo(r)) continue;
+      const sc = r.sub_chan || 'Khác';
+      const cur = map.get(sc) || { total: 0, cold: 0, dry: 0, aso: 0 };
+      cur.total += Number(r.total_so) || 0;
+      cur.cold += Number(r.cold_so) || 0;
+      cur.dry += Number(r.dry_so) || 0;
+      cur.aso += Number(r.aso_count) || 0;
+      map.set(sc, cur);
+    }
+    const items = Array.from(map.entries())
+      .map(([name, v]) => ({
+        name,
+        cold: Number((v.cold / 1e6).toFixed(1)),
+        dry: Number((v.dry / 1e6).toFixed(1)),
+        aso: v.aso,
+        total: v.total,
+      }))
+      .sort((a, b) => b.total - a.total);
+    return {
+      tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+      legend: { data: ['Hàng Đông (Tr)', 'Hàng Khô (Tr)', 'ASO'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 48, right: 48, top: 38, bottom: 36 },
+      xAxis: { type: 'category' as const, data: items.map((i) => i.name), axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10, rotate: items.length > 5 ? 18 : 0 } },
+      yAxis: [
+        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+      ],
+      series: [
+        {
+          name: 'Hàng Đông (Tr)',
+          type: 'bar' as const,
+          stack: 'so',
+          data: items.map((i) => i.cold),
+          itemStyle: { color: '#38bdf8' },
+          label: { show: true, position: 'inside' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toFixed(0) : '') },
+          labelLayout: { hideOverlap: true },
+        },
+        {
+          name: 'Hàng Khô (Tr)',
+          type: 'bar' as const,
+          stack: 'so',
+          data: items.map((i) => i.dry),
+          itemStyle: { color: '#fbbf24', borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toFixed(0) : '') },
+          labelLayout: { hideOverlap: true },
+        },
+        {
+          name: 'ASO',
+          type: 'line' as const,
+          yAxisIndex: 1,
+          smooth: true,
+          data: items.map((i) => i.aso),
+          itemStyle: { color: '#4ade80' },
+          lineStyle: { width: 2.5, color: '#4ade80' },
+          label: { show: true, position: 'top' as const, color: '#4ade80', fontSize: 9 },
+          labelLayout: { hideOverlap: true },
+        },
+      ],
+    };
+  }, [subchanRows, year, selectedMonths, matchGeo]);
 
   const { kpis, rows, topSalesmen, byRegion } = useMemo(() => {
     const mcpMap = new Map<string, number>();
@@ -99,6 +275,8 @@ export function GtProductivityPage() {
         vung: r.vung || 'Khác',
         gsbh: r.gsbh || '',
         sellout: 0,
+        coldSellout: 0,
+        drySellout: 0,
         aso: 0,
         orders: 0,
         mcp: mcpMap.get(key) || 0,
@@ -106,7 +284,13 @@ export function GtProductivityPage() {
         strikeRate: 0,
       };
       const so = Number(r.sellout_val || 0);
+      const storage = String(r.storage || '').toLowerCase();
       cur.sellout += so;
+      if (storage.includes('đông') || storage.includes('cold') || storage.includes('lạnh')) {
+        cur.coldSellout += so;
+      } else {
+        cur.drySellout += so;
+      }
       cur.aso += Number(r.aso_count || 0);
       cur.orders += Number(r.order_count || 0);
       cur.skuCnt = Math.max(cur.skuCnt, Number(r.order_sku_cnt || 0));
@@ -140,8 +324,9 @@ export function GtProductivityPage() {
 
   const topChartOption = useMemo(
     () => ({
-      tooltip: { trigger: 'axis' as const },
-      grid: { left: 110, right: 20, top: 20, bottom: 28 },
+      tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+      legend: { data: ['Hàng Đông', 'Hàng Khô'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      grid: { left: 110, right: 32, top: 32, bottom: 28 },
       xAxis: {
         type: 'value' as const,
         axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
@@ -154,10 +339,22 @@ export function GtProductivityPage() {
       },
       series: [
         {
-          name: 'Sell-out (Tr)',
+          name: 'Hàng Đông',
           type: 'bar' as const,
-          data: [...topSalesmen].reverse().map((s) => Number((s.sellout / 1e6).toFixed(1))),
-          itemStyle: { color: 'rgba(255,255,255,0.9)', borderRadius: [0, 3, 3, 0] },
+          stack: 'total',
+          data: [...topSalesmen].reverse().map((s) => Number((s.coldSellout / 1e6).toFixed(1))),
+          itemStyle: { color: '#38bdf8' },
+          label: { show: true, position: 'inside' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}M` : '') },
+          labelLayout: { hideOverlap: true },
+        },
+        {
+          name: 'Hàng Khô',
+          type: 'bar' as const,
+          stack: 'total',
+          data: [...topSalesmen].reverse().map((s) => Number((s.drySellout / 1e6).toFixed(1))),
+          itemStyle: { color: '#fbbf24', borderRadius: [0, 3, 3, 0] },
+          label: { show: true, position: 'right' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}M` : '') },
+          labelLayout: { hideOverlap: true },
         },
       ],
     }),
@@ -251,26 +448,57 @@ export function GtProductivityPage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <EChartsCard
-          title="Top 12 NVBH Sell-out Cao Nhất"
-          subtitle="Đơn vị: Triệu VNĐ"
-          option={topChartOption}
-          height={290}
+          title="Xu Hướng Năng Suất NVBH (12 Tháng)"
+          subtitle="Sell-out (Tỷ VNĐ) & Số đơn hàng theo tháng"
+          option={monthlyTrendOption}
+          height={270}
           loading={loading}
           gradientClass="grad-blue"
-          badgeText="Top Salesman"
+          badgeText="Monthly Trend"
           badgeClass="badge-pill badge-pill-blue"
         />
         <EChartsCard
-          title="Năng Suất & Đơn Hàng Theo Vùng"
-          subtitle="Sell-out (Tỷ) và Số đơn hàng"
-          option={regionChartOption}
-          height={290}
+          title="Xu Hướng Salesman Active (12 Tháng)"
+          subtitle="Chỉ tiêu Active vs Thực tế Active"
+          option={activeTrendOption}
+          height={270}
           loading={loading}
           gradientClass="grad-green"
-          badgeText="Regional"
+          badgeText="Active Trend"
           badgeClass="badge-pill badge-pill-green"
         />
+        <EChartsCard
+          title="Cơ Cấu Sell-out Theo Sub-channel GT"
+          subtitle="Tỷ trọng đóng góp theo phân kênh"
+          option={subchanOption}
+          height={270}
+          loading={loading}
+          gradientClass="grad-purple"
+          badgeText="Sub-channel"
+          badgeClass="badge-pill badge-pill-purple"
+        />
+        <EChartsCard
+          title="Top 12 NVBH Sell-out Cao Nhất"
+          subtitle="Đơn vị: Triệu VNĐ"
+          option={topChartOption}
+          height={270}
+          loading={loading}
+          gradientClass="grad-orange"
+          badgeText="Top Salesman"
+          badgeClass="badge-pill badge-pill-orange"
+        />
       </div>
+
+      <EChartsCard
+        title="Năng Suất & Đơn Hàng Theo Vùng"
+        subtitle="Sell-out (Tỷ) và Số đơn hàng"
+        option={regionChartOption}
+        height={250}
+        loading={loading}
+        gradientClass="grad-primary"
+        badgeText="Regional"
+        badgeClass="badge-pill badge-pill-primary"
+      />
 
       <div className="material-card p-4">
         <DataTable
