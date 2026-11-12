@@ -1,5 +1,4 @@
 import { BadRequestException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { AuditService } from '../../../shared/audit/audit.service';
 import { NetworkContextService } from '../../infrastructure/adapters/network-context.service';
@@ -42,7 +41,6 @@ describe('LoginUseCase', () => {
   let otpService: jest.Mocked<OtpServicePort>;
   let networkContext: jest.Mocked<NetworkContextService>;
   let audit: jest.Mocked<AuditService>;
-  let configService: jest.Mocked<ConfigService>;
 
   beforeEach(() => {
     userRepo = {
@@ -71,9 +69,8 @@ describe('LoginUseCase', () => {
       checkNetworkContext: jest.fn().mockResolvedValue({ isCompany: true, networkName: 'LAN' }),
     } as unknown as jest.Mocked<NetworkContextService>;
     audit = { log: jest.fn().mockResolvedValue(undefined) } as unknown as jest.Mocked<AuditService>;
-    configService = { get: jest.fn().mockReturnValue('payload-key-hex') } as unknown as jest.Mocked<ConfigService>;
 
-    useCase = new LoginUseCase(userRepo, tokenService, otpService, networkContext, audit, configService);
+    useCase = new LoginUseCase(userRepo, tokenService, otpService, networkContext, audit);
   });
 
   it('issues JWT on valid credentials from company network', async () => {
@@ -89,7 +86,6 @@ describe('LoginUseCase', () => {
 
     expect(res.require2fa).toBe(false);
     expect(res.access_token).toBe('jwt-access-token');
-    expect(res.payload_key).toBe('payload-key-hex');
     expect(userRepo.updateById).toHaveBeenCalledWith('u-1', expect.objectContaining({ failedAttempts: 0 }));
   });
 

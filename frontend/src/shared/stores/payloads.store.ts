@@ -1,37 +1,67 @@
 import { create } from 'zustand';
+import { dashboardApi } from '../api/dashboard.api';
 import type { AuthUser } from '../types/auth';
 import type { PayloadName } from '../types/sales';
-import { fetchDecryptedPayload } from '../utils/crypto';
-import { applyEnterpriseRls } from '../utils/rls';
+import { buildDatasetCacheKey, idbCache } from '../utils/idb-cache';
 
 interface PayloadsState {
   cache: Partial<Record<PayloadName, unknown[]>>;
   loading: Partial<Record<PayloadName, boolean>>;
   errors: Partial<Record<PayloadName, string>>;
+  dbRefreshDate: string;
+  syncMetadata: () => Promise<string>;
   loadPayload: (name: PayloadName, user: AuthUser | null) => Promise<unknown[]>;
   preloadBatch: (names: PayloadName[], user: AuthUser | null) => Promise<void>;
   clearAll: () => void;
 }
 
-const inflight = new Map<PayloadName, Promise<unknown[]>>();
+const inflight = new Map<string, Promise<unknown[]>>();
+let metadataPromise: Promise<string> | null = null;
+
+function getUserScopeTag(user: AuthUser | null): string {
+  if (!user) return 'anon';
+  return `${user.username}:${user.role}:${user.channel}:${user.scopeLevel}:${user.scopeValue}`;
+}
 
 export const usePayloadsStore = create<PayloadsState>((set, get) => ({
   cache: {},
   loading: {},
   errors: {},
+  dbRefreshDate: '',
+
+  syncMetadata: async () => {
+    const current = get().dbRefreshDate;
+    if (current) return current;
+    if (metadataPromise) return metadataPromise;
+
+    metadataPromise = (async () => {
+      try {
+        const meta = await dashboardApi.getMeta();
+        const refresh = (meta?.data_refresh_date || 'unknown').trim() || 'unknown';
+        set({ dbRefreshDate: refresh });
+        await idbCache.pruneStale(refresh);
+        return refresh;
+      } catch {
+        return 'unknown';
+      } finally {
+        metadataPromise = null;
+      }
+    })();
+
+    return metadataPromise;
+  },
 
   loadPayload: async (name, user) => {
     const existing = get().cache[name];
     if (existing) {
-      const geo = (get().cache.DIM_GEO_HIER as Record<string, unknown>[] | undefined) || [];
-      return applyEnterpriseRls(name, existing, user, geo);
+      return existing;
     }
 
-    const pending = inflight.get(name);
+    const scopeTag = getUserScopeTag(user);
+    const inflightKey = `${name}::${scopeTag}`;
+    const pending = inflight.get(inflightKey);
     if (pending) {
-      const raw = await pending;
-      const geo = (get().cache.DIM_GEO_HIER as Record<string, unknown>[] | undefined) || [];
-      return applyEnterpriseRls(name, raw, user, geo);
+      return pending;
     }
 
     set((s) => ({
@@ -41,11 +71,25 @@ export const usePayloadsStore = create<PayloadsState>((set, get) => ({
 
     const req = (async () => {
       try {
-        const raw = await fetchDecryptedPayload<unknown[]>(name);
+        const refreshDate = await get().syncMetadata();
+        const cacheKey = buildDatasetCacheKey(name, scopeTag, refreshDate);
+        const cached = await idbCache.get<unknown[]>(cacheKey);
+        if (Array.isArray(cached) && cached.length > 0) {
+          set((s) => ({
+            cache: { ...s.cache, [name]: cached },
+            loading: { ...s.loading, [name]: false },
+          }));
+          return cached;
+        }
+
+        const raw = await dashboardApi.getDataset<unknown>(name);
         set((s) => ({
           cache: { ...s.cache, [name]: raw },
           loading: { ...s.loading, [name]: false },
         }));
+        if (Array.isArray(raw) && raw.length > 0) {
+          void idbCache.put(cacheKey, raw);
+        }
         return raw;
       } catch (err) {
         const msg = err instanceof Error ? err.message : `Lỗi tải ${name}`;
@@ -55,23 +99,18 @@ export const usePayloadsStore = create<PayloadsState>((set, get) => ({
         }));
         return [];
       } finally {
-        inflight.delete(name);
+        inflight.delete(inflightKey);
       }
     })();
 
-    inflight.set(name, req);
-    const raw = await req;
-    const geo = (get().cache.DIM_GEO_HIER as Record<string, unknown>[] | undefined) || [];
-    return applyEnterpriseRls(name, raw, user, geo);
+    inflight.set(inflightKey, req);
+    return req;
   },
 
   preloadBatch: async (names, user) => {
-    if (!get().cache.DIM_GEO_HIER && !names.includes('DIM_GEO_HIER')) {
-      await get().loadPayload('DIM_GEO_HIER', user);
-    }
+    await get().syncMetadata();
     await Promise.all(names.map((n) => get().loadPayload(n, user)));
   },
 
-  clearAll: () => set({ cache: {}, loading: {}, errors: {} }),
+  clearAll: () => set({ cache: {}, loading: {}, errors: {}, dbRefreshDate: '' }),
 }));
-

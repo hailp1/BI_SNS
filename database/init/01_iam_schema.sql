@@ -90,7 +90,8 @@ CREATE TABLE IF NOT EXISTS iam.trusted_networks (
     cidr_or_ip VARCHAR(50) NOT NULL,
     description VARCHAR(255),
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_trusted_network_cidr UNIQUE (cidr_or_ip)
 );
 
 INSERT INTO iam.trusted_networks (network_name, cidr_or_ip, description) VALUES
@@ -99,4 +100,4 @@ INSERT INTO iam.trusted_networks (network_name, cidr_or_ip, description) VALUES
 ('Mang noi bo Van phong CJ (LAN Class C)', '192.168.0.0/16', 'Dai mang noi bo van phong Wi-Fi / Day'),
 ('Mang noi bo Tap doan CJ (Intranet Class A)', '10.0.0.0/8', 'He thong VPN va mang Intranet Tap doan CJ'),
 ('Mang noi bo Docker & Cloud Private', '172.16.0.0/12', 'Subnet may chu va container noi bo')
-ON CONFLICT DO NOTHING;
+ON CONFLICT (cidr_or_ip) DO NOTHING;

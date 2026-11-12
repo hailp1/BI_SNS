@@ -1,4 +1,11 @@
-import { BadRequestException, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { AuthenticatedUser } from '../../../shared/interfaces/jwt-payload.interface';
@@ -567,7 +574,7 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
     const lyYear = year - 1;
 
     const params: unknown[] = [year, months, lyYear];
-    const conds: string[] = ['year IN ($1, $3)', 'TRIM(month_num) = ANY($2)'];
+    const conds: string[] = ['year IN ($1, $3)', 'month_num = ANY($2::bpchar[])'];
 
     const userChan = (user?.channel || 'all').toUpperCase().trim();
     const role = (user?.role || '').toLowerCase();
@@ -708,23 +715,49 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
     };
   }
 
-  async getChannelSummary(channelKey: 'MT' | 'B2B' | 'KR' | 'GT', yearStr: string, monthsArr: string[]) {
+  private shiftSqlParams(whereSql: string, offset: number): string {
+    return offset > 0 ? whereSql.replace(/\$(\d+)/g, (_, idx) => `$${Number(idx) + offset}`) : whereSql;
+  }
+
+  async getChannelSummary(
+    channelKey: 'MT' | 'B2B' | 'KR' | 'GT',
+    yearStr: string,
+    monthsArr: string[],
+    user?: AuthenticatedUser,
+  ) {
+    const role = (user?.role || '').toLowerCase();
+    const userChan = (user?.channel || 'all').toUpperCase().trim();
+    const isUnrestricted = !user || role === 'admin' || role === 'director' || role === 'bod' || userChan === 'ALL';
+    if (!isUnrestricted && userChan !== channelKey) {
+      throw new ForbiddenException('Không có quyền truy cập dữ liệu kênh khác!');
+    }
+
     const year = parseInt(yearStr || '2026', 10) || 2026;
     const months = (monthsArr && monthsArr.length > 0 ? monthsArr : ['10']).map((m) => m.padStart(2, '0'));
     const lyYear = year - 1;
 
     if (channelKey === 'GT') {
+      const siRls = this.buildRlsWhere(DATASET_CONFIGS.GT_SI, user);
+      const soRls = this.buildRlsWhere(DATASET_CONFIGS.GT_TREE, user);
+      if (siRls.denied || soRls.denied) {
+        throw new ForbiddenException('Không có quyền truy cập phạm vi dữ liệu này!');
+      }
+
+      const siWhere = siRls.whereSql ? ` AND ${this.shiftSqlParams(siRls.whereSql, 1)}` : '';
+      const soWhere = soRls.whereSql ? ` AND ${this.shiftSqlParams(soRls.whereSql, 3)}` : '';
+
       const [siRes, soRes] = await Promise.all([
-        this.pool.query(`SELECT SUM(sellin_val)::float8 AS sellin FROM datamart.fact_gt_si WHERE month = ANY($1)`, [
-          months.map((m) => `${year}-${m}`),
-        ]),
+        this.pool.query(
+          `SELECT SUM(sellin_val)::float8 AS sellin FROM datamart.fact_gt_si WHERE month = ANY($1)${siWhere}`,
+          [months.map((m) => `${year}-${m}`), ...siRls.params],
+        ),
         this.pool.query(
           `SELECT
              SUM(CASE WHEN year = $1 THEN sellout_val ELSE 0 END)::float8 AS cy_so,
              SUM(CASE WHEN year = $3 THEN sellout_val ELSE 0 END)::float8 AS ly_so
            FROM datamart.fact_gt_tree
-           WHERE year IN ($1, $3) AND TRIM(month_num) = ANY($2)`,
-          [year, months, lyYear],
+           WHERE year IN ($1, $3) AND month_num = ANY($2::bpchar[])${soWhere}`,
+          [year, months, lyYear, ...soRls.params],
         ),
       ]);
       return {
@@ -738,22 +771,28 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
     }
 
     const tableMap = {
-      MT: { table: 'datamart.fact_mt_tree', groupCol: 'sub_channel' },
-      B2B: { table: 'datamart.fact_b2b_tree', groupCol: 'b2b_account' },
-      KR: { table: 'datamart.fact_kr_tree', groupCol: 'account_code' },
+      MT: { table: 'datamart.fact_mt_tree', groupCol: 'sub_channel', cfgKey: 'MT_TREE' },
+      B2B: { table: 'datamart.fact_b2b_tree', groupCol: 'b2b_account', cfgKey: 'B2B_TREE' },
+      KR: { table: 'datamart.fact_kr_tree', groupCol: 'account_code', cfgKey: 'KR_TREE' },
     } as const;
 
-    const { table, groupCol } = tableMap[channelKey];
+    const { table, groupCol, cfgKey } = tableMap[channelKey];
+    const rls = this.buildRlsWhere(DATASET_CONFIGS[cfgKey], user);
+    if (rls.denied) {
+      throw new ForbiddenException('Không có quyền truy cập phạm vi dữ liệu này!');
+    }
+    const extraWhere = rls.whereSql ? ` AND ${this.shiftSqlParams(rls.whereSql, 3)}` : '';
+
     const res = await this.pool.query(
       `SELECT
          ${groupCol} AS segment,
          SUM(CASE WHEN year = $1 THEN sellin_val ELSE 0 END)::float8 AS cy_sellin,
          SUM(CASE WHEN year = $3 THEN sellin_val ELSE 0 END)::float8 AS ly_sellin
        FROM ${table}
-       WHERE year IN ($1, $3) AND TRIM(month_num) = ANY($2)
+       WHERE year IN ($1, $3) AND month_num = ANY($2::bpchar[])${extraWhere}
        GROUP BY ${groupCol}
        ORDER BY cy_sellin DESC`,
-      [year, months, lyYear],
+      [year, months, lyYear, ...rls.params],
     );
 
     const totalCy = res.rows.reduce((s, r) => s + (r.cy_sellin || 0), 0);

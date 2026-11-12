@@ -56,24 +56,54 @@
         const db = await open();
         if (!db) return null;
         return new Promise((resolve) => {
+            let settled = false;
+            const done = (val) => {
+                if (!settled) {
+                    settled = true;
+                    resolve(val);
+                }
+            };
             try {
                 const tx = db.transaction(STORE_NAME, 'readonly');
                 const req = tx.objectStore(STORE_NAME).get(key);
-                req.onsuccess = () => resolve(req.result || null);
-                req.onerror = () => resolve(null);
+                req.onsuccess = () => done(req.result !== undefined ? req.result : null);
+                req.onerror = () => done(null);
+                tx.onerror = () => done(null);
+                tx.onabort = () => done(null);
             } catch (_) {
-                resolve(null);
+                done(null);
             }
         });
     }
 
     async function put(key, val) {
         const db = await open();
-        if (!db) return;
-        try {
-            const tx = db.transaction(STORE_NAME, 'readwrite');
-            tx.objectStore(STORE_NAME).put(val, key);
-        } catch (_) {}
+        if (!db) return false;
+        return new Promise((resolve) => {
+            let settled = false;
+            const done = (ok) => {
+                if (!settled) {
+                    settled = true;
+                    resolve(ok);
+                }
+            };
+            try {
+                const tx = db.transaction(STORE_NAME, 'readwrite');
+                const req = tx.objectStore(STORE_NAME).put(val, key);
+                req.onerror = (e) => {
+                    try { console.warn('IndexedDB put request failed for ' + key, e && e.target && e.target.error); } catch (_) {}
+                    done(false);
+                };
+                tx.oncomplete = () => done(true);
+                tx.onerror = (e) => {
+                    try { console.warn('IndexedDB put tx failed for ' + key, e && e.target && e.target.error); } catch (_) {}
+                    done(false);
+                };
+                tx.onabort = () => done(false);
+            } catch (_) {
+                done(false);
+            }
+        });
     }
 
     async function clear() {
@@ -221,3 +251,4 @@
         fetchDatasetsWithCache,
     };
 })(typeof window !== 'undefined' ? window : globalThis);
+

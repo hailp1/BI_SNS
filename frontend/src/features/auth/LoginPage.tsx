@@ -50,17 +50,26 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-red-950 p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/95 p-8 shadow-2xl backdrop-blur">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-600 to-orange-500 text-lg font-black text-white shadow-md">
-            CJ
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-[#002952] to-slate-900 p-4">
+      <div className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl">
+        <div
+          className="flex flex-col items-center justify-center px-6 pb-5 pt-7 text-center"
+          style={{ backgroundColor: '#004B91', borderBottom: '4px solid #E31837' }}
+        >
+          <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2 shadow-md">
+            <span className="text-2xl font-black tracking-tight text-[#004B91]">CJ</span>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-900">CJ Foods Enterprise SNS</h1>
-            <p className="text-xs text-slate-500">Hệ thống Điều hành Kênh Phân phối & Zero-Trust IAM</p>
-          </div>
+          <h1 className="text-lg font-black uppercase tracking-wide text-white">CJ FOODS VIỆT NAM</h1>
+          <p className="mt-1 text-sm font-bold tracking-wide text-blue-100">SNS - Sales Network System</p>
         </div>
+
+        <div className="p-6">
+          <div className="mb-5 text-center">
+            <h2 className="text-sm font-black uppercase tracking-tight text-slate-800">ĐĂNG NHẬP HỆ THỐNG</h2>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-500">
+              Vui lòng đăng nhập để truy cập dữ liệu phân quyền
+            </p>
+          </div>
 
         {error && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-xs font-medium text-red-700">
@@ -206,6 +215,7 @@ export function LoginPage() {
             </button>
           </form>
         )}
+        </div>
       </div>
     </div>
   );

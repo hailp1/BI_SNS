@@ -10,7 +10,7 @@ events {
 http {
     include /etc/nginx/mime.types;
     default_type application/octet-stream;
-    client_max_body_size 100M;
+    client_max_body_size 10M;
     server_tokens off;
 
     gzip on;
@@ -44,8 +44,10 @@ http {
         add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header X-Content-Type-Options "nosniff" always;
+        add_header X-XSS-Protection "1; mode=block" always;
         add_header Referrer-Policy "strict-origin-when-cross-origin" always;
         add_header Permissions-Policy "geolocation=(self), camera=(), microphone=()" always;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://router.project-osrm.org https://nominatim.openstreetmap.org; frame-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'" always;
 
         location /nginx-health {
             access_log off;
@@ -76,17 +78,32 @@ http {
             return 403;
         }
 
-        location /assets/ {
-            root /usr/share/nginx/html/frontend;
-            expires 1y;
-            add_header Cache-Control "public, max-age=31536000, immutable";
+        location /v2/ {
+            alias /usr/share/nginx/html/v2/;
+            index index.html;
+            try_files $uri $uri/ /v2/index.html;
+            add_header Cache-Control "no-cache, must-revalidate" always;
+            add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header X-XSS-Protection "1; mode=block" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+            add_header Permissions-Policy "geolocation=(self), camera=(), microphone=()" always;
+            add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://router.project-osrm.org https://nominatim.openstreetmap.org; frame-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'" always;
         }
 
         location / {
-            root /usr/share/nginx/html/frontend;
+            root /usr/share/nginx/html/web_app;
             index index.html;
             try_files $uri $uri/ /index.html;
-            add_header Cache-Control "no-cache, must-revalidate";
+            add_header Cache-Control "no-cache, must-revalidate" always;
+            add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+            add_header X-Frame-Options "SAMEORIGIN" always;
+            add_header X-Content-Type-Options "nosniff" always;
+            add_header X-XSS-Protection "1; mode=block" always;
+            add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+            add_header Permissions-Policy "geolocation=(self), camera=(), microphone=()" always;
+            add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; connect-src 'self' https://router.project-osrm.org https://nominatim.openstreetmap.org; frame-src 'self'; frame-ancestors 'self'; object-src 'none'; base-uri 'self'" always;
         }
     }
 }

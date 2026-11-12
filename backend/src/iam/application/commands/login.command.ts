@@ -1,5 +1,4 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { AuditService } from '../../../shared/audit/audit.service';
 import { NetworkContextService } from '../../infrastructure/adapters/network-context.service';
@@ -15,7 +14,6 @@ export class LoginUseCase {
     @Inject(OTP_SERVICE_PORT) private readonly otpService: OtpServicePort,
     private readonly networkContext: NetworkContextService,
     private readonly audit: AuditService,
-    private readonly configService: ConfigService,
   ) {}
 
   async execute(params: {
@@ -192,7 +190,6 @@ export class LoginUseCase {
       network_type: 'COMPANY',
       network_name: netContext.networkName,
       access_token: accessToken,
-      payload_key: this.configService.get<string>('PAYLOAD_KEY'),
       user: user.toPublicProfile(),
     };
   }

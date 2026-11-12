@@ -27,11 +27,47 @@ export function OverviewPage() {
   const year = useFiltersStore((s) => s.year);
   const selectedMonths = useFiltersStore((s) => s.selectedMonths);
   const dashChannel = useFiltersStore((s) => s.dashChannel);
+  const dashSubChannel = useFiltersStore((s) => s.dashSubChannel);
+  const dashAccount = useFiltersStore((s) => s.dashAccount);
+  const prodStorage = useFiltersStore((s) => s.prodStorage);
+  const prodCate = useFiltersStore((s) => s.prodCate);
+  const prodPh1 = useFiltersStore((s) => s.prodPh1);
   const setDashFilter = useFiltersStore((s) => s.setDashFilter);
+  const setProdFilter = useFiltersStore((s) => s.setProdFilter);
   const loadPayload = usePayloadsStore((s) => s.loadPayload);
 
   const apiMonth = useMemo(() => getActiveApiMonth(year, selectedMonths), [year, selectedMonths]);
   const [sellinRows, setSellinRows] = useState<SellinRecord[]>([]);
+
+  const dimensionsQuery = useQuery({
+    queryKey: ['dashboard-dimensions'],
+    queryFn: () => dashboardApi.getDimensions(),
+  });
+
+  const summaryQuery = useQuery({
+    queryKey: [
+      'dashboard-overview-summary',
+      year,
+      selectedMonths.join(','),
+      dashChannel,
+      dashSubChannel,
+      dashAccount,
+      prodStorage,
+      prodCate,
+      prodPh1,
+    ],
+    queryFn: () =>
+      dashboardApi.getOverviewSummary({
+        year,
+        months: selectedMonths.join(','),
+        channel: dashChannel !== 'ALL' ? dashChannel : undefined,
+        subChannel: dashSubChannel !== 'ALL' ? dashSubChannel : undefined,
+        account: dashAccount !== 'ALL' ? dashAccount : undefined,
+        storage: prodStorage !== 'ALL' ? prodStorage : undefined,
+        cate: prodCate !== 'ALL' ? prodCate : undefined,
+        ph1: prodPh1 !== 'ALL' ? prodPh1 : undefined,
+      }),
+  });
 
   const overviewQuery = useQuery({
     queryKey: ['dashboard-overview', apiMonth],
@@ -56,6 +92,33 @@ export function OverviewPage() {
   }, [loadPayload, user]);
 
   const channelTableRows = useMemo<ChannelSummaryRow[]>(() => {
+    const summaryData = summaryQuery.data as
+      | {
+          total_sellin?: number;
+          channels?: Array<{
+            channel: string;
+            cy_sellin: number;
+            ly_sellin: number;
+            target_amt: number;
+            ach_pct: number;
+            yoy_pct: number;
+          }>;
+        }
+      | undefined;
+
+    if (summaryData?.channels && summaryData.channels.length > 0) {
+      const total = summaryData.total_sellin || summaryData.channels.reduce((s, c) => s + (c.cy_sellin || 0), 0);
+      return summaryData.channels.map((c) => ({
+        channel: c.channel,
+        sellin: (c.cy_sellin || 0) / 1e9,
+        target: (c.target_amt || 0) / 1e9,
+        ly: (c.ly_sellin || 0) / 1e9,
+        achievement: c.ach_pct || 0,
+        yoy: c.yoy_pct || 0,
+        share: total > 0 ? ((c.cy_sellin || 0) / total) * 100 : 0,
+      }));
+    }
+
     const channelsObj = overviewQuery.data?.channels || {};
     const apiRows = Object.entries(channelsObj).map(([ch, m]) => ({
       channel: ch,
@@ -93,7 +156,54 @@ export function OverviewPage() {
       yoy: v.ly > 0 ? ((v.sellin - v.ly) / v.ly) * 100 : 0,
       share: total > 0 ? (v.sellin / total) * 100 : 0,
     }));
-  }, [overviewQuery.data, sellinRows, year, selectedMonths]);
+  }, [summaryQuery.data, overviewQuery.data, sellinRows, year, selectedMonths]);
+
+  const dimOptions = useMemo(() => {
+    const comm = dimensionsQuery.data?.commercial || [];
+    const prod = dimensionsQuery.data?.product || [];
+    const subChannels = Array.from(
+      new Set(
+        comm
+          .filter((r) => dashChannel === 'ALL' || String(r.channel || '') === dashChannel)
+          .map((r) => String(r.sub_channel || ''))
+          .filter(Boolean),
+      ),
+    ).sort();
+    const accounts = Array.from(
+      new Set(
+        comm
+          .filter(
+            (r) =>
+              (dashChannel === 'ALL' || String(r.channel || '') === dashChannel) &&
+              (dashSubChannel === 'ALL' || String(r.sub_channel || '') === dashSubChannel),
+          )
+          .map((r) => String(r.account_name || ''))
+          .filter(Boolean),
+      ),
+    ).sort();
+    const storages = Array.from(new Set(prod.map((r) => String(r.storage || '')).filter(Boolean))).sort();
+    const cates = Array.from(
+      new Set(
+        prod
+          .filter((r) => prodStorage === 'ALL' || String(r.storage || '') === prodStorage)
+          .map((r) => String(r.cate || ''))
+          .filter(Boolean),
+      ),
+    ).sort();
+    const ph1s = Array.from(
+      new Set(
+        prod
+          .filter(
+            (r) =>
+              (prodStorage === 'ALL' || String(r.storage || '') === prodStorage) &&
+              (prodCate === 'ALL' || String(r.cate || '') === prodCate),
+          )
+          .map((r) => String(r.ph1 || ''))
+          .filter(Boolean),
+      ),
+    ).sort();
+    return { subChannels, accounts, storages, cates, ph1s };
+  }, [dimensionsQuery.data, dashChannel, dashSubChannel, prodStorage, prodCate]);
 
   const topCategories = useMemo(() => {
     const map = new Map<string, number>();
@@ -109,7 +219,23 @@ export function OverviewPage() {
       .slice(0, 8);
   }, [sellinRows, year, selectedMonths, dashChannel]);
 
-  const overall = overviewQuery.data?.overall;
+  const summaryOverall = summaryQuery.data as
+    | { total_sellin?: number; total_target?: number; ach_pct?: number; total_ly_sellin?: number; yoy_pct?: number }
+    | undefined;
+  const legacyOverall = overviewQuery.data?.overall;
+  const overall = summaryOverall?.total_sellin !== undefined
+    ? {
+        channel: 'ALL',
+        sellin_revenue: (summaryOverall.total_sellin || 0) / 1e9,
+        target_sellin: (summaryOverall.total_target || 0) / 1e9,
+        achievement_rate: summaryOverall.ach_pct || 0,
+        ly_sellin: (summaryOverall.total_ly_sellin || 0) / 1e9,
+        yoy_growth_rate: summaryOverall.yoy_pct || 0,
+        gap_sellin: ((summaryOverall.total_sellin || 0) - (summaryOverall.total_target || 0)) / 1e9,
+        yoy_growth_amt: ((summaryOverall.total_sellin || 0) - (summaryOverall.total_ly_sellin || 0)) / 1e9,
+        mom_mtd_rate: legacyOverall?.mom_mtd_rate || 0,
+      }
+    : legacyOverall;
 
   const dailyChartOption = useMemo(() => {
     const pts = trendQuery.data || [];
@@ -212,18 +338,73 @@ export function OverviewPage() {
           <h1 className="text-xl font-bold text-slate-900">Tổng quan Doanh số Toàn hệ thống</h1>
           <p className="text-xs text-slate-500">Dữ liệu đồng bộ PostgreSQL Data Mart ({apiMonth}) & Payload RLS</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={dashChannel}
             onChange={(e) => setDashFilter('dashChannel', e.target.value)}
             aria-label="Lọc kênh"
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
           >
             <option value="ALL">Tất cả Kênh</option>
             <option value="GT">GT — General Trade</option>
             <option value="MT">MT — Modern Trade</option>
             <option value="B2B">B2B — Công nghiệp</option>
             <option value="KR">KR — Xuất khẩu</option>
+          </select>
+          <select
+            value={dashSubChannel}
+            onChange={(e) => setDashFilter('dashSubChannel', e.target.value)}
+            aria-label="Sub-channel"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả Sub-channel</option>
+            {dimOptions.subChannels.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <select
+            value={dashAccount}
+            onChange={(e) => setDashFilter('dashAccount', e.target.value)}
+            aria-label="Tài khoản"
+            className="max-w-[160px] rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả Account</option>
+            {dimOptions.accounts.map((a) => (
+              <option key={a} value={a}>{a}</option>
+            ))}
+          </select>
+          <select
+            value={prodStorage}
+            onChange={(e) => setProdFilter('prodStorage', e.target.value)}
+            aria-label="Kho bảo quản"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả Kho</option>
+            {dimOptions.storages.map((st) => (
+              <option key={st} value={st}>{st}</option>
+            ))}
+          </select>
+          <select
+            value={prodCate}
+            onChange={(e) => setProdFilter('prodCate', e.target.value)}
+            aria-label="Ngành hàng"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả Ngành hàng</option>
+            {dimOptions.cates.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <select
+            value={prodPh1}
+            onChange={(e) => setProdFilter('prodPh1', e.target.value)}
+            aria-label="Nhóm PH1"
+            className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả PH1</option>
+            {dimOptions.ph1s.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
           </select>
           <ExportExcelButton
             filename={`CJ_Overview_${apiMonth}.xlsx`}

@@ -19,9 +19,6 @@ export const appConfigValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().min(32).required(),
   JWT_EXPIRES_IN: Joi.string().default('8h'),
 
-  DATA_PAYLOADS_DIR: Joi.string().default('/app/data_payloads'),
-  PAYLOAD_KEY: Joi.string().min(32).required(),
-
   SMTP_HOST: Joi.string().allow('').optional(),
   SMTP_PORT: Joi.number().default(587),
   SMTP_SECURE: Joi.string().valid('true', 'false').default('false'),

@@ -1,23 +1,20 @@
-﻿==============================================================================
+==============================================================================
 HƯỚNG DẪN THIẾT LẬP MÁY CHỦ EMAIL SMTP CHO HỆ THỐNG CJ FOODS SNS
 ==============================================================================
 
 File cấu hình ".env" nằm ngay tại thư mục: d:\CJ_Enterprise_SNS\.env (hoac .env tai thu muc goc du an)
 
-1. NGUYÊN NHÂN BẠN KHÔNG NHÌN THẤY FILE .ENV TRONG WINDOWS:
-   - Các file có dấu chấm ở đầu (như .env, .gitignore) mặc định bị Windows xem là file ẩn.
-   - Để hiện ra: Trong thư mục d:\CJ_Enterprise_SNS, vào menu View (Xem) trên thanh công cụ -> Tích chọn ô "Hidden items" (Mục ẩn) và "File name extensions".
+1. **TRÊN WINDOWS**:
+   - Nhấn tổ hợp phím `Windows + R`, dán `notepad d:\CJ_Enterprise_SNS\.env` rồi Enter (hoặc nhấp đúp `scripts\config-smtp.bat`).
+   - File `.env` nằm ở thư mục gốc dự án (bật *Hidden items* trong File Explorer nếu bị ẩn).
 
-2. CÁCH MỞ FILE .ENV NHANH NHẤT (CHỈ MẤT 3 GIÂY):
-   - Nhấn tổ hợp phím: Windows + R (mở hộp thoại Run).
-   - Dán dòng lệnh sau rồi bấm OK / Enter:
-     notepad d:\CJ_Enterprise_SNS\.env (hoac .env tai thu muc goc du an)
+2. **TRÊN UBUNTU / LINUX**:
+   - Mở Terminal tại thư mục dự án rồi sửa file cấu hình:
+     `nano .env`
+   - Sau khi điền thông tin SMTP và lưu lại, nạp lại biến môi trường cho backend:
+     `docker compose up -d standard_backend`
 
-3. HOẶC DÙNG CÔNG CỤ TỰ ĐỘNG:
-   - Nhấp đúp chuột vào file: d:\CJ_Enterprise_SNS\scripts\config-smtp.bat
-   - Công cụ sẽ tự động mở Notepad để bạn điền thông tin, khi bạn Lưu và Đóng Notepad, công cụ sẽ tự động nạp cấu hình vào máy chủ Docker.
-
-4. CẤU HÌNH MẪU:
+3. **CẤU HÌNH MẪU** (`SMTP_TLS_REJECT_UNAUTHORIZED=true` mặc định):
 
 --- NẾU DÙNG GMAIL / GOOGLE WORKSPACE (@cjfoods.com.vn) ---
 SMTP_HOST=smtp.gmail.com

@@ -23,7 +23,7 @@ export class ManageUsersUseCase {
   ) {}
 
   private generateTemporaryPassword(): string {
-    return crypto.randomBytes(9).toString('base64url');
+    return `Cj#${crypto.randomBytes(6).toString('base64url')}9`;
   }
 
   async updateEmail(

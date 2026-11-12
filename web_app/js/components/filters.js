@@ -4645,8 +4645,12 @@
                 const nvbhSel = document.getElementById('sel-geo-nvbh');
                 if (!nvbhSel || nvbhSel.options.length <= 1) populateGeoNvbh();
             } else if (state.activeTab === 'tab-mt' && typeof populateMtFilters === 'function') {
+                if (typeof window.refreshDeferredScopeConstraints === 'function' && typeof currentUser !== 'undefined' && currentUser) {
+                    window.refreshDeferredScopeConstraints(currentUser);
+                }
                 const mtSel = document.getElementById('sel-mt-subchan');
-                if (!mtSel || mtSel.options.length <= 1) {
+                const constrainedMtChain = window.userScopeConstraint && window.userScopeConstraint.mtChain;
+                if (!mtSel || mtSel.options.length <= 1 || (constrainedMtChain && state.mtChain !== constrainedMtChain)) {
                     populateMtFilters();
                     if (typeof updateGlobalMtStoreUI === 'function') updateGlobalMtStoreUI();
                 }
@@ -4654,8 +4658,14 @@
                 const b2bSel = document.getElementById('sel-b2b-acc');
                 if (!b2bSel || b2bSel.options.length <= 1) populateB2bFilters();
             } else if (state.activeTab === 'tab-kr' && typeof populateKrFilters === 'function') {
+                if (typeof window.refreshDeferredScopeConstraints === 'function' && typeof currentUser !== 'undefined' && currentUser) {
+                    window.refreshDeferredScopeConstraints(currentUser);
+                }
                 const krSel = document.getElementById('sel-kr-subchan');
-                if (!krSel || krSel.options.length <= 1) populateKrFilters();
+                const constrainedKrChain = window.userScopeConstraint && window.userScopeConstraint.krChain;
+                if (!krSel || krSel.options.length <= 1 || (constrainedKrChain && state.krChain !== constrainedKrChain)) {
+                    populateKrFilters();
+                }
             }
 
             if (state.activeTab === 'tab-overview') renderTabOverview();
@@ -4711,7 +4721,13 @@
 
                 if (!window._dropdownsInitialized && _payloadCache['DIM_COMM_HIER'] && _payloadCache['DIM_PROD_HIER'] && _payloadCache['DIM_GEO_HIER']) {
                     window._dropdownsInitialized = true;
-                    try { initDropdowns(); applyUrlParams(); } catch (_) {}
+                    try {
+                        if (typeof window.refreshDeferredScopeConstraints === 'function' && typeof currentUser !== 'undefined' && currentUser) {
+                            window.refreshDeferredScopeConstraints(currentUser);
+                        }
+                        initDropdowns();
+                        applyUrlParams();
+                    } catch (_) {}
                 }
 
                 const stillMissingStage2 = stage2Payloads.filter(p => !_payloadCache[p]);

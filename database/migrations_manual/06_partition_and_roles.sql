@@ -36,6 +36,7 @@
 -- GRANT USAGE ON SCHEMA iam, datamart TO cj_app_reader;
 -- GRANT SELECT ON ALL TABLES IN SCHEMA iam, datamart TO cj_app_reader;
 -- GRANT cj_app_reader TO cj_app_writer;
--- GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA iam TO cj_app_writer;
+-- GRANT INSERT, UPDATE, DELETE ON iam.users, iam.roles, iam.permissions, iam.role_permissions, iam.trusted_networks TO cj_app_writer;
+-- GRANT INSERT ON iam.audit_logs TO cj_app_writer;
 -- GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA iam TO cj_app_writer;
 

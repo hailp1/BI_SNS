@@ -1,6 +1,7 @@
 import { Controller, Get, Header, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../../shared/decorators/current-user.decorator';
+import { Public } from '../../../shared/decorators/public.decorator';
 import { JwtAuthGuard } from '../../../shared/guards/jwt-auth.guard';
 import { AuthenticatedUser } from '../../../shared/interfaces/jwt-payload.interface';
 import { GetDailyTrendQuery } from '../../application/queries/get-daily-trend.query';
@@ -18,6 +19,7 @@ export class DashboardController {
   ) {}
 
   @Get('meta')
+  @Public()
   @Header('Cache-Control', 'no-cache')
   @ApiOperation({ summary: 'Get latest PostgreSQL ETL refresh metadata and available months' })
   async getMetadata() {
@@ -88,26 +90,27 @@ export class DashboardController {
   @ApiBearerAuth()
   @ApiCookieAuth('cj_auth_token')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Server-side SQL aggregation per channel (MT, B2B, KR, GT)' })
+  @ApiOperation({ summary: 'Server-side SQL aggregation per channel (MT, B2B, KR, GT) with RBAC' })
   async getChannelSummary(
     @Query('channel') channel: 'MT' | 'B2B' | 'KR' | 'GT' = 'MT',
     @Query('year') year = '2026',
     @Query('months') months = '10',
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     const safeChan = (['MT', 'B2B', 'KR', 'GT'].includes(channel) ? channel : 'MT') as 'MT' | 'B2B' | 'KR' | 'GT';
     const monthsList = months
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    return this.datamartService.getChannelSummary(safeChan, year, monthsList);
+    return this.datamartService.getChannelSummary(safeChan, year, monthsList, user);
   }
 
   @Get('daily-trend')
   @ApiBearerAuth()
   @ApiCookieAuth('cj_auth_token')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Get daily sales progression for a month and channel' })
-  async getDailyTrend(@Query() query: DailyTrendQueryDto) {
-    return this.getDailyTrendQuery.execute(query.month || '2026-10', query.channel || 'ALL');
+  @ApiOperation({ summary: 'Get daily sales progression for a month and channel with RBAC' })
+  async getDailyTrend(@Query() query: DailyTrendQueryDto, @CurrentUser() user: AuthenticatedUser) {
+    return this.getDailyTrendQuery.execute(query.month || '2026-10', query.channel || 'ALL', user);
   }
 }

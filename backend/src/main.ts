@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
@@ -27,6 +28,32 @@ async function bootstrap() {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+
+  // Defense-in-depth CSRF Origin verification for mutating cookie-authenticated requests
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method.toUpperCase())) {
+      return next();
+    }
+    const originHeader = req.headers.origin;
+    if (originHeader) {
+      const reqHost = req.get('host');
+      let sameHost = false;
+      try {
+        sameHost = Boolean(reqHost && new URL(originHeader).host === reqHost);
+      } catch {
+        sameHost = false;
+      }
+      if (!sameHost && !allowedOrigins.includes(originHeader)) {
+        return res.status(403).json({
+          type: 'https://httpstatuses.com/403',
+          title: 'Forbidden',
+          status: 403,
+          detail: 'Cross-site request origin rejected by CSRF guard.',
+        });
+      }
+    }
+    return next();
+  });
 
   app.enableCors({
     origin: allowedOrigins,

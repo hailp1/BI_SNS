@@ -12,9 +12,17 @@ import { formatCurrencyVnd, formatPercent } from '../../shared/utils/format';
 interface B2bRow {
   year?: string;
   month_num?: number | string;
+  sub_channel?: string;
   b2b_account?: string;
   b2b_customer?: string;
   sellin_val?: number;
+}
+
+interface TargetSellinRow {
+  year?: string;
+  month?: string;
+  channel?: string;
+  target_amt?: number;
 }
 
 interface B2bSummary {
@@ -36,11 +44,14 @@ export function B2bOverviewPage() {
   const loading = usePayloadsStore((s) => Boolean(s.loading.B2B_TREE));
 
   const [b2bTree, setB2bTree] = useState<B2bRow[]>([]);
+  const [targetRows, setTargetRows] = useState<TargetSellinRow[]>([]);
 
   useEffect(() => {
     let active = true;
-    loadPayload('B2B_TREE', user).then((data) => {
-      if (active && Array.isArray(data)) setB2bTree(data as B2bRow[]);
+    Promise.all([loadPayload('B2B_TREE', user), loadPayload('TARGET_SELLIN', user)]).then(([data, tgt]) => {
+      if (!active) return;
+      if (Array.isArray(data)) setB2bTree(data as B2bRow[]);
+      if (Array.isArray(tgt)) setTargetRows(tgt as TargetSellinRow[]);
     });
     return () => {
       active = false;
@@ -65,10 +76,11 @@ export function B2bOverviewPage() {
     [b2bTree, b2bAcc],
   );
 
-  const { total, lyTotal, yoy, rows } = useMemo(() => {
+  const { total, lyTotal, yoy, target, achievement, rows } = useMemo(() => {
     const lyYear = String(parseInt(year, 10) - 1);
     let sum = 0;
     let ly = 0;
+    let tgt = 0;
     const map = new Map<string, B2bSummary>();
 
     for (const r of b2bTree) {
@@ -94,6 +106,16 @@ export function B2bOverviewPage() {
       }
     }
 
+    for (const r of targetRows) {
+      if (String(r.channel || '').toUpperCase() !== 'B2B') continue;
+      const mStr = String(r.month || '');
+      const rYear = r.year ? String(r.year) : mStr.slice(0, 4);
+      if (rYear !== year) continue;
+      const mNum = mStr.includes('-') ? parseInt(mStr.slice(5, 7), 10) : parseInt(mStr, 10);
+      if (!matchMonthNum(mNum, selectedMonths)) continue;
+      tgt += Number(r.target_amt) || 0;
+    }
+
     const list = Array.from(map.values())
       .map((x) => ({
         ...x,
@@ -105,9 +127,11 @@ export function B2bOverviewPage() {
       total: sum,
       lyTotal: ly,
       yoy: ly > 0 ? ((sum - ly) / ly) * 100 : 0,
+      target: tgt,
+      achievement: tgt > 0 ? (sum / tgt) * 100 : 0,
       rows: list,
     };
-  }, [b2bTree, year, selectedMonths, b2bAcc, b2bCust]);
+  }, [b2bTree, targetRows, year, selectedMonths, b2bAcc, b2bCust]);
 
   const chartOption = useMemo(() => {
     const top = rows.slice(0, 10);
@@ -199,7 +223,7 @@ export function B2bOverviewPage() {
         <KpiCard
           title="Doanh số B2B"
           value={loading ? '...' : formatCurrencyVnd(total)}
-          subtitle={`Cùng kỳ: ${formatCurrencyVnd(lyTotal)}`}
+          subtitle={`Target: ${formatCurrencyVnd(target)} (${formatPercent(achievement)}) | Cùng kỳ: ${formatCurrencyVnd(lyTotal)}`}
           badge={formatPercent(yoy, true)}
           badgeTone={yoy >= 0 ? 'positive' : 'negative'}
           accent="amber"

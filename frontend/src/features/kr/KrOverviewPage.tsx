@@ -13,8 +13,16 @@ interface KrRow {
   year?: string;
   month_num?: number | string;
   sub_channel?: string;
+  account_code?: string;
   kr_chain?: string;
   sellin_val?: number;
+}
+
+interface TargetSellinRow {
+  year?: string;
+  month?: string;
+  channel?: string;
+  target_amt?: number;
 }
 
 interface KrSummary {
@@ -36,11 +44,14 @@ export function KrOverviewPage() {
   const loading = usePayloadsStore((s) => Boolean(s.loading.KR_TREE));
 
   const [krTree, setKrTree] = useState<KrRow[]>([]);
+  const [targetRows, setTargetRows] = useState<TargetSellinRow[]>([]);
 
   useEffect(() => {
     let active = true;
-    loadPayload('KR_TREE', user).then((data) => {
-      if (active && Array.isArray(data)) setKrTree(data as KrRow[]);
+    Promise.all([loadPayload('KR_TREE', user), loadPayload('TARGET_SELLIN', user)]).then(([data, tgt]) => {
+      if (!active) return;
+      if (Array.isArray(data)) setKrTree(data as KrRow[]);
+      if (Array.isArray(tgt)) setTargetRows(tgt as TargetSellinRow[]);
     });
     return () => {
       active = false;
@@ -65,10 +76,11 @@ export function KrOverviewPage() {
     [krTree, krSubChan],
   );
 
-  const { total, lyTotal, yoy, rows } = useMemo(() => {
+  const { total, lyTotal, yoy, target, achievement, rows } = useMemo(() => {
     const lyYear = String(parseInt(year, 10) - 1);
     let sum = 0;
     let ly = 0;
+    let tgt = 0;
     const map = new Map<string, KrSummary>();
 
     for (const r of krTree) {
@@ -94,6 +106,16 @@ export function KrOverviewPage() {
       }
     }
 
+    for (const r of targetRows) {
+      if (String(r.channel || '').toUpperCase() !== 'KR') continue;
+      const mStr = String(r.month || '');
+      const rYear = r.year ? String(r.year) : mStr.slice(0, 4);
+      if (rYear !== year) continue;
+      const mNum = mStr.includes('-') ? parseInt(mStr.slice(5, 7), 10) : parseInt(mStr, 10);
+      if (!matchMonthNum(mNum, selectedMonths)) continue;
+      tgt += Number(r.target_amt) || 0;
+    }
+
     const list = Array.from(map.values())
       .map((x) => ({
         ...x,
@@ -105,9 +127,11 @@ export function KrOverviewPage() {
       total: sum,
       lyTotal: ly,
       yoy: ly > 0 ? ((sum - ly) / ly) * 100 : 0,
+      target: tgt,
+      achievement: tgt > 0 ? (sum / tgt) * 100 : 0,
       rows: list,
     };
-  }, [krTree, year, selectedMonths, krSubChan, krChain]);
+  }, [krTree, targetRows, year, selectedMonths, krSubChan, krChain]);
 
   const chartOption = useMemo(
     () => ({
@@ -198,7 +222,7 @@ export function KrOverviewPage() {
         <KpiCard
           title="Doanh số Kênh KR"
           value={loading ? '...' : formatCurrencyVnd(total)}
-          subtitle={`Cùng kỳ: ${formatCurrencyVnd(lyTotal)}`}
+          subtitle={`Target: ${formatCurrencyVnd(target)} (${formatPercent(achievement)}) | Cùng kỳ: ${formatCurrencyVnd(lyTotal)}`}
           badge={formatPercent(yoy, true)}
           badgeTone={yoy >= 0 ? 'positive' : 'negative'}
           accent="emerald"

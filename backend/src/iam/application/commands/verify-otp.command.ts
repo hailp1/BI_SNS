@@ -1,5 +1,4 @@
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AuditService } from '../../../shared/audit/audit.service';
 import { TempTokenPayload } from '../../../shared/interfaces/jwt-payload.interface';
 import { TotpService } from '../../infrastructure/adapters/totp.service';
@@ -15,7 +14,6 @@ export class VerifyOtpUseCase {
     @Inject(OTP_SERVICE_PORT) private readonly otpService: OtpServicePort,
     private readonly totpService: TotpService,
     private readonly audit: AuditService,
-    private readonly configService: ConfigService,
   ) {}
 
   async generate2faSecret(identifier: string) {
@@ -108,7 +106,6 @@ export class VerifyOtpUseCase {
     return {
       status: 'success',
       access_token: accessToken,
-      payload_key: this.configService.get<string>('PAYLOAD_KEY'),
       user: user.toPublicProfile(),
     };
   }
@@ -174,7 +171,6 @@ export class VerifyOtpUseCase {
     return {
       status: 'success',
       access_token: accessToken,
-      payload_key: this.configService.get<string>('PAYLOAD_KEY'),
       user: user.toPublicProfile(),
     };
   }

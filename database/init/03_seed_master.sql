@@ -27,10 +27,7 @@ INSERT INTO iam.users (username, email, password_hash, full_name, role, channel,
 ('kam_winmart', 'kam_winmart@cjfoods.com.vn', '$2b$12$qNwM3QPkLaL7QqSF/8V7ZeK.o57TPD0BHzxgndf0HvXn971FrOjQ.', 'KAM Phụ Trách Chuỗi WinMart', 'kam', 'MT', 'chain', 'WinMart'),
 ('lead_b2b', 'lead_b2b@cjfoods.com.vn', '$2b$12$qNwM3QPkLaL7QqSF/8V7ZeK.o57TPD0BHzxgndf0HvXn971FrOjQ.', 'Trưởng Kênh Khách Hàng B2B', 'head_b2b', 'B2B', 'channel', 'Kênh B2B'),
 ('sales_08562', 'sales08562@cjfoods.com.vn', '$2b$12$qNwM3QPkLaL7QqSF/8V7ZeK.o57TPD0BHzxgndf0HvXn971FrOjQ.', 'Nguyễn Văn Ngọc (NVBH 08562)', 'nvbh', 'GT', 'route', 'Tuyến T2-T4-T6')
-ON CONFLICT (username) DO UPDATE SET
-    password_hash = EXCLUDED.password_hash,
-    full_name = EXCLUDED.full_name,
-    is_active = TRUE;
+ON CONFLICT (username) DO NOTHING;
 
 -- 3. SEED DỮ LIỆU BÁO CÁO MẪU CHO DATAMART (Tháng 10/2026 chuẩn CJ Foods)
 INSERT INTO datamart.fact_monthly_performance 

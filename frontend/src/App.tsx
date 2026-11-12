@@ -76,7 +76,7 @@ function AuthenticatedApp() {
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename="/v2">
         <AuthenticatedApp />
       </BrowserRouter>
     </QueryClientProvider>

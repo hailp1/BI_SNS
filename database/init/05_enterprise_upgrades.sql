@@ -70,6 +70,20 @@ CREATE INDEX IF NOT EXISTS idx_perf_year_month_chan
 CREATE INDEX IF NOT EXISTS idx_std_daily_month_chan
   ON datamart.fact_daily_sales (month, channel);
 
+-- 5. Enforce WORM immutability on iam.audit_logs (ISO/IEC 27001)
+CREATE OR REPLACE FUNCTION iam.prevent_audit_log_mutation()
+RETURNS TRIGGER AS $$
+BEGIN
+  RAISE EXCEPTION 'iam.audit_logs is append-only (WORM); UPDATE and DELETE are prohibited';
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_audit_logs_immutable ON iam.audit_logs;
+CREATE TRIGGER trg_audit_logs_immutable
+  BEFORE UPDATE OR DELETE ON iam.audit_logs
+  FOR EACH ROW
+  EXECUTE FUNCTION iam.prevent_audit_log_mutation();
+
 -- Refresh query planner statistics
 ANALYZE;
 

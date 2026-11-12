@@ -1,28 +1,30 @@
-import 'leaflet/dist/leaflet.css';
-import { MapPin } from 'lucide-react';
+import { MapPin, Route, Store } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { CircleMarker, MapContainer, Popup, TileLayer } from 'react-leaflet';
 import { DataTable, type ColumnDef } from '../../shared/components/DataTable';
+import { ExportExcelButton } from '../../shared/components/ExportExcelButton';
+import { KpiCard } from '../../shared/components/KpiCard';
 import { useAuthStore } from '../../shared/stores/auth.store';
 import { usePayloadsStore } from '../../shared/stores/payloads.store';
+import { formatCurrencyVnd } from '../../shared/utils/format';
 
 type RouteTuple = unknown[];
 
 interface OutletRow {
   code: string;
   name: string;
-  lat: number;
-  lon: number;
+  address: string;
+  route: string;
   salesman: string;
   distributor: string;
-  area: string;
-  office: string;
+  nppCode: string;
+  gsbh: string;
+  vung: string;
+  mien: string;
+  isActive: boolean;
+  sellout: number;
   freq: string;
-  address: string;
-  phone: string;
+  daysStr: string;
 }
-
-const MAX_MAP_POINTS = 600;
 
 export function GtRouteMapPage() {
   const user = useAuthStore((s) => s.user);
@@ -30,9 +32,10 @@ export function GtRouteMapPage() {
   const loading = usePayloadsStore((s) => Boolean(s.loading.GT_CUST_ROUTES));
 
   const [rawRoutes, setRawRoutes] = useState<RouteTuple[]>([]);
-  const [selectedArea, setSelectedArea] = useState('ALL');
-  const [selectedOffice, setSelectedOffice] = useState('ALL');
-  const [selectedDay, setSelectedDay] = useState<string>('ALL');
+  const [selectedMien, setSelectedMien] = useState('ALL');
+  const [selectedVung, setSelectedVung] = useState('ALL');
+  const [selectedNpp, setSelectedNpp] = useState('ALL');
+  const [selectedDay, setSelectedDay] = useState('ALL');
 
   useEffect(() => {
     let active = true;
@@ -46,169 +49,205 @@ export function GtRouteMapPage() {
     };
   }, [loadPayload, user]);
 
-  const areas = useMemo(
-    () => Array.from(new Set(rawRoutes.map((r) => String(r[9] || '')).filter(Boolean))).sort(),
+  // GT_CUST_ROUTES tuple order from PostgreSQL DatamartService:
+  // [0]month, [1]c_code, [2]c_name, [3]addr, [4]route, [5]nvbh, [6]npp_name,
+  // [7]npp_code, [8]gsbh, [9]vung, [10]mien, [11]is_active, [12]sellout,
+  // [13]freq, [14]week_type, [15]days_str, [16]emp_code, [17]is_target
+  const miens = useMemo(
+    () => Array.from(new Set(rawRoutes.map((r) => String(r[10] || '')).filter(Boolean))).sort(),
     [rawRoutes],
   );
 
-  const offices = useMemo(
+  const vungs = useMemo(
     () =>
       Array.from(
         new Set(
           rawRoutes
-            .filter((r) => selectedArea === 'ALL' || String(r[9] || '') === selectedArea)
-            .map((r) => String(r[10] || ''))
+            .filter((r) => selectedMien === 'ALL' || String(r[10] || '') === selectedMien)
+            .map((r) => String(r[9] || ''))
             .filter(Boolean),
         ),
       ).sort(),
-    [rawRoutes, selectedArea],
+    [rawRoutes, selectedMien],
+  );
+
+  const npps = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          rawRoutes
+            .filter(
+              (r) =>
+                (selectedMien === 'ALL' || String(r[10] || '') === selectedMien) &&
+                (selectedVung === 'ALL' || String(r[9] || '') === selectedVung),
+            )
+            .map((r) => String(r[6] || ''))
+            .filter(Boolean),
+        ),
+      ).sort(),
+    [rawRoutes, selectedMien, selectedVung],
   );
 
   const filteredOutlets = useMemo<OutletRow[]>(() => {
-    const dayColMap: Record<string, number> = {
-      t2: 13,
-      t3: 14,
-      t4: 15,
-      t5: 16,
-      t6: 17,
-      t7: 18,
-      cn: 19,
-    };
-
     const result: OutletRow[] = [];
     for (const r of rawRoutes) {
-      if (selectedArea !== 'ALL' && String(r[9] || '') !== selectedArea) continue;
-      if (selectedOffice !== 'ALL' && String(r[10] || '') !== selectedOffice) continue;
-      if (selectedDay !== 'ALL' && !r[dayColMap[selectedDay]]) continue;
-      const lat = Number(r[3]);
-      const lon = Number(r[4]);
-      if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat === 0 || lon === 0) continue;
+      const mien = String(r[10] || '');
+      const vung = String(r[9] || '');
+      const nppName = String(r[6] || '');
+      const daysStr = String(r[15] || '');
+
+      if (selectedMien !== 'ALL' && mien !== selectedMien) continue;
+      if (selectedVung !== 'ALL' && vung !== selectedVung) continue;
+      if (selectedNpp !== 'ALL' && nppName !== selectedNpp) continue;
+      if (selectedDay !== 'ALL' && !daysStr.toUpperCase().includes(selectedDay)) continue;
+
       result.push({
         code: String(r[1] || ''),
         name: String(r[2] || ''),
-        lat,
-        lon,
+        address: String(r[3] || ''),
+        route: String(r[4] || ''),
         salesman: String(r[5] || ''),
-        distributor: String(r[6] || ''),
-        area: String(r[9] || ''),
-        office: String(r[10] || ''),
-        freq: String(r[11] || ''),
-        address: String(r[20] || ''),
-        phone: String(r[21] || ''),
+        distributor: nppName,
+        nppCode: String(r[7] || ''),
+        gsbh: String(r[8] || ''),
+        vung,
+        mien,
+        isActive: Number(r[11]) === 1,
+        sellout: Number(r[12]) || 0,
+        freq: String(r[13] || ''),
+        daysStr,
       });
     }
     return result;
-  }, [rawRoutes, selectedArea, selectedOffice, selectedDay]);
+  }, [rawRoutes, selectedMien, selectedVung, selectedNpp, selectedDay]);
 
-  const visibleMarkers = useMemo(() => filteredOutlets.slice(0, MAX_MAP_POINTS), [filteredOutlets]);
+  const activeCount = useMemo(() => filteredOutlets.filter((o) => o.isActive).length, [filteredOutlets]);
+  const routeCount = useMemo(
+    () => new Set(filteredOutlets.map((o) => `${o.nppCode}|${o.route}`).filter(Boolean)).size,
+    [filteredOutlets],
+  );
 
   const columns: ColumnDef<OutletRow>[] = [
     { key: 'code', header: 'Mã KH', sortValue: (r) => r.code, render: (r) => <span className="font-mono text-xs">{r.code}</span> },
-    { key: 'name', header: 'Tên cửa hàng', sortValue: (r) => r.name, render: (r) => <span className="font-semibold">{r.name}</span> },
+    { key: 'name', header: 'Tên Điểm bán', sortValue: (r) => r.name, render: (r) => <span className="font-semibold">{r.name}</span> },
     { key: 'distributor', header: 'NPP', sortValue: (r) => r.distributor, render: (r) => r.distributor },
     { key: 'salesman', header: 'NVBH', sortValue: (r) => r.salesman, render: (r) => r.salesman },
-    { key: 'freq', header: 'Tần suất', render: (r) => r.freq },
-    { key: 'address', header: 'Địa chỉ', render: (r) => <span className="max-w-xs truncate block">{r.address}</span> },
+    { key: 'route', header: 'Tuyến', sortValue: (r) => r.route, render: (r) => r.route },
+    { key: 'daysStr', header: 'Thứ viếng thăm', render: (r) => r.daysStr || '-' },
+    { key: 'sellout', header: 'Sell-out', align: 'right', sortValue: (r) => r.sellout, render: (r) => formatCurrencyVnd(r.sellout) },
   ];
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Bản đồ Tuyến Bán Hàng GT (Route Map)</h1>
+          <h1 className="text-xl font-bold text-slate-900">Tuyến Bán Hàng GT (MCP & Route Map)</h1>
           <p className="text-xs text-slate-500">
-            Hiển thị {visibleMarkers.length.toLocaleString('vi-VN')} / {filteredOutlets.length.toLocaleString('vi-VN')} điểm bán có tọa độ GPS hợp lệ
+            Hiển thị {filteredOutlets.length.toLocaleString('vi-VN')} điểm bán thuộc {routeCount.toLocaleString('vi-VN')} tuyến DMS
           </p>
         </div>
+        <ExportExcelButton
+          filename="CJ_GT_Routes.xlsx"
+          sheetName="GT_Routes"
+          rows={filteredOutlets.slice(0, 5000)}
+          columns={[
+            { header: 'Mã KH', key: 'code' },
+            { header: 'Tên Điểm bán', key: 'name' },
+            { header: 'NPP', key: 'distributor' },
+            { header: 'NVBH', key: 'salesman' },
+            { header: 'Tuyến', key: 'route' },
+            { header: 'Thứ', key: 'daysStr' },
+            { header: 'Địa chỉ', key: 'address' },
+            { header: 'Sell-out', key: (r) => Math.round(r.sellout) },
+          ]}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <KpiCard
+          title="Tổng Điểm bán (MCP)"
+          value={loading ? '...' : filteredOutlets.length.toLocaleString('vi-VN')}
+          subtitle="Điểm bán theo phạm vi phân quyền"
+          accent="blue"
+          icon={<MapPin className="h-5 w-5" />}
+        />
+        <KpiCard
+          title="Điểm bán Active"
+          value={loading ? '...' : activeCount.toLocaleString('vi-VN')}
+          subtitle="Có phát sinh đơn hàng"
+          accent="emerald"
+          icon={<Store className="h-5 w-5" />}
+        />
+        <KpiCard
+          title="Tổng số Tuyến"
+          value={loading ? '...' : routeCount.toLocaleString('vi-VN')}
+          subtitle="Số tuyến bán hàng đang quản lý"
+          accent="amber"
+          icon={<Route className="h-5 w-5" />}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:grid-cols-4">
         <select
-          value={selectedArea}
+          value={selectedMien}
           onChange={(e) => {
-            setSelectedArea(e.target.value);
-            setSelectedOffice('ALL');
+            setSelectedMien(e.target.value);
+            setSelectedVung('ALL');
+            setSelectedNpp('ALL');
           }}
-          aria-label="Lọc Vùng Route"
+          aria-label="Lọc Miền"
           className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold"
         >
-          <option value="ALL">-- Tất cả Vùng --</option>
-          {areas.map((a) => (
-            <option key={a} value={a}>
-              {a}
-            </option>
+          <option value="ALL">-- Tất cả Miền --</option>
+          {miens.map((m) => (
+            <option key={m} value={m}>{m}</option>
           ))}
         </select>
 
         <select
-          value={selectedOffice}
-          onChange={(e) => setSelectedOffice(e.target.value)}
-          aria-label="Lọc Office Route"
+          value={selectedVung}
+          onChange={(e) => {
+            setSelectedVung(e.target.value);
+            setSelectedNpp('ALL');
+          }}
+          aria-label="Lọc Vùng"
           className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold"
         >
-          <option value="ALL">-- Tất cả Office --</option>
-          {offices.map((o) => (
-            <option key={o} value={o}>
-              {o}
-            </option>
+          <option value="ALL">-- Tất cả Vùng --</option>
+          {vungs.map((v) => (
+            <option key={v} value={v}>{v}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedNpp}
+          onChange={(e) => setSelectedNpp(e.target.value)}
+          aria-label="Lọc NPP"
+          className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold"
+        >
+          <option value="ALL">-- Tất cả NPP --</option>
+          {npps.map((n) => (
+            <option key={n} value={n}>{n}</option>
           ))}
         </select>
 
         <select
           value={selectedDay}
           onChange={(e) => setSelectedDay(e.target.value)}
-          aria-label="Lọc Ngày viếng thăm"
+          aria-label="Lọc Thứ viếng thăm"
           className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold"
         >
-          <option value="ALL">-- Tất cả ngày trong tuần --</option>
-          <option value="t2">Thứ 2</option>
-          <option value="t3">Thứ 3</option>
-          <option value="t4">Thứ 4</option>
-          <option value="t5">Thứ 5</option>
-          <option value="t6">Thứ 6</option>
-          <option value="t7">Thứ 7</option>
-          <option value="cn">Chủ nhật</option>
+          <option value="ALL">-- Tất cả các thứ --</option>
+          {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((d) => (
+            <option key={d} value={d}>{d}</option>
+          ))}
         </select>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        {loading ? (
-          <div className="flex h-[420px] items-center justify-center gap-2 text-sm text-slate-500">
-            <MapPin className="h-4 w-4 animate-bounce text-red-600" />
-            Đang giải mã dữ liệu tọa độ GT_CUST_ROUTES...
-          </div>
-        ) : (
-          <MapContainer center={[16.047, 108.206]} zoom={6} className="h-[440px] w-full">
-            <TileLayer
-              attribution="&copy; OpenStreetMap contributors"
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {visibleMarkers.map((m, idx) => (
-              <CircleMarker
-                key={`${m.code}-${idx}`}
-                center={[m.lat, m.lon]}
-                radius={5}
-                pathOptions={{ color: '#dc2626', fillColor: '#ef4444', fillOpacity: 0.75, weight: 1 }}
-              >
-                <Popup>
-                  <div className="text-xs">
-                    <p className="font-bold text-slate-900">{m.name}</p>
-                    <p className="text-slate-600">Mã KH: {m.code}</p>
-                    <p>NPP: {m.distributor}</p>
-                    <p>NVBH: {m.salesman}</p>
-                    <p className="text-slate-500">{m.address}</p>
-                  </div>
-                </Popup>
-              </CircleMarker>
-            ))}
-          </MapContainer>
-        )}
-      </div>
-
       <DataTable
-        data={filteredOutlets}
+        data={filteredOutlets.slice(0, 1000)}
         columns={columns}
-        searchPlaceholder="Tìm cửa hàng, địa chỉ, NVBH..."
+        searchPlaceholder="Tìm mã KH, tên cửa hàng, NVBH, địa chỉ..."
         searchFilter={(r, q) =>
           r.name.toLowerCase().includes(q) ||
           r.code.toLowerCase().includes(q) ||
@@ -219,4 +258,3 @@ export function GtRouteMapPage() {
     </div>
   );
 }
-

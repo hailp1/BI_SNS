@@ -11,14 +11,20 @@ import { formatCurrencyVnd } from '../../shared/utils/format';
 interface GtStockRaw {
   month?: string;
   npp_code?: string;
-  npp_name?: string;
-  vung?: string;
-  mien?: string;
-  sku?: string;
-  sku_name?: string;
+  storage?: string;
   cate?: string;
+  ph1?: string;
+  ph2?: string;
+  sku_name?: string;
   stock_val?: number;
-  stock_qty?: number;
+}
+
+interface DimGeoRow {
+  mien?: string;
+  vung?: string;
+  gsbh?: string;
+  npp_code?: string;
+  npp_name?: string;
 }
 
 interface StockRow {
@@ -26,8 +32,8 @@ interface StockRow {
   nppName: string;
   vung: string;
   stockVal: number;
-  stockQty: number;
   skuCount: number;
+  lineCount: number;
 }
 
 export function GtStockPage() {
@@ -38,106 +44,132 @@ export function GtStockPage() {
   const loading = usePayloadsStore((s) => Boolean(s.loading.GT_STOCK));
 
   const [stockRaw, setStockRaw] = useState<GtStockRaw[]>([]);
+  const [dimGeo, setDimGeo] = useState<DimGeoRow[]>([]);
+  const [storageFilter, setStorageFilter] = useState('ALL');
   const activeMonth = useMemo(() => getActiveApiMonth(year, selectedMonths), [year, selectedMonths]);
 
   useEffect(() => {
     let active = true;
-    loadPayload('GT_STOCK', user).then((data) => {
-      if (active && Array.isArray(data)) setStockRaw(data as GtStockRaw[]);
+    Promise.all([loadPayload('GT_STOCK', user), loadPayload('DIM_GEO_HIER', user)]).then(([stock, geo]) => {
+      if (!active) return;
+      if (Array.isArray(stock)) setStockRaw(stock as GtStockRaw[]);
+      if (Array.isArray(geo)) setDimGeo(geo as DimGeoRow[]);
     });
     return () => {
       active = false;
     };
   }, [loadPayload, user]);
 
-  const { latestMonth, rows, totalStockVal, totalQty } = useMemo(() => {
+  const storages = useMemo(
+    () => Array.from(new Set(stockRaw.map((d) => String(d.storage || '')).filter(Boolean))).sort(),
+    [stockRaw],
+  );
+
+  const { latestMonth, rows, totalStockVal } = useMemo(() => {
+    const geoMap = new Map<string, DimGeoRow>();
+    for (const g of dimGeo) {
+      if (g.npp_code) geoMap.set(String(g.npp_code), g);
+    }
+
     const months = Array.from(new Set(stockRaw.map((d) => String(d.month || '')).filter(Boolean))).sort();
     const eligible = months.filter((m) => m <= activeMonth);
     const chosenMonth = eligible.length > 0 ? eligible[eligible.length - 1] : months[months.length - 1] || activeMonth;
 
     const map = new Map<string, { row: StockRow; skus: Set<string> }>();
     let totalVal = 0;
-    let totalQ = 0;
 
     for (const d of stockRaw) {
       if (d.month && d.month !== chosenMonth) continue;
+      if (storageFilter !== 'ALL' && String(d.storage || '') !== storageFilter) continue;
       const code = String(d.npp_code || 'UNKNOWN');
       const val = Number(d.stock_val) || 0;
-      const qty = Number(d.stock_qty) || 0;
       totalVal += val;
-      totalQ += qty;
 
+      const geo = geoMap.get(code);
       if (!map.has(code)) {
         map.set(code, {
           row: {
             nppCode: code,
-            nppName: String(d.npp_name || code),
-            vung: String(d.vung || d.mien || '-'),
+            nppName: String(geo?.npp_name || code),
+            vung: String(geo?.vung || geo?.mien || '-'),
             stockVal: 0,
-            stockQty: 0,
             skuCount: 0,
+            lineCount: 0,
           },
           skus: new Set<string>(),
         });
       }
       const entry = map.get(code)!;
       entry.row.stockVal += val;
-      entry.row.stockQty += qty;
-      if (d.sku || d.sku_name) entry.skus.add(String(d.sku || d.sku_name));
+      entry.row.lineCount += 1;
+      if (d.sku_name) entry.skus.add(String(d.sku_name));
     }
 
-    const list = Array.from(map.values()).map(({ row, skus }) => ({
-      ...row,
-      skuCount: skus.size,
-    }));
+    const list = Array.from(map.values())
+      .map(({ row, skus }) => ({
+        ...row,
+        skuCount: skus.size,
+      }))
+      .sort((a, b) => b.stockVal - a.stockVal);
 
-    return { latestMonth: chosenMonth, rows: list, totalStockVal: totalVal, totalQty: totalQ };
-  }, [stockRaw, activeMonth]);
+    return { latestMonth: chosenMonth, rows: list, totalStockVal: totalVal };
+  }, [stockRaw, dimGeo, activeMonth, storageFilter]);
 
   const columns: ColumnDef<StockRow>[] = [
     { key: 'nppCode', header: 'Mã NPP', sortValue: (r) => r.nppCode, render: (r) => <span className="font-mono text-xs">{r.nppCode}</span> },
-    { key: 'nppName', header: 'Tên Nhà Phân Phối', sortValue: (r) => r.nppName, render: (r) => <span className="font-semibold">{r.nppName}</span> },
+    { key: 'nppName', header: 'Tên Nhà phân phối', sortValue: (r) => r.nppName, render: (r) => <span className="font-semibold">{r.nppName}</span> },
     { key: 'vung', header: 'Vùng', sortValue: (r) => r.vung, render: (r) => r.vung },
-    { key: 'skuCount', header: 'Số SKU tồn', align: 'right', sortValue: (r) => r.skuCount, render: (r) => r.skuCount },
-    { key: 'stockQty', header: 'Sản lượng tồn', align: 'right', sortValue: (r) => r.stockQty, render: (r) => r.stockQty.toLocaleString('vi-VN') },
-    { key: 'stockVal', header: 'Giá trị tồn kho', align: 'right', sortValue: (r) => r.stockVal, render: (r) => <span className="font-semibold text-slate-900">{formatCurrencyVnd(r.stockVal)}</span> },
+    { key: 'skuCount', header: 'Số SKU tồn', align: 'right', sortValue: (r) => r.skuCount, render: (r) => r.skuCount.toLocaleString('vi-VN') },
+    { key: 'stockVal', header: 'Giá trị Tồn kho', align: 'right', sortValue: (r) => r.stockVal, render: (r) => <span className="font-semibold">{formatCurrencyVnd(r.stockVal)}</span> },
   ];
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">Tồn kho Nhà Phân Phối GT (Stock Snapshot)</h1>
+          <h1 className="text-xl font-bold text-slate-900">Tồn kho Nhà Phân Phối (GT Stock)</h1>
           <p className="text-xs text-slate-500">Kỳ tồn kho gần nhất: {latestMonth}</p>
         </div>
-        <ExportExcelButton
-          filename={`CJ_GT_Stock_${latestMonth}.xlsx`}
-          sheetName="GT_Stock"
-          rows={rows}
-          columns={[
-            { header: 'Mã NPP', key: 'nppCode' },
-            { header: 'Tên NPP', key: 'nppName' },
-            { header: 'Vùng', key: 'vung' },
-            { header: 'Số SKU', key: 'skuCount' },
-            { header: 'Sản lượng tồn', key: 'stockQty' },
-            { header: 'Giá trị tồn (VNĐ)', key: (r) => Math.round(r.stockVal) },
-          ]}
-        />
+        <div className="flex items-center gap-2">
+          <select
+            value={storageFilter}
+            onChange={(e) => setStorageFilter(e.target.value)}
+            aria-label="Lọc kho bảo quản"
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700"
+          >
+            <option value="ALL">Tất cả Kho</option>
+            {storages.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <ExportExcelButton
+            filename={`CJ_GT_Stock_${latestMonth}.xlsx`}
+            sheetName="GT_Stock"
+            rows={rows}
+            columns={[
+              { header: 'Mã NPP', key: 'nppCode' },
+              { header: 'Tên NPP', key: 'nppName' },
+              { header: 'Vùng', key: 'vung' },
+              { header: 'Số SKU', key: 'skuCount' },
+              { header: 'Giá trị tồn', key: (r) => Math.round(r.stockVal) },
+            ]}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <KpiCard
-          title="Tổng Giá trị Tồn kho NPP"
+          title="Tổng giá trị Tồn kho"
           value={loading ? '...' : formatCurrencyVnd(totalStockVal)}
-          subtitle={`Trên ${rows.length} Nhà phân phối`}
-          accent="red"
+          subtitle={`Tại ${rows.length} Nhà phân phối`}
+          accent="blue"
           icon={<Package className="h-5 w-5" />}
         />
         <KpiCard
-          title="Tổng Sản lượng Tồn kho"
-          value={loading ? '...' : totalQty.toLocaleString('vi-VN')}
-          subtitle={`Snapshot tháng ${latestMonth}`}
-          accent="blue"
+          title="Số NPP có tồn kho"
+          value={rows.length.toLocaleString('vi-VN')}
+          subtitle={`Kỳ dữ liệu: ${latestMonth}`}
+          accent="amber"
           icon={<Boxes className="h-5 w-5" />}
         />
       </div>
@@ -146,9 +178,10 @@ export function GtStockPage() {
         data={rows}
         columns={columns}
         searchPlaceholder="Tìm mã hoặc tên NPP..."
-        searchFilter={(r, q) => r.nppName.toLowerCase().includes(q) || r.nppCode.toLowerCase().includes(q)}
+        searchFilter={(r, q) =>
+          r.nppName.toLowerCase().includes(q) || r.nppCode.toLowerCase().includes(q) || r.vung.toLowerCase().includes(q)
+        }
       />
     </div>
   );
 }
-

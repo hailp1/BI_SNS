@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { authApi } from '../api/auth.api';
 import type { AuthUser, LoginResponse } from '../types/auth';
-import { clearPayloadIdbCache, clearPayloadKeyHex, setPayloadKeyHex } from '../utils/crypto';
+import { clearPayloadKeyHex, setPayloadKeyHex } from '../utils/crypto';
+import { idbCache } from '../utils/idb-cache';
 
 export type OtpChallengeState = {
   type: 'email' | 'totp';
@@ -110,7 +111,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Ignore logout network error
     }
     clearPayloadKeyHex();
-    await clearPayloadIdbCache();
+    await idbCache.clear();
     set({ user: null, otpChallenge: null, error: null });
   },
 

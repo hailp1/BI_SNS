@@ -16,13 +16,13 @@ flowchart TD
     subgraph SERVER_ZONE["🖥️ 2. ENTERPRISE HOST SERVER (DOCKER COMPOSE STACK)"]
         subgraph DOCKER_STACK["🐳 DOCKER COMPOSE ECOSYSTEM (Isolated Network: standard_network)"]
             
-            NGINX["🛡️ Container 1: NGINX Perimeter Gateway (Port 8090)<br/>• Single Public Entry Point (SSL/TLS & DDoS Protection)<br/>• Static Asset Serving & Strict CORS Enforcement<br/>• Secure Reverse Proxy to Internal Backend"]
+            NGINX["🛡️ Container 1: NGINX 1.27 Perimeter Gateway (Port 8090)<br/>• Single Public Entry Point (TLS-ready template, CSP & Rate Limit)<br/>• Static Asset Serving & Gzip Compression<br/>• Secure Reverse Proxy to Internal Backend"]
             
-            BACKEND["⚙️ Container 2: NestJS 12 Application & Security Engine<br/>• NIST SP 800-63B Bcrypt (Cost Factor 12) Hashing<br/>• Context-Aware Zero Trust (Intranet vs External Network)<br/>• OWASP ASVS v4.0 Level 3 HttpOnly Secure Cookie<br/>• Enterprise Row-Level Security (RLS) Data Filtering"]
+            BACKEND["⚙️ Container 2: NestJS 10.3 Application & Security Engine<br/>• NIST SP 800-63B Bcrypt (Cost Factor 12) + Password Policy<br/>• Context-Aware Zero Trust (Intranet CIDR vs External 2FA/Email OTP)<br/>• OWASP ASVS HttpOnly Cookie + CSRF Origin Guard + RFC 7807<br/>• Server-side Row-Level Security (RLS) across 37 Datamart Datasets"]
             
-            REDIS["⚡ Container 3: Redis 8 In-Memory Cache<br/>• Ephemeral OTP 6-Digit Storage (TTL: 300s / 5 mins)<br/>• Revocation List & Real-Time Token Blacklist"]
+            REDIS["⚡ Container 3: Redis 8 (AOF Persistent)<br/>• Ephemeral OTP 6-Digit Storage (TTL: 300s / 5 mins)<br/>• Revocation List & Real-Time Token Blacklist + Query Cache"]
             
-            POSTGRES["💾 Container 4: PostgreSQL 18 Enterprise Database<br/>• Schema 'iam': 103 Standard Users & Bound Emails<br/>• Schema 'datamart': 4-Channel Master Sales & KPI Data<br/>• Schema 'iam.audit_logs': ISO/IEC 27001 Security Logs"]
+            POSTGRES["💾 Container 4: PostgreSQL 18 Enterprise Database (592 MB)<br/>• Schema 'iam': Users, Roles/Permissions, Trusted Networks<br/>• Schema 'datamart': 37 Datasets / 2.57M Rows (Sales, Route Map, CTKM)<br/>• Schema 'iam.audit_logs': ISO/IEC 27001 Security Audit Trail"]
             
             VOLUME[("💽 Host Storage: Persistent Docker Volume (standard_pg_data)<br/>Guarantees zero data loss across restarts & outages")]
             
@@ -57,17 +57,17 @@ flowchart TD
 
     subgraph KHOI2["2. MÁY CHỦ BẢO MẬT & XỬ LÝ (SERVER BACKEND)"]
         direction TB
-        B["⚙️ Backend NestJS & Nginx Gateway<br/>• Nhận diện Mạng Trong vs Mạng Ngoài<br/>• Kiểm tra quyền hạn RBAC / Lọc dữ liệu RLS<br/>• Cấp Cookie an toàn HttpOnly (Chống soi code F12)"]
+        B["⚙️ Backend NestJS 10.3 & Nginx 1.27 Gateway<br/>• Nhận diện Mạng Trong vs Mạng Ngoài (Zero Trust)<br/>• Kiểm tra quyền hạn RBAC / Lọc dữ liệu RLS (37 datasets)<br/>• Cookie HttpOnly + CSRF Origin Guard + CSP + RFC 7807"]
         M["✉️ Tổng Đài SMTP (Gmail/Office 365)<br/>Bắn mã OTP thật về Email nhân viên"]
-        R["⚡ Bộ Nhớ Tạm Redis<br/>Giữ mã OTP 6 số trong 5 phút"]
+        R["⚡ Bộ Nhớ Tạm Redis 8 (AOF)<br/>Giữ mã OTP 5 phút, Token Blacklist & Query Cache"]
     end
 
     subgraph KHOI3["3. CƠ SỞ DỮ LIỆU LƯU TRỮ TRÊN SERVER (POSTGRESQL 18)"]
         direction TB
-        DU["👥 Bảng CSDL iam.users<br/>Lưu 103 User & Email cá nhân"]
-        DD["📊 Bảng Dữ Liệu Bán Hàng<br/>Doanh thu, NPP, Đơn hàng 4 kênh"]
+        DU["👥 Bảng CSDL iam.users<br/>Quản lý tài khoản, Bcrypt 12, Email OTP & 2FA"]
+        DD["📊 Schema datamart (37 bảng / 2.57M dòng)<br/>Doanh thu 4 kênh, Route Map DMS & Tracking CTKM"]
         DL["📋 Bảng iam.audit_logs<br/>Lưu vết lịch sử thao tác (ISO 27001)"]
-        V["💾 Ổ ĐĨA MÁY CHỦ (Docker Volume)<br/>Lưu trữ vĩnh viễn, cúp điện không mất"]
+        V["💾 Ổ ĐĨA MÁY CHỦ & SYNC GOOGLE DRIVE (.dump)<br/>Volume standard_pg_data + export-db / restore-db Windows ↔ Ubuntu"]
     end
 
     W <-->|"Gửi yêu cầu Đăng nhập / Nhập / Xuất"| B

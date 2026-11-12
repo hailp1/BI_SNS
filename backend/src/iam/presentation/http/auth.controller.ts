@@ -1,5 +1,4 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { Request, Response } from 'express';
@@ -29,7 +28,6 @@ export class AuthController {
     private readonly verifyOtpUseCase: VerifyOtpUseCase,
     private readonly manageUsersUseCase: ManageUsersUseCase,
     @Inject(TOKEN_SERVICE_PORT) private readonly tokenService: TokenServicePort,
-    private readonly configService: ConfigService,
   ) {}
 
   private setAuthCookie(req: Request, res: Response, token: string): void {
@@ -156,17 +154,13 @@ export class AuthController {
     return Date.now() + 8 * 3600 * 1000;
   }
 
-  private buildOtpHttpResponse(
-    req: Request,
-    res: Response,
-    result: { access_token?: string; payload_key?: string; [key: string]: unknown },
-  ) {
+  private buildOtpHttpResponse(req: Request, res: Response, result: { access_token?: string; [key: string]: unknown }) {
     let expiresAt: number | undefined;
     if (result.access_token) {
       this.setAuthCookie(req, res, result.access_token);
       expiresAt = this.resolveTokenExpiresAt(result.access_token);
     }
-    const { access_token: _ignoredToken, payload_key: _ignoredKey, ...safeResult } = result;
+    const { access_token: _ignoredToken, ...safeResult } = result;
     return expiresAt ? { ...safeResult, expires_at: expiresAt } : safeResult;
   }
 

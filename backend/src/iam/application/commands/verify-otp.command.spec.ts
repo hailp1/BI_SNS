@@ -1,5 +1,4 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AuditService } from '../../../shared/audit/audit.service';
 import { UserEntity } from '../../domain/model/user.entity';
 import { TotpService } from '../../infrastructure/adapters/totp.service';
@@ -67,9 +66,8 @@ describe('VerifyOtpUseCase', () => {
     } as unknown as jest.Mocked<TotpService>;
 
     const audit = { log: jest.fn().mockResolvedValue(undefined) } as unknown as AuditService;
-    const configService = { get: jest.fn().mockReturnValue('payload-key') } as unknown as ConfigService;
 
-    useCase = new VerifyOtpUseCase(userRepo, tokenService, otpService, totpService, audit, configService);
+    useCase = new VerifyOtpUseCase(userRepo, tokenService, otpService, totpService, audit);
   });
 
   it('rejects hardcoded 123456 bypass code when TOTP verification returns false', async () => {

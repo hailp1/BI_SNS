@@ -8,6 +8,7 @@ import { IamModule } from './iam/iam.module';
 import { SalesModule } from './sales/sales.module';
 import { AppConfigModule } from './shared/config/config.module';
 import { SharedDatabaseModule } from './shared/database/database.module';
+import { JwtAuthGuard } from './shared/guards/jwt-auth.guard';
 import { AppLoggerModule } from './shared/logger/logger.module';
 import { RedisModule } from './shared/redis/redis.module';
 
@@ -28,6 +29,10 @@ import { RedisModule } from './shared/redis/redis.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
     },
   ],
 })

@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../../../shared/redis/redis.service';
 import { DatamartService } from './datamart.service';
@@ -132,6 +132,42 @@ describe('DatamartService', () => {
     expect((res as unknown as Record<string, unknown>).users).toBeUndefined();
     expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('LOWER(TRIM(vung)) = LOWER($1)'), [
       'Hải Phòng',
+    ]);
+  });
+
+  it('enforces channel and geo RLS in getChannelSummary', async () => {
+    await expect(
+      service.getChannelSummary('MT', '2026', ['10'], {
+        id: '11',
+        username: 'gt_rsm',
+        fullName: 'GT RSM',
+        role: 'rsm',
+        channel: 'GT',
+        scopeLevel: 'region',
+        scopeValue: 'MIỀN BẮC',
+      }),
+    ).rejects.toThrow(ForbiddenException);
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ sellin: 500 }] })
+      .mockResolvedValueOnce({ rows: [{ cy_so: 400, ly_so: 350 }] });
+
+    const gtRes = await service.getChannelSummary('GT', '2026', ['10'], {
+      id: '11',
+      username: 'gt_rsm',
+      fullName: 'GT RSM',
+      role: 'rsm',
+      channel: 'GT',
+      scopeLevel: 'region',
+      scopeValue: 'MIỀN BẮC',
+    });
+
+    expect(gtRes).toEqual({ channel: 'GT', year: '2026', months: ['10'], sellin: 500, sellout: 400, ly_sellout: 350 });
+    expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('LOWER(TRIM(mien)) = LOWER($4)'), [
+      2026,
+      ['10'],
+      2025,
+      'MIỀN BẮC',
     ]);
   });
 });

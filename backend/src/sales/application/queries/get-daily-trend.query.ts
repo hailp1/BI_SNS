@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { AuthenticatedUser } from '../../../shared/interfaces/jwt-payload.interface';
 import { RedisService } from '../../../shared/redis/redis.service';
 import { PERFORMANCE_REPOSITORY_PORT, PerformanceRepositoryPort } from '../ports/performance.repository.port';
 
@@ -9,8 +10,17 @@ export class GetDailyTrendQuery {
     private readonly redis: RedisService,
   ) {}
 
-  async execute(month: string, channel = 'ALL') {
-    const cacheKey = `cache:daily:${month}:${channel}`;
+  async execute(month: string, channel = 'ALL', user?: AuthenticatedUser) {
+    const role = (user?.role || '').toLowerCase();
+    const userChan = (user?.channel || 'ALL').toUpperCase().trim();
+    const isUnrestricted = !user || role === 'admin' || role === 'director' || role === 'bod' || userChan === 'ALL';
+
+    const requestedChan = (channel || 'ALL').toUpperCase().trim();
+    if (!isUnrestricted && requestedChan !== 'ALL' && requestedChan !== userChan) {
+      throw new ForbiddenException('Không có quyền xem dữ liệu kênh khác!');
+    }
+    const effectiveChannel = isUnrestricted ? requestedChan : userChan;
+    const cacheKey = `cache:daily:${month}:${effectiveChannel}`;
 
     try {
       const cached = await this.redis.get(cacheKey);
@@ -21,8 +31,8 @@ export class GetDailyTrendQuery {
       // Fall through to DB
     }
 
-    const records = await this.performanceRepo.findDailySalesTrend(month, channel);
-    const result = { month, channel, records };
+    const records = await this.performanceRepo.findDailySalesTrend(month, effectiveChannel);
+    const result = { month, channel: effectiveChannel, records };
 
     try {
       await this.redis.set(cacheKey, JSON.stringify(result), 600);
