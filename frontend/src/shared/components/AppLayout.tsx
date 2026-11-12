@@ -7,7 +7,34 @@ import { CJ_LOGO_DATA_URI } from '../constants/brand';
 import { useAuthStore } from '../stores/auth.store';
 import { useFiltersStore } from '../stores/filters.store';
 import { usePayloadsStore } from '../stores/payloads.store';
+import type { PayloadName } from '../types/sales';
 import { MonthYearBar } from './MonthYearBar';
+
+const PRELOAD_DATASETS: PayloadName[] = [
+  'SELLIN_M',
+  'DAILY_DATA',
+  'TARGET_SELLIN',
+  'TARGET_SELLOUT',
+  'GT_TREE',
+  'GT_SI',
+  'GT_STOCK',
+  'GT_ASO_M',
+  'GT_MCP_M',
+  'GT_L3M',
+  'GT_DAILY_SI',
+  'GT_DAILY_SO',
+  'GT_NVBH_M',
+  'GT_NVBH_MCP_M',
+  'GT_SALESMAN_ACTIVE',
+  'GT_SUBCHAN_M',
+  'GT_FREEZER_DATA',
+  'GT_STANDEE_DATA',
+  'MT_TREE',
+  'MT_STORE_DATA',
+  'MT_DAILY_DATA',
+  'B2B_TREE',
+  'KR_TREE',
+];
 
 const GT_SUB_ITEMS = [
   { to: '/gt', label: 'Tổng quan GT', icon: '📑', end: true },
@@ -45,7 +72,8 @@ export function AppLayout() {
   const year = useFiltersStore((s) => s.year);
   const setYear = useFiltersStore((s) => s.setYear);
   const dbRefreshDate = usePayloadsStore((s) => s.dbRefreshDate);
-  const syncMetadata = usePayloadsStore((s) => s.syncMetadata);
+  const preloadProgress = usePayloadsStore((s) => s.preloadProgress);
+  const preloadBatch = usePayloadsStore((s) => s.preloadBatch);
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [gtExpanded, setGtExpanded] = useState(false);
@@ -53,8 +81,10 @@ export function AppLayout() {
   const [show2faModal, setShow2faModal] = useState(false);
 
   useEffect(() => {
-    void syncMetadata();
-  }, [syncMetadata]);
+    if (user) {
+      void preloadBatch(PRELOAD_DATASETS, user);
+    }
+  }, [preloadBatch, user]);
 
   useEffect(() => {
     if (location.pathname.startsWith('/gt')) {
@@ -352,6 +382,24 @@ export function AppLayout() {
           </div>
 
           <MonthYearBar />
+
+          {preloadProgress.active && preloadProgress.total > 0 && (
+            <div className="border-t border-sky-100 bg-sky-50/90 px-4 py-1.5 lg:px-8">
+              <div className="flex items-center justify-between text-[11px] font-bold text-[#004B91]">
+                <span>
+                  ⚡ Đang nạp sẵn dữ liệu biểu đồ ({preloadProgress.done}/{preloadProgress.total})
+                  {preloadProgress.currentLabel ? ` — ${preloadProgress.currentLabel}` : ''}
+                </span>
+                <span>{Math.round((preloadProgress.done / preloadProgress.total) * 100)}%</span>
+              </div>
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-sky-100">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-[#004B91] via-sky-500 to-emerald-500 transition-all duration-300"
+                  style={{ width: `${Math.round((preloadProgress.done / preloadProgress.total) * 100)}%` }}
+                />
+              </div>
+            </div>
+          )}
         </header>
 
         <main className="mx-auto w-full max-w-full flex-1 space-y-6 px-4 pb-6 pt-3 lg:px-8">

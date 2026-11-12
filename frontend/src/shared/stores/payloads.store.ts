@@ -4,11 +4,19 @@ import type { AuthUser } from '../types/auth';
 import type { PayloadName } from '../types/sales';
 import { buildDatasetCacheKey, idbCache } from '../utils/idb-cache';
 
+interface PreloadProgress {
+  active: boolean;
+  done: number;
+  total: number;
+  currentLabel: string;
+}
+
 interface PayloadsState {
   cache: Partial<Record<PayloadName, unknown[]>>;
   loading: Partial<Record<PayloadName, boolean>>;
   errors: Partial<Record<PayloadName, string>>;
   dbRefreshDate: string;
+  preloadProgress: PreloadProgress;
   syncMetadata: () => Promise<string>;
   loadPayload: (name: PayloadName, user: AuthUser | null) => Promise<unknown[]>;
   preloadBatch: (names: PayloadName[], user: AuthUser | null) => Promise<void>;
@@ -28,6 +36,7 @@ export const usePayloadsStore = create<PayloadsState>((set, get) => ({
   loading: {},
   errors: {},
   dbRefreshDate: '',
+  preloadProgress: { active: false, done: 0, total: 0, currentLabel: '' },
 
   syncMetadata: async () => {
     const current = get().dbRefreshDate;
@@ -108,9 +117,55 @@ export const usePayloadsStore = create<PayloadsState>((set, get) => ({
   },
 
   preloadBatch: async (names, user) => {
+    if (get().preloadProgress.active || names.length === 0) return;
+    set({
+      preloadProgress: {
+        active: true,
+        done: 0,
+        total: names.length,
+        currentLabel: names[0] || '',
+      },
+    });
+
     await get().syncMetadata();
-    await Promise.all(names.map((n) => get().loadPayload(n, user)));
+
+    let done = 0;
+    const CONCURRENCY = 4;
+    for (let i = 0; i < names.length; i += CONCURRENCY) {
+      const chunk = names.slice(i, i + CONCURRENCY);
+      set((s) => ({
+        preloadProgress: { ...s.preloadProgress, currentLabel: chunk[0] || '' },
+      }));
+      await Promise.all(
+        chunk.map((n) =>
+          get()
+            .loadPayload(n, user)
+            .finally(() => {
+              done += 1;
+              set((s) => ({
+                preloadProgress: { ...s.preloadProgress, done },
+              }));
+            }),
+        ),
+      );
+    }
+
+    set({
+      preloadProgress: {
+        active: false,
+        done: names.length,
+        total: names.length,
+        currentLabel: '',
+      },
+    });
   },
 
-  clearAll: () => set({ cache: {}, loading: {}, errors: {}, dbRefreshDate: '' }),
+  clearAll: () =>
+    set({
+      cache: {},
+      loading: {},
+      errors: {},
+      dbRefreshDate: '',
+      preloadProgress: { active: false, done: 0, total: 0, currentLabel: '' },
+    }),
 }));
