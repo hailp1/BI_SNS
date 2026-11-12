@@ -101,36 +101,174 @@ function buildCountBarOption(rows: PosmAssetRow[], keyFn: (r: PosmAssetRow) => s
   };
 }
 
-function buildSalesTierOption(rows: PosmAssetRow[], seriesName: string) {
-  const tiers = { '0đ': 0, '< 5Tr': 0, '5 - 15Tr': 0, '> 15Tr': 0 };
+function buildHorizontalCountBarOption(rows: PosmAssetRow[], keyFn: (r: PosmAssetRow) => string, seriesName: string, barColor = '#38BDF8') {
+  const map = new Map<string, number>();
   for (const r of rows) {
-    const s = extractLatestSales(r.sales);
-    const qty = Number(r.qty || 1);
-    if (s <= 0) tiers['0đ'] += qty;
-    else if (s < 5_000_000) tiers['< 5Tr'] += qty;
-    else if (s <= 15_000_000) tiers['5 - 15Tr'] += qty;
-    else tiers['> 15Tr'] += qty;
+    const k = keyFn(r) || 'Khác';
+    map.set(k, (map.get(k) || 0) + Number(r.qty || 1));
   }
-  const total = Object.values(tiers).reduce((a, b) => a + b, 0);
-  const colors = ['#F87171', '#FBBF24', '#38BDF8', '#34D399'];
+  const entries = Array.from(map.entries()).sort((a, b) => a[1] - b[1]).slice(-10);
   return {
-    tooltip: { trigger: 'axis' as const },
-    grid: { left: 48, right: 16, top: 24, bottom: 32 },
-    xAxis: { type: 'category' as const, data: Object.keys(tiers), axisLabel: { color: '#FFFFFF', fontSize: 10.5, fontWeight: 'bold' as const } },
-    yAxis: {
+    tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+    grid: { left: 96, right: 44, top: 16, bottom: 24 },
+    xAxis: {
       type: 'value' as const,
       axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
       splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+    },
+    yAxis: {
+      type: 'category' as const,
+      data: entries.map((e) => e[0]),
+      axisLabel: { color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' as const },
     },
     series: [
       {
         name: seriesName,
         type: 'bar' as const,
-        barMaxWidth: 36,
-        data: Object.values(tiers).map((v, idx) => ({ value: v, itemStyle: { color: colors[idx], borderRadius: [4, 4, 0, 0] } })),
+        barMaxWidth: 22,
+        data: entries.map((e) => e[1]),
+        itemStyle: { color: barColor, borderRadius: [0, 4, 4, 0] },
+        label: { show: true, position: 'right' as const, color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' as const },
+      },
+    ],
+  };
+}
+
+function buildYearTwoBarLineOption(
+  rows: PosmAssetRow[],
+  totalLabel: string,
+  activeLabel: string,
+  lineLabel: string,
+  divisor: number,
+  unitSuffix: string,
+) {
+  const map = new Map<string, { total: number; active: number; sales: number }>();
+  for (const r of rows) {
+    const yr = String(r.model_year || 'N/A');
+    const cur = map.get(yr) || { total: 0, active: 0, sales: 0 };
+    const qty = Number(r.qty || 1);
+    const s = extractLatestSales(r.sales);
+    cur.total += qty;
+    if (s > 0) {
+      cur.active += qty;
+      cur.sales += s;
+    }
+    map.set(yr, cur);
+  }
+  const entries = Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  return {
+    tooltip: { trigger: 'axis' as const },
+    legend: { data: [totalLabel, activeLabel, lineLabel], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
+    grid: { left: 48, right: 48, top: 38, bottom: 32 },
+    xAxis: { type: 'category' as const, data: entries.map((e) => e[0]), axisLabel: { color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' as const } },
+    yAxis: [
+      {
+        type: 'value' as const,
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
+      {
+        type: 'value' as const,
+        name: unitSuffix,
+        nameTextStyle: { color: '#fde047', fontSize: 9 },
+        axisLabel: { color: '#fde047', fontSize: 10 },
+        splitLine: { show: false },
+      },
+    ],
+    series: [
+      {
+        name: totalLabel,
+        type: 'bar' as const,
+        data: entries.map((e) => e[1].total),
+        itemStyle: { color: 'rgba(255,255,255,0.55)', borderRadius: [3, 3, 0, 0] },
+        label: { show: true, position: 'top' as const, color: '#fff', fontSize: 8.5 },
+        labelLayout: { hideOverlap: true },
+      },
+      {
+        name: activeLabel,
+        type: 'bar' as const,
+        data: entries.map((e) => e[1].active),
+        itemStyle: { color: '#38BDF8', borderRadius: [3, 3, 0, 0] },
+        label: { show: true, position: 'top' as const, color: '#BAE6FD', fontSize: 8.5 },
+        labelLayout: { hideOverlap: true },
+      },
+      {
+        name: lineLabel,
+        type: 'line' as const,
+        yAxisIndex: 1,
+        smooth: true,
+        data: entries.map((e) => (e[1].active > 0 ? Number((e[1].sales / e[1].active / divisor).toFixed(1)) : 0)),
+        itemStyle: { color: '#fde047' },
+        lineStyle: { width: 2.2, color: '#fde047' },
+        label: { show: true, position: 'top' as const, color: '#FEF08A', fontSize: 8.5 },
+        labelLayout: { hideOverlap: true },
+      },
+    ],
+  };
+}
+
+function buildDonutOption(rows: PosmAssetRow[], keyFn: (r: PosmAssetRow) => string, seriesName: string) {
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    const k = keyFn(r) || 'Khác';
+    map.set(k, (map.get(k) || 0) + Number(r.qty || 1));
+  }
+  const items = Array.from(map.entries())
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+  return {
+    tooltip: { trigger: 'item' as const, formatter: '{b}: {c} ({d}%)' },
+    series: [
+      {
+        name: seriesName,
+        type: 'pie' as const,
+        radius: ['45%', '72%'],
+        data: items,
+        label: { color: '#FFFFFF', fontSize: 10.5, formatter: '{b}: {c} ({d}%)' },
+      },
+    ],
+  };
+}
+
+function buildSalesTierOption(rows: PosmAssetRow[], seriesName: string) {
+  const tiers = [
+    { label: '0đ', val: 0, color: '#F87171' },
+    { label: '< 5Tr', val: 0, color: '#FBBF24' },
+    { label: '5 - 15Tr', val: 0, color: '#38BDF8' },
+    { label: '> 15Tr', val: 0, color: '#34D399' },
+  ];
+  for (const r of rows) {
+    const s = extractLatestSales(r.sales);
+    const qty = Number(r.qty || 1);
+    if (s <= 0) tiers[0].val += qty;
+    else if (s < 5_000_000) tiers[1].val += qty;
+    else if (s <= 15_000_000) tiers[2].val += qty;
+    else tiers[3].val += qty;
+  }
+  const total = tiers.reduce((a, b) => a + b.val, 0);
+  const ordered = [...tiers].reverse();
+  return {
+    tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+    grid: { left: 72, right: 64, top: 16, bottom: 24 },
+    xAxis: {
+      type: 'value' as const,
+      axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+      splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+    },
+    yAxis: {
+      type: 'category' as const,
+      data: ordered.map((t) => t.label),
+      axisLabel: { color: '#FFFFFF', fontSize: 10.5, fontWeight: 'bold' as const },
+    },
+    series: [
+      {
+        name: seriesName,
+        type: 'bar' as const,
+        barMaxWidth: 24,
+        data: ordered.map((t) => ({ value: t.val, itemStyle: { color: t.color, borderRadius: [0, 5, 5, 0] } })),
         label: {
           show: true,
-          position: 'top' as const,
+          position: 'right' as const,
           color: '#FFFFFF',
           fontSize: 9.5,
           fontWeight: 'bold' as const,
@@ -186,29 +324,29 @@ export function GtPosmPage() {
   const uniqueNpps = useMemo(() => new Set(activeRows.map((r) => r.npp_code).filter(Boolean)).size, [activeRows]);
 
   const freezerChannelOption = useMemo(
-    () => buildCountBarOption(filteredFreezers, (r) => r.channel_name || r.channel || 'Khác', 'Tủ Đông'),
+    () => buildHorizontalCountBarOption(filteredFreezers, (r) => r.channel_name || r.channel || 'Khác', 'Tủ Đông', '#38BDF8'),
     [filteredFreezers],
   );
   const freezerCapacityOption = useMemo(
-    () => buildCountBarOption(filteredFreezers, (r) => r.cap_group || r.capacity || 'Khác', 'Số tủ', '#38BDF8', true),
+    () => buildCountBarOption(filteredFreezers, (r) => r.cap_group || r.capacity || 'Khác', 'Số Lượng Tủ', '#38BDF8', true),
     [filteredFreezers],
   );
   const freezerYearOption = useMemo(
-    () => buildCountBarOption(filteredFreezers, (r) => String(r.model_year || 'N/A'), 'Số tủ', 'rgba(255,255,255,0.9)', true),
+    () => buildYearTwoBarLineOption(filteredFreezers, 'Tổng Số Lượng Tủ', 'Số Tủ Có Mua', 'DS / Tủ (M)', 1e6, 'M'),
     [filteredFreezers],
   );
   const freezerTierOption = useMemo(() => buildSalesTierOption(filteredFreezers, 'Tier Tủ Đông'), [filteredFreezers]);
 
   const standeeChannelOption = useMemo(
-    () => buildCountBarOption(filteredStandees, (r) => r.channel_name || r.channel || 'Khác', 'Standee'),
+    () => buildDonutOption(filteredStandees, (r) => r.channel_name || r.channel || 'Khác', 'Standee theo Kênh'),
     [filteredStandees],
   );
   const standeeCategoryOption = useMemo(
-    () => buildCountBarOption(filteredStandees, (r) => r.dev_type || r.dev_name || 'Khác', 'Số lượng', '#38BDF8', true),
+    () => buildCountBarOption(filteredStandees, (r) => r.dev_type || r.dev_name || 'Khác', 'Số Kệ', '#0ea5e9', true),
     [filteredStandees],
   );
   const standeeYearOption = useMemo(
-    () => buildCountBarOption(filteredStandees, (r) => String(r.model_year || 'N/A'), 'Số lượng', 'rgba(255,255,255,0.9)', true),
+    () => buildYearTwoBarLineOption(filteredStandees, 'Tổng Số Standee', 'Standee Có Mua', 'DS / Kệ (K)', 1e3, 'K'),
     [filteredStandees],
   );
   const standeeTierOption = useMemo(() => buildSalesTierOption(filteredStandees, 'Tier Standee'), [filteredStandees]);

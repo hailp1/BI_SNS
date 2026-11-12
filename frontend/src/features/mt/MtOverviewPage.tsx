@@ -289,16 +289,30 @@ export function MtOverviewPage() {
     for (const r of chainRows) {
       map.set(r.subChannel, (map.get(r.subChannel) || 0) + r.sellin);
     }
-    const items = Array.from(map.entries()).map(([name, value]) => ({ name, value: Math.round(value / 1e6) }));
+    const items = Array.from(map.entries())
+      .map(([name, value]) => ({ name, value: Number((value / 1e9).toFixed(2)) }))
+      .sort((a, b) => a.value - b.value);
     return {
-      tooltip: { trigger: 'item' as const, formatter: '{b}: {c} Tr ({d}%)' },
+      tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+      grid: { left: 76, right: 48, top: 16, bottom: 28 },
+      xAxis: {
+        type: 'value' as const,
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10, formatter: '{value}B' },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
+      yAxis: {
+        type: 'category' as const,
+        data: items.map((i) => i.name),
+        axisLabel: { color: '#ffffff', fontSize: 11, fontWeight: 'bold' as const },
+      },
       series: [
         {
-          name: 'Phân kênh MT',
-          type: 'pie' as const,
-          radius: ['42%', '72%'],
-          data: items,
-          label: { color: '#ffffff', fontSize: 11, formatter: '{b}: {d}%' },
+          name: 'Sell-in (Tỷ)',
+          type: 'bar' as const,
+          barMaxWidth: 22,
+          data: items.map((i) => i.value),
+          itemStyle: { color: '#C084FC', borderRadius: [0, 4, 4, 0] },
+          label: { show: true, position: 'right' as const, color: '#ffffff', fontSize: 10, fontWeight: 'bold' as const, formatter: '{c}B' },
         },
       ],
     };

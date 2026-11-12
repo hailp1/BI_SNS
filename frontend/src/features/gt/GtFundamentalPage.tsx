@@ -317,19 +317,37 @@ export function GtFundamentalPage() {
   const strikeOption = useMemo(
     () => ({
       tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Strike Rate (% ASO/MCP)', 'Tần Suất Mua Hàng (Đơn/CH)'], top: 4, textStyle: { color: '#fff', fontSize: 11, fontWeight: 'bold' as const } },
-      grid: { left: 48, right: 44, top: 38, bottom: 28 },
+      legend: { data: ['Tần Suất Mua Hàng (Đơn/CH)'], top: 4, textStyle: { color: '#fff', fontSize: 11, fontWeight: 'bold' as const } },
+      grid: { left: 48, right: 20, top: 38, bottom: 28 },
       xAxis: xAxisBase,
-      yAxis: [
-        { ...yAxisBase, name: '%', nameTextStyle: { color: '#CBD5E1', fontSize: 9.5 } },
-        { type: 'value' as const, axisLabel: { color: '#fff', fontSize: 9.5 }, splitLine: { show: false } },
-      ],
+      yAxis: { ...yAxisBase, name: 'Đơn/CH', nameTextStyle: { color: '#93C5FD', fontSize: 9.5 } },
       series: [
-        { name: 'Strike Rate (% ASO/MCP)', type: 'bar' as const, data: metrics.activePct, itemStyle: { color: 'rgba(255,255,255,0.75)', borderRadius: [3, 3, 0, 0] }, label: { show: true, position: 'top' as const, color: '#fff', fontSize: 8.5, formatter: '{c}%' }, labelLayout: { hideOverlap: true } },
-        { name: 'Tần Suất Mua Hàng (Đơn/CH)', type: 'line' as const, yAxisIndex: 1, smooth: true, data: metrics.freq, itemStyle: { color: '#fde047' }, lineStyle: { width: 2.5, color: '#fde047' }, label: { show: true, position: 'top' as const, color: '#FEF08A', fontSize: 8.5 }, labelLayout: { hideOverlap: true } },
+        {
+          name: 'Tần Suất Mua Hàng (Đơn/CH)',
+          type: 'line' as const,
+          smooth: true,
+          data: metrics.freq,
+          itemStyle: { color: '#38BDF8' },
+          lineStyle: { width: 2.5, color: '#38BDF8' },
+          areaStyle: {
+            color: {
+              type: 'linear' as const,
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(56, 189, 248, 0.35)' },
+                { offset: 1, color: 'rgba(56, 189, 248, 0.02)' },
+              ],
+            },
+          },
+          label: { show: true, position: 'top' as const, color: '#E0F2FE', fontSize: 8.5 },
+          labelLayout: { hideOverlap: true },
+        },
       ],
     }),
-    [metrics.activePct, metrics.freq, xAxisBase, yAxisBase],
+    [metrics.freq, xAxisBase, yAxisBase],
   );
 
   const skuOption = useMemo(

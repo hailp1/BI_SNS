@@ -43,6 +43,7 @@ interface GtSubchanRow extends GeoRecord {
   cold_so?: number;
   dry_so?: number;
   aso_count?: number;
+  nv_count?: number;
 }
 
 interface SalesmanAgg {
@@ -105,144 +106,168 @@ export function GtProductivityPage() {
   );
 
   const monthlyTrendOption = useMemo(() => {
-    const soM = new Array<number>(12).fill(0);
-    const ordM = new Array<number>(12).fill(0);
+    const totalSoM = new Array<number>(12).fill(0);
+    const coldSoM = new Array<number>(12).fill(0);
+    const drySoM = new Array<number>(12).fill(0);
+    const nvSetM = Array.from({ length: 12 }, () => new Set<string>());
     for (const r of nvbhRows) {
       if (String(r.year) !== year || !matchGeo(r)) continue;
       const idx = parseInt(String(r.month_num || '0'), 10) - 1;
       if (idx >= 0 && idx < 12) {
-        soM[idx] += (Number(r.sellout_val) || 0) / 1e9;
-        ordM[idx] += Number(r.order_count || 0);
+        const so = Number(r.sellout_val) || 0;
+        const st = String(r.storage || '').toLowerCase();
+        totalSoM[idx] += so;
+        if (st.includes('đông') || st.includes('cold') || st.includes('lạnh')) coldSoM[idx] += so;
+        else drySoM[idx] += so;
+        if (r.nvbh_name) nvSetM[idx].add(`${r.npp_code || ''}::${r.nvbh_name}`);
       }
     }
+    const tgtNvM = new Array<number>(12).fill(0);
+    for (const r of activeRows) {
+      if (String(r.year) !== year || !matchGeo(r)) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) {
+        tgtNvM[idx] += Number(r.is_active_target || 0);
+      }
+    }
+    const totalPerNv = totalSoM.map((v, i) => {
+      const nv = tgtNvM[i] > 0 ? tgtNvM[i] : nvSetM[i].size;
+      return nv > 0 ? Number((v / nv / 1e6).toFixed(1)) : 0;
+    });
+    const coldPerNv = coldSoM.map((v, i) => {
+      const nv = tgtNvM[i] > 0 ? tgtNvM[i] : nvSetM[i].size;
+      return nv > 0 ? Number((v / nv / 1e6).toFixed(1)) : 0;
+    });
+    const dryPerNv = drySoM.map((v, i) => {
+      const nv = tgtNvM[i] > 0 ? tgtNvM[i] : nvSetM[i].size;
+      return nv > 0 ? Number((v / nv / 1e6).toFixed(1)) : 0;
+    });
+    const coldPct = totalSoM.map((tot, i) => (tot > 0 ? Number(((coldSoM[i] / tot) * 100).toFixed(1)) : 0));
+
     return {
       tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Sell-out (Tỷ)', 'Đơn hàng'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
-      grid: { left: 48, right: 48, top: 38, bottom: 28 },
+      legend: { data: ['Total Sell-out / NV', 'Sell-out Hàng Đông / NV', 'Sell-out Hàng Khô / NV', '% Tỷ Lệ Hàng Đông'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
+      grid: { left: 48, right: 44, top: 44, bottom: 28 },
       xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
       yAxis: [
-        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
-        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+        { type: 'value' as const, name: 'Tr/NV', nameTextStyle: { color: '#CBD5E1', fontSize: 9 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, name: '%', nameTextStyle: { color: '#fde047', fontSize: 9 }, axisLabel: { color: '#fde047', fontSize: 10, formatter: '{value}%' }, splitLine: { show: false } },
       ],
       series: [
-        {
-          name: 'Sell-out (Tỷ)',
-          type: 'bar' as const,
-          data: soM.map((v) => Number(v.toFixed(2))),
-          itemStyle: { color: 'rgba(255,255,255,0.9)', borderRadius: [3, 3, 0, 0] },
-          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(1)}B` : '') },
-          labelLayout: { hideOverlap: true },
-        },
-        {
-          name: 'Đơn hàng',
-          type: 'line' as const,
-          yAxisIndex: 1,
-          smooth: true,
-          data: ordM,
-          itemStyle: { color: '#fde047' },
-          lineStyle: { width: 2.5, color: '#fde047' },
-          label: { show: true, position: 'top' as const, color: '#fde047', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toLocaleString('en-US') : '') },
-          labelLayout: { hideOverlap: true },
-        },
+        { name: 'Total Sell-out / NV', type: 'bar' as const, data: totalPerNv, itemStyle: { color: '#818CF8', borderRadius: [4, 4, 0, 0] }, label: { show: true, position: 'top' as const, color: '#fff', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}` : '') }, labelLayout: { hideOverlap: true } },
+        { name: 'Sell-out Hàng Đông / NV', type: 'bar' as const, data: coldPerNv, itemStyle: { color: '#38BDF8', borderRadius: [4, 4, 0, 0] }, label: { show: true, position: 'top' as const, color: '#BAE6FD', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}` : '') }, labelLayout: { hideOverlap: true } },
+        { name: 'Sell-out Hàng Khô / NV', type: 'bar' as const, data: dryPerNv, itemStyle: { color: '#FBBF24', borderRadius: [4, 4, 0, 0] }, label: { show: true, position: 'top' as const, color: '#FEF3C7', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}` : '') }, labelLayout: { hideOverlap: true } },
+        { name: '% Tỷ Lệ Hàng Đông', type: 'line' as const, yAxisIndex: 1, smooth: true, data: coldPct, itemStyle: { color: '#34D399' }, lineStyle: { width: 2.2, color: '#34D399' }, label: { show: true, position: 'top' as const, color: '#D1FAE5', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}%` : '') }, labelLayout: { hideOverlap: true } },
       ],
     };
-  }, [nvbhRows, year, matchGeo]);
+  }, [nvbhRows, activeRows, year, matchGeo]);
 
   const activeTrendOption = useMemo(() => {
-    const tgtM = new Array<number>(12).fill(0);
+    const totalSoM = new Array<number>(12).fill(0);
+    const coldSoM = new Array<number>(12).fill(0);
+    const drySoM = new Array<number>(12).fill(0);
+    for (const r of nvbhRows) {
+      if (String(r.year) !== year || !matchGeo(r)) continue;
+      const idx = parseInt(String(r.month_num || '0'), 10) - 1;
+      if (idx >= 0 && idx < 12) {
+        const so = Number(r.sellout_val) || 0;
+        const st = String(r.storage || '').toLowerCase();
+        totalSoM[idx] += so;
+        if (st.includes('đông') || st.includes('cold') || st.includes('lạnh')) coldSoM[idx] += so;
+        else drySoM[idx] += so;
+      }
+    }
     const actM = new Array<number>(12).fill(0);
     for (const r of activeRows) {
       if (String(r.year) !== year || !matchGeo(r)) continue;
       const idx = parseInt(String(r.month_num || '0'), 10) - 1;
       if (idx >= 0 && idx < 12) {
-        tgtM[idx] += Number(r.is_active_target || 0);
-        if (String(r.is_active_in_month || '').toLowerCase() === 'true' || r.is_active_in_month === '1') actM[idx] += 1;
+        const flag = String(r.is_active_in_month || '').toLowerCase();
+        if (flag === 'true' || flag === '1' || flag === 'y') actM[idx] += 1;
       }
     }
+    const totalPerNv = totalSoM.map((v, i) => (actM[i] > 0 ? Number((v / actM[i] / 1e6).toFixed(1)) : 0));
+    const coldPerNv = coldSoM.map((v, i) => (actM[i] > 0 ? Number((v / actM[i] / 1e6).toFixed(1)) : 0));
+    const dryPerNv = drySoM.map((v, i) => (actM[i] > 0 ? Number((v / actM[i] / 1e6).toFixed(1)) : 0));
+    const coldPct = totalSoM.map((tot, i) => (tot > 0 ? Number(((coldSoM[i] / tot) * 100).toFixed(1)) : 0));
+
     return {
       tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Chỉ tiêu Active', 'Thực tế Active'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
-      grid: { left: 48, right: 16, top: 38, bottom: 28 },
+      legend: { data: ['Total Sell-out / NV Active', 'Sell-out Hàng Đông / NV', 'Sell-out Hàng Khô / NV', '% Tỷ Lệ Hàng Đông'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
+      grid: { left: 48, right: 44, top: 44, bottom: 28 },
       xAxis: { type: 'category' as const, data: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'], axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
-      yAxis: { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+      yAxis: [
+        { type: 'value' as const, name: 'Tr/NV', nameTextStyle: { color: '#CBD5E1', fontSize: 9 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, name: '%', nameTextStyle: { color: '#fde047', fontSize: 9 }, axisLabel: { color: '#fde047', fontSize: 10, formatter: '{value}%' }, splitLine: { show: false } },
+      ],
       series: [
-        {
-          name: 'Chỉ tiêu Active',
-          type: 'bar' as const,
-          data: tgtM,
-          itemStyle: { color: 'rgba(255,255,255,0.45)', borderRadius: [3, 3, 0, 0] },
-          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? String(p.value) : '') },
-          labelLayout: { hideOverlap: true },
-        },
-        {
-          name: 'Thực tế Active',
-          type: 'line' as const,
-          smooth: true,
-          data: actM,
-          itemStyle: { color: '#fde047' },
-          lineStyle: { width: 2.5, color: '#fde047' },
-          label: { show: true, position: 'top' as const, color: '#fde047', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? String(p.value) : '') },
-          labelLayout: { hideOverlap: true },
-        },
+        { name: 'Total Sell-out / NV Active', type: 'bar' as const, data: totalPerNv, itemStyle: { color: '#A855F7', borderRadius: [4, 4, 0, 0] }, label: { show: true, position: 'top' as const, color: '#fff', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}` : '') }, labelLayout: { hideOverlap: true } },
+        { name: 'Sell-out Hàng Đông / NV', type: 'bar' as const, data: coldPerNv, itemStyle: { color: '#0EA5E9', borderRadius: [4, 4, 0, 0] }, label: { show: true, position: 'top' as const, color: '#BAE6FD', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}` : '') }, labelLayout: { hideOverlap: true } },
+        { name: 'Sell-out Hàng Khô / NV', type: 'bar' as const, data: dryPerNv, itemStyle: { color: '#F59E0B', borderRadius: [4, 4, 0, 0] }, label: { show: true, position: 'top' as const, color: '#FEF3C7', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}` : '') }, labelLayout: { hideOverlap: true } },
+        { name: '% Tỷ Lệ Hàng Đông', type: 'line' as const, yAxisIndex: 1, smooth: true, data: coldPct, itemStyle: { color: '#34D399' }, lineStyle: { width: 2.2, color: '#34D399' }, label: { show: true, position: 'top' as const, color: '#D1FAE5', fontSize: 8.5, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? `${Number(p.value || 0).toFixed(0)}%` : '') }, labelLayout: { hideOverlap: true } },
       ],
     };
-  }, [activeRows, year, matchGeo]);
+  }, [nvbhRows, activeRows, year, matchGeo]);
 
   const subchanOption = useMemo(() => {
-    const map = new Map<string, { total: number; cold: number; dry: number; aso: number }>();
+    const map = new Map<string, { total: number; cold: number; dry: number; aso: number; nv: number }>();
     for (const r of subchanRows) {
       if (String(r.year) !== year || !matchMonthNum(r.month_num, selectedMonths) || !matchGeo(r)) continue;
       const sc = r.sub_chan || 'Khác';
-      const cur = map.get(sc) || { total: 0, cold: 0, dry: 0, aso: 0 };
+      const cur = map.get(sc) || { total: 0, cold: 0, dry: 0, aso: 0, nv: 0 };
       cur.total += Number(r.total_so) || 0;
       cur.cold += Number(r.cold_so) || 0;
       cur.dry += Number(r.dry_so) || 0;
       cur.aso += Number(r.aso_count) || 0;
+      cur.nv += Number(r.nv_count) || 0;
       map.set(sc, cur);
     }
     const items = Array.from(map.entries())
-      .map(([name, v]) => ({
-        name,
-        cold: Number((v.cold / 1e6).toFixed(1)),
-        dry: Number((v.dry / 1e6).toFixed(1)),
-        aso: v.aso,
-        total: v.total,
-      }))
+      .map(([name, v]) => {
+        const nv = v.nv > 0 ? v.nv : 1;
+        return {
+          name,
+          coldPerNv: Number((v.cold / nv / 1e6).toFixed(1)),
+          dryPerNv: Number((v.dry / nv / 1e6).toFixed(1)),
+          avgAso: Number((v.aso / nv).toFixed(1)),
+          total: v.total,
+        };
+      })
       .sort((a, b) => b.total - a.total);
     return {
       tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
-      legend: { data: ['Hàng Đông (Tr)', 'Hàng Khô (Tr)', 'ASO'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
+      legend: { data: ['Đông / NV', 'Khô / NV', 'ASO TB / NV'], top: 4, textStyle: { color: '#fff', fontSize: 11 } },
       grid: { left: 48, right: 48, top: 38, bottom: 36 },
       xAxis: { type: 'category' as const, data: items.map((i) => i.name), axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10, rotate: items.length > 5 ? 18 : 0 } },
       yAxis: [
-        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
-        { type: 'value' as const, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { show: false } },
+        { type: 'value' as const, name: 'Tr/NV', nameTextStyle: { color: '#CBD5E1', fontSize: 9 }, axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } } },
+        { type: 'value' as const, name: 'ASO/NV', nameTextStyle: { color: '#4ade80', fontSize: 9 }, axisLabel: { color: '#4ade80', fontSize: 10 }, splitLine: { show: false } },
       ],
       series: [
         {
-          name: 'Hàng Đông (Tr)',
+          name: 'Đông / NV',
           type: 'bar' as const,
-          stack: 'so',
-          data: items.map((i) => i.cold),
-          itemStyle: { color: '#38bdf8' },
-          label: { show: true, position: 'inside' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toFixed(0) : '') },
+          stack: 'prod_nv',
+          data: items.map((i) => i.coldPerNv),
+          itemStyle: { color: '#38BDF8' },
+          label: { show: true, position: 'inside' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toFixed(1) : '') },
           labelLayout: { hideOverlap: true },
         },
         {
-          name: 'Hàng Khô (Tr)',
+          name: 'Khô / NV',
           type: 'bar' as const,
-          stack: 'so',
-          data: items.map((i) => i.dry),
-          itemStyle: { color: '#fbbf24', borderRadius: [3, 3, 0, 0] },
-          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toFixed(0) : '') },
+          stack: 'prod_nv',
+          data: items.map((i) => i.dryPerNv),
+          itemStyle: { color: '#F59E0B', borderRadius: [4, 4, 0, 0] },
+          label: { show: true, position: 'top' as const, color: '#fff', fontSize: 9, formatter: (p: { value?: unknown }) => (Number(p.value || 0) > 0 ? Number(p.value || 0).toFixed(1) : '') },
           labelLayout: { hideOverlap: true },
         },
         {
-          name: 'ASO',
+          name: 'ASO TB / NV',
           type: 'line' as const,
           yAxisIndex: 1,
           smooth: true,
-          data: items.map((i) => i.aso),
+          data: items.map((i) => i.avgAso),
           itemStyle: { color: '#4ade80' },
           lineStyle: { width: 2.5, color: '#4ade80' },
           label: { show: true, position: 'top' as const, color: '#4ade80', fontSize: 9 },
@@ -448,8 +473,8 @@ export function GtProductivityPage() {
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <EChartsCard
-          title="Xu Hướng Năng Suất NVBH (12 Tháng)"
-          subtitle="Sell-out (Tỷ VNĐ) & Số đơn hàng theo tháng"
+          title="Năng Suất / NV Target Theo Tháng"
+          subtitle="Total / Đông / Khô (Triệu/NV) & % Tỷ lệ Hàng Đông"
           option={monthlyTrendOption}
           height={270}
           loading={loading}
@@ -458,8 +483,8 @@ export function GtProductivityPage() {
           badgeClass="badge-pill badge-pill-blue"
         />
         <EChartsCard
-          title="Xu Hướng Salesman Active (12 Tháng)"
-          subtitle="Chỉ tiêu Active vs Thực tế Active"
+          title="Năng Suất / NV Active Theo Tháng"
+          subtitle="Total / Đông / Khô (Triệu/NV Active) & % Tỷ lệ Hàng Đông"
           option={activeTrendOption}
           height={270}
           loading={loading}
@@ -468,8 +493,8 @@ export function GtProductivityPage() {
           badgeClass="badge-pill badge-pill-green"
         />
         <EChartsCard
-          title="Cơ Cấu Sell-out Theo Sub-channel GT"
-          subtitle="Tỷ trọng đóng góp theo phân kênh"
+          title="Năng Suất / NV Theo Sub-channel GT"
+          subtitle="Đông / Khô (Triệu/NV) & ASO TB / NV"
           option={subchanOption}
           height={270}
           loading={loading}
