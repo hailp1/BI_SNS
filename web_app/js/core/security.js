@@ -264,12 +264,31 @@
         const _IDB_VERSION = 1;
         let _idbPromise = null;
 
+        function _resolveCacheUserObj() {
+            if (typeof currentUser !== 'undefined' && currentUser && currentUser.username) return currentUser;
+            if (window.currentUser && window.currentUser.username) return window.currentUser;
+            try {
+                const raw = sessionStorage.getItem('cj_current_user') || localStorage.getItem('cj_current_user');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.username) return parsed;
+                }
+            } catch (_) {}
+            return null;
+        }
+
         function _getDbCacheTag() {
-            const u = (typeof currentUser !== 'undefined' && currentUser && currentUser.username)
-                ? currentUser.username
-                : (sessionStorage.getItem('cj_current_user_name') || 'anon');
-            const dt = (window.__DB_META__ && window.__DB_META__.data_refresh_date) || '2026-11-10';
-            return u + '::' + dt;
+            const uObj = _resolveCacheUserObj();
+            const dt = (window.__DB_META__ && window.__DB_META__.data_refresh_date)
+                || sessionStorage.getItem('cj_db_refresh_date')
+                || localStorage.getItem('cj_db_refresh_date')
+                || 'unknown';
+            if (window.CJCacheStore && typeof window.CJCacheStore.buildCacheTag === 'function') {
+                return window.CJCacheStore.buildCacheTag(uObj || 'anon', dt);
+            }
+            const d = new Date();
+            const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            return ((uObj && uObj.username) || 'anon') + '::' + dt + '::' + day;
         }
 
         function _getAuthHeaders() {
@@ -277,6 +296,9 @@
         }
 
         function _openEnterpriseIDB() {
+            if (window.CJCacheStore && typeof window.CJCacheStore.open === 'function') {
+                return window.CJCacheStore.open();
+            }
             if (_idbPromise) return _idbPromise;
             _idbPromise = new Promise((resolve) => {
                 if (typeof indexedDB === 'undefined') return resolve(null);
@@ -298,6 +320,9 @@
         }
 
         async function _idbGetEnc(propName) {
+            if (window.CJCacheStore && typeof window.CJCacheStore.get === 'function') {
+                return window.CJCacheStore.get(propName);
+            }
             const db = await _openEnterpriseIDB();
             if (!db) return null;
             return new Promise((resolve) => {
@@ -313,6 +338,9 @@
         }
 
         async function _idbPutEnc(propName, encUint8) {
+            if (window.CJCacheStore && typeof window.CJCacheStore.put === 'function') {
+                return window.CJCacheStore.put(propName, encUint8);
+            }
             const db = await _openEnterpriseIDB();
             if (!db) return;
             try {
@@ -322,6 +350,9 @@
         }
 
         async function _clearEnterpriseIDB() {
+            if (window.CJCacheStore && typeof window.CJCacheStore.clear === 'function') {
+                return window.CJCacheStore.clear();
+            }
             try {
                 if (typeof indexedDB === 'undefined') return;
                 const db = await _openEnterpriseIDB();
@@ -340,6 +371,13 @@
             } catch (_) {}
         }
         window._clearEnterpriseIDB = _clearEnterpriseIDB;
+
+        async function _pruneStaleCache() {
+            if (window.CJCacheStore && typeof window.CJCacheStore.pruneExceptTag === 'function') {
+                await window.CJCacheStore.pruneExceptTag(_getDbCacheTag());
+            }
+        }
+        window._pruneStaleCache = _pruneStaleCache;
 
         function _getPayloadKeyHex() {
             return '';
@@ -575,13 +613,14 @@
 
         const TAB_REQUIRED_PAYLOADS = TAB_STAGE1_PAYLOADS;
 
-        // Instant UI Snapshot Cache: saves rendered KPI values so F5 reload shows numbers at 0.01s!
+        // Instant UI Snapshot Cache: saves rendered KPI values per user+refresh_date+day so F5 shows numbers at 0.01s!
         function _getSnapshotKey() {
+            const tag = _getDbCacheTag();
             const tab = (typeof state !== 'undefined' && state.activeTab) ? state.activeTab : 'tab-overview';
             const sub = (typeof state !== 'undefined' && tab === 'tab-gt') ? (state.gtSubTab || 'gt-sub-overview') : '';
             const yr = (typeof state !== 'undefined' && state.year) ? state.year : '2026';
             const m = (typeof state !== 'undefined' && Array.isArray(state.selectedMonths)) ? state.selectedMonths.join(',') : '09';
-            return 'cj_snap_' + _IDB_NAME + '_' + tab + '_' + sub + '_' + yr + '_' + m;
+            return 'cj_snap_' + _IDB_NAME + '_' + tag + '_' + tab + '_' + sub + '_' + yr + '_' + m;
         }
 
         window._saveInstantUiSnapshot = function() {

@@ -2096,9 +2096,8 @@
 
 
 
-  <!-- Dữ liệu Bản đồ Tuyến được nạp bảo mật trực tiếp từ PostgreSQL API (JwtAuthGuard + RLS) -->
-
-
+  <!-- Dữ liệu Bản đồ Tuyến được nạp bảo mật trực tiếp từ PostgreSQL API + IndexedDB Cache -->
+  <script src="/js/core/idb-cache.js?v=20261112c"></script>
 
   <script>
 
@@ -4046,14 +4045,32 @@
       if (window.DMS_RAW_DATA && Array.isArray(window.DMS_RAW_DATA.cj)) {
         return true;
       }
+      const handleUnauth = () => {
+        alert('Phiên đăng nhập đã hết hạn hoặc chưa đăng nhập. Hệ thống sẽ chuyển về màn hình đăng nhập.');
+        (window.top || window).location.href = '/';
+      };
+      if (window.CJCacheStore && typeof window.CJCacheStore.fetchDatasetsWithCache === 'function') {
+        const loaded = await window.CJCacheStore.fetchDatasetsWithCache(
+          [
+            { name: 'DMS_CJ_DATA', url: '/api/v1/sales/datasets/DMS_CJ_DATA' },
+            { name: 'DMS_POT_DATA', url: '/api/v1/sales/datasets/DMS_POT_DATA' },
+          ],
+          handleUnauth,
+        );
+        if (!loaded) return false;
+        window.DMS_RAW_DATA = {
+          cj: Array.isArray(loaded.DMS_CJ_DATA) ? loaded.DMS_CJ_DATA : [],
+          pot: Array.isArray(loaded.DMS_POT_DATA) ? loaded.DMS_POT_DATA : [],
+        };
+        return true;
+      }
       const opts = { credentials: 'same-origin' };
       const [cjRes, potRes] = await Promise.all([
         fetch('/api/v1/sales/datasets/DMS_CJ_DATA', opts),
         fetch('/api/v1/sales/datasets/DMS_POT_DATA', opts),
       ]);
       if (cjRes.status === 401 || potRes.status === 401) {
-        alert('Phiên đăng nhập đã hết hạn hoặc chưa đăng nhập. Hệ thống sẽ chuyển về màn hình đăng nhập.');
-        (window.top || window).location.href = '/';
+        handleUnauth();
         return false;
       }
       if (!cjRes.ok || !potRes.ok) {

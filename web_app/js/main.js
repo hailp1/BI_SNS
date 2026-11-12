@@ -55,20 +55,37 @@
         async function syncDbRefreshMetadata() {
             try {
                 const res = await fetch('/api/v1/dashboard/meta', { credentials: 'same-origin' });
-                if (!res.ok) return;
+                if (!res.ok) return null;
                 const meta = await res.json();
                 window.__DB_META__ = meta;
                 if (meta && meta.data_refresh_date) {
+                    try {
+                        sessionStorage.setItem('cj_db_refresh_date', meta.data_refresh_date);
+                        localStorage.setItem('cj_db_refresh_date', meta.data_refresh_date);
+                    } catch (_) {}
                     const hdr = document.getElementById('header-data-refresh-date');
                     if (hdr) hdr.textContent = meta.data_refresh_date;
                     const lgn = document.getElementById('login-data-refresh-date');
                     if (lgn) lgn.textContent = 'Dữ liệu: ' + meta.data_refresh_date;
                 }
-            } catch (_) {}
+                if (typeof window._pruneStaleCache === 'function') {
+                    window._pruneStaleCache();
+                }
+                return meta;
+            } catch (_) {
+                return null;
+            }
         }
 
-        syncDbRefreshMetadata();
-        initApp();
+        (async function bootApplication() {
+            try {
+                await Promise.race([
+                    syncDbRefreshMetadata(),
+                    new Promise(resolve => setTimeout(resolve, 1500))
+                ]);
+            } catch (_) {}
+            initApp();
+        })();
 
         window.addEventListener('hashchange', () => {
             const hash = (window.location.hash || '').replace('#', '');

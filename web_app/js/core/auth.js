@@ -2905,6 +2905,9 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                             localStorage.setItem('cj_session_exp', expVal);
                         }
                     }
+                    if (typeof window._pruneStaleCache === 'function') {
+                        window._pruneStaleCache();
+                    }
                 } else {
                     // Phiên backend đã hết hạn hoặc bị thu hồi -> xóa triệt để phiên cũ
                     if (typeof window._clearAuthStorage === 'function') window._clearAuthStorage();

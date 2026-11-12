@@ -3113,9 +3113,8 @@
 
 
 
-    <!-- DỮ LIỆU CTKM ĐƯỢC NẠP TRỰC TIẾP TỪ POSTGRESQL API (/api/v1/sales/apps/ctkm) -->
-
-
+    <!-- DỮ LIỆU CTKM ĐƯỢC NẠP TRỰC TIẾP TỪ POSTGRESQL API + INDEXEDDB CACHE (/api/v1/sales/apps/ctkm) -->
+    <script src="/js/core/idb-cache.js?v=20261112c"></script>
 
     <!-- CORE APPLICATION LOGIC -->
 
@@ -3247,25 +3246,29 @@
 
             try {
 
-                const resp = await fetch('/api/v1/sales/apps/ctkm', { credentials: 'same-origin' });
-
-                if (resp.status === 401) {
-
+                const handleUnauth = () => {
                     alert('Phiên đăng nhập đã hết hạn hoặc chưa đăng nhập. Vui lòng đăng nhập lại!');
-
                     (window.top || window).location.href = '/';
+                };
 
-                    return;
-
+                if (window.CJCacheStore && typeof window.CJCacheStore.fetchDatasetsWithCache === 'function') {
+                    const loaded = await window.CJCacheStore.fetchDatasetsWithCache(
+                        [{ name: 'CTKM_APP_DATA', url: '/api/v1/sales/apps/ctkm' }],
+                        handleUnauth,
+                    );
+                    if (!loaded) return;
+                    RAW_DATA = loaded.CTKM_APP_DATA;
+                } else {
+                    const resp = await fetch('/api/v1/sales/apps/ctkm', { credentials: 'same-origin' });
+                    if (resp.status === 401) {
+                        handleUnauth();
+                        return;
+                    }
+                    if (!resp.ok) {
+                        throw new Error(`HTTP ${resp.status} khi tải dữ liệu CTKM từ PostgreSQL`);
+                    }
+                    RAW_DATA = await resp.json();
                 }
-
-                if (!resp.ok) {
-
-                    throw new Error(`HTTP ${resp.status} khi tải dữ liệu CTKM từ PostgreSQL`);
-
-                }
-
-                RAW_DATA = await resp.json();
 
                 METADATA = RAW_DATA.metadata || {};
 
@@ -3275,7 +3278,7 @@
 
 
 
-                console.log(`Đã nạp từ PostgreSQL: ${TIEN_DATA.length} khoản tiền, ${HANG_DATA.length} mục hàng.`);
+                console.log(`Đã nạp CTKM: ${TIEN_DATA.length} khoản tiền, ${HANG_DATA.length} mục hàng.`);
 
 
 

@@ -1041,7 +1041,7 @@
                     }
                 }
             }
-            const cacheBuster = 'v=20261112b';
+            const cacheBuster = 'v=20261112c';
             url += (url.includes('?') ? '&' : '?') + cacheBuster;
             return url;
         }
