@@ -138,14 +138,20 @@ export function B2bOverviewPage() {
     return {
       tooltip: { trigger: 'axis' as const },
       grid: { left: 60, right: 20, top: 20, bottom: 50 },
-      xAxis: { type: 'category' as const, data: top.map((r) => r.customer), axisLabel: { rotate: 20, fontSize: 11 } },
-      yAxis: { type: 'value' as const, name: 'Triệu VNĐ' },
+      xAxis: { type: 'category' as const, data: top.map((r) => r.customer), axisLabel: { rotate: 20, fontSize: 10, color: 'rgba(255,255,255,0.85)' } },
+      yAxis: {
+        type: 'value' as const,
+        name: 'Triệu',
+        nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
       series: [
         {
           name: 'Sell-in B2B',
           type: 'bar' as const,
           data: top.map((r) => Math.round(r.sellin / 1e6)),
-          itemStyle: { color: '#d97706', borderRadius: [4, 4, 0, 0] },
+          itemStyle: { color: 'rgba(255,255,255,0.9)', borderRadius: [4, 4, 0, 0] },
         },
       ],
     };
@@ -245,7 +251,15 @@ export function B2bOverviewPage() {
         />
       </div>
 
-      <EChartsCard title="Top Khách hàng B2B theo Doanh số (Triệu VNĐ)" option={chartOption} loading={loading} />
+      <EChartsCard
+        title="Top Khách hàng B2B theo Doanh số (Triệu VNĐ)"
+        subtitle="Phân tích đóng góp khách hàng B2B"
+        option={chartOption}
+        loading={loading}
+        gradientClass="grad-orange"
+        badgeText="B2B Top"
+        badgeClass="badge-pill badge-pill-orange"
+      />
 
       <DataTable
         data={rows}

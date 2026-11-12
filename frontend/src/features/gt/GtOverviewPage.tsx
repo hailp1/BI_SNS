@@ -252,15 +252,21 @@ export function GtOverviewPage() {
       xAxis: {
         type: 'category' as const,
         data: regionBars.map((b) => b.name),
-        axisLabel: { rotate: 20, fontSize: 11 },
+        axisLabel: { rotate: 20, fontSize: 10, color: 'rgba(255,255,255,0.85)' },
       },
-      yAxis: { type: 'value' as const, name: 'Triệu VNĐ' },
+      yAxis: {
+        type: 'value' as const,
+        name: 'Triệu',
+        nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
       series: [
         {
           name: 'Sell-out',
           type: 'bar' as const,
           data: regionBars.map((b) => Math.round(b.value / 1e6)),
-          itemStyle: { color: '#dc2626', borderRadius: [4, 4, 0, 0] },
+          itemStyle: { color: 'rgba(255,255,255,0.9)', borderRadius: [4, 4, 0, 0] },
         },
       ],
     }),
@@ -393,6 +399,9 @@ export function GtOverviewPage() {
         subtitle="Đơn vị: Triệu VNĐ"
         option={regionChartOption}
         loading={loading}
+        gradientClass="grad-blue"
+        badgeText="GT Regional"
+        badgeClass="badge-pill badge-pill-blue"
       />
 
       <DataTable

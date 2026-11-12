@@ -203,16 +203,23 @@ export function MtOverviewPage() {
     return {
       tooltip: { trigger: 'axis' as const },
       grid: { left: 56, right: 20, top: 20, bottom: 40 },
-      xAxis: { type: 'category' as const, data: pts.map((p) => p[0].slice(5)) },
-      yAxis: { type: 'value' as const, name: 'Triệu VNĐ' },
+      xAxis: { type: 'category' as const, data: pts.map((p) => p[0].slice(5)), axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 } },
+      yAxis: {
+        type: 'value' as const,
+        name: 'Triệu',
+        nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
       series: [
         {
           name: 'Daily Sell-in MT',
           type: 'line' as const,
           smooth: true,
-          areaStyle: { opacity: 0.12 },
+          areaStyle: { color: 'rgba(255,255,255,0.18)' },
           data: pts.map((p) => Math.round(p[1] / 1e6)),
-          itemStyle: { color: '#004B91' },
+          itemStyle: { color: '#fde047' },
+          lineStyle: { width: 2.5, color: '#fde047' },
         },
       ],
     };
@@ -223,14 +230,24 @@ export function MtOverviewPage() {
     return {
       tooltip: { trigger: 'axis' as const },
       grid: { left: 60, right: 20, top: 20, bottom: 56 },
-      xAxis: { type: 'category' as const, data: top.map((c) => c.keyAccount), axisLabel: { rotate: 25, fontSize: 11 } },
-      yAxis: { type: 'value' as const, name: 'Triệu VNĐ' },
+      xAxis: {
+        type: 'category' as const,
+        data: top.map((c) => c.keyAccount),
+        axisLabel: { rotate: 25, fontSize: 10, color: 'rgba(255,255,255,0.85)' },
+      },
+      yAxis: {
+        type: 'value' as const,
+        name: 'Triệu',
+        nameTextStyle: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 10 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
       series: [
         {
           name: 'Sell-in',
           type: 'bar' as const,
           data: top.map((c) => Math.round(c.sellin / 1e6)),
-          itemStyle: { color: '#2563eb', borderRadius: [4, 4, 0, 0] },
+          itemStyle: { color: 'rgba(255,255,255,0.9)', borderRadius: [4, 4, 0, 0] },
         },
       ],
     };
@@ -351,16 +368,24 @@ export function MtOverviewPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         <EChartsCard
           title="Top Chuỗi Siêu thị theo Doanh số (Triệu VNĐ)"
+          subtitle="Đóng góp Sell-in theo Key Account MT"
           option={chartOption}
           loading={loading}
+          gradientClass="grad-purple"
+          badgeText="MT Chains"
+          badgeClass="badge-pill badge-pill-purple"
         />
         <EChartsCard
           title="Xu hướng Sell-in MT theo Ngày (Triệu VNĐ)"
+          subtitle="Nhịp độ xuất hóa đơn MT hàng ngày"
           option={dailyChartOption}
           loading={loading}
+          gradientClass="grad-green"
+          badgeText="Daily Trend"
+          badgeClass="badge-pill badge-pill-green"
         />
       </div>
 

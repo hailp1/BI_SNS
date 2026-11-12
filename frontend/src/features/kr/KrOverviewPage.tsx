@@ -142,7 +142,7 @@ export function KrOverviewPage() {
           type: 'pie' as const,
           radius: ['42%', '72%'],
           data: rows.slice(0, 8).map((r) => ({ name: r.krChain, value: Math.round(r.sellin / 1e6) })),
-          label: { formatter: '{b}: {d}%', fontSize: 11 },
+          label: { formatter: '{b}: {d}%', fontSize: 11, color: '#ffffff' },
         },
       ],
     }),
@@ -244,7 +244,15 @@ export function KrOverviewPage() {
         />
       </div>
 
-      <EChartsCard title="Cơ cấu Doanh số theo Chuỗi KR" option={chartOption} loading={loading} />
+      <EChartsCard
+        title="Cơ cấu Doanh số theo Chuỗi KR"
+        subtitle="Tỷ trọng đóng góp theo hệ thống đối tác KR"
+        option={chartOption}
+        loading={loading}
+        gradientClass="grad-primary"
+        badgeText="KR Mix"
+        badgeClass="badge-pill badge-pill-primary"
+      />
 
       <DataTable
         data={rows}
