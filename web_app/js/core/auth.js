@@ -2872,13 +2872,26 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
 
 
         async function initAuth() {
-    // 1. Kiểm tra phiên đăng nhập an toàn từ Backend qua HttpOnly Cookie (OWASP ASVS)
-    if (!sessionStorage.getItem('cj_current_user')) {
+    let token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
+    if (token && typeof window._isJwtExpired === 'function' && window._isJwtExpired(token)) {
+        if (typeof window._clearAuthStorage === 'function') window._clearAuthStorage();
+        token = null;
+    }
+
+    // 1. Luôn xác thực phiên hiện tại với Backend (/api/v1/auth/me) qua HttpOnly Cookie hoặc Bearer Token
+    const isLoggedOut = localStorage.getItem('cj_logged_out') === '1';
+    let backendAuthenticated = false;
+    if (!isLoggedOut) {
         try {
-            const meRes = await fetch('/api/v1/auth/me');
+            const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+            const meRes = await fetch('/api/v1/auth/me', {
+                credentials: 'same-origin',
+                headers
+            });
             if (meRes.ok) {
                 const meData = await meRes.json();
-                if (meData && meData.user) {
+                if (meData && meData.authenticated && meData.user) {
+                    backendAuthenticated = true;
                     const u = meData.user;
                     const safeUser = {
                         username: u.username,
@@ -2889,20 +2902,27 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                         scope_value: u.scopeValue || u.scope_value || 'Toàn Quốc'
                     };
                     sessionStorage.setItem('cj_current_user', JSON.stringify(safeUser));
-                    localStorage.setItem('cj_current_user', JSON.stringify(safeUser));
+                    if (localStorage.getItem('cj_current_user')) {
+                        localStorage.setItem('cj_current_user', JSON.stringify(safeUser));
+                    }
                     if (meData.payload_key) {
                         sessionStorage.setItem('cj_payload_key', meData.payload_key);
                     }
+                } else {
+                    // Phiên backend đã hết hạn hoặc bị thu hồi -> xóa triệt để token cũ
+                    if (typeof window._clearAuthStorage === 'function') window._clearAuthStorage();
                 }
+            } else if (meRes.status === 401 || meRes.status === 403) {
+                if (typeof window._clearAuthStorage === 'function') window._clearAuthStorage();
             }
         } catch (_) {}
     }
 
     let savedUserJson = sessionStorage.getItem('cj_current_user') || localStorage.getItem('cj_current_user');
-    let token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
+    token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
     let user = null;
 
-    if (savedUserJson && token) {
+    if (savedUserJson && (backendAuthenticated || (token && (typeof window._isJwtExpired !== 'function' || !window._isJwtExpired(token))))) {
         try {
             user = JSON.parse(savedUserJson);
         } catch(e) {
@@ -2911,61 +2931,20 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
     }
 
     if (user) {
-
-
-
-
-
-
-
+                window._sessionExpiryHandled = false;
                 currentUser = user;
-
-
-
-
-
-
-
-                applyUserScope(currentUser);
-
-
-
-
-
-
-
+                window.currentUser = user;
+                window._isStage1Render = true;
+                try {
+                    applyUserScope(currentUser);
+                } finally {
+                    window._isStage1Render = false;
+                }
             } else {
-
-
-
-
-
-
-
                 currentUser = null;
-
-
-
-
-
-
-
+                window.currentUser = null;
                 applyUnauthenticatedState();
-
-
-
-
-
-
-
                 showLoginModal();
-
-
-
-
-
-
-
             }
 
 
@@ -6904,6 +6883,9 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                             scope_level: otpData.user.scopeLevel || otpData.user.scope_level || 'all',
                             scope_value: otpData.user.scopeValue || otpData.user.scope_value || 'Toàn Quốc'
                         };
+                        localStorage.removeItem('cj_logged_out');
+                        sessionStorage.removeItem('cj_logged_out');
+                        window._sessionExpiryHandled = false;
                         sessionStorage.setItem('cj_current_user', JSON.stringify(safeUser));
                         sessionStorage.setItem('cj_access_token', otpData.access_token);
                         if (otpData.payload_key) {
@@ -6968,9 +6950,12 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
         const rememberMe = document.getElementById('login-remember')?.checked;
         const storage = rememberMe ? localStorage : sessionStorage;
 
-        // Clean any legacy plain passwords
+        // Clean any legacy plain passwords & stale logout/expiry flags
         localStorage.removeItem('cj_app_users');
         localStorage.removeItem('cj_custom_passwords');
+        localStorage.removeItem('cj_logged_out');
+        sessionStorage.removeItem('cj_logged_out');
+        window._sessionExpiryHandled = false;
 
         storage.setItem('cj_access_token', data.access_token);
         if (data.payload_key) {

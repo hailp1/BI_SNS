@@ -13,7 +13,9 @@
                 updateMonthChipsUI();
 
                 let savedUserJson = localStorage.getItem('cj_current_user') || sessionStorage.getItem('cj_current_user');
-                const hasSavedSession = Boolean(savedUserJson && !localStorage.getItem('cj_logged_out'));
+                let savedToken = localStorage.getItem('cj_access_token') || sessionStorage.getItem('cj_access_token');
+                const tokenValid = Boolean(savedToken && (typeof window._isJwtExpired !== 'function' || !window._isJwtExpired(savedToken)));
+                const hasSavedSession = Boolean(savedUserJson && tokenValid && !localStorage.getItem('cj_logged_out'));
 
                 if (!hasSavedSession) {
                     try {

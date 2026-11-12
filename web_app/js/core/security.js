@@ -1,4 +1,31 @@
-        // PURGE UN-AUTHENTICATED SESSION KEYS (ZERO-TRUST STRICT)
+        // JWT EXPIRATION & AUTH STORAGE HELPERS
+        function _isJwtExpired(token) {
+            if (!token || typeof token !== 'string') return true;
+            try {
+                const parts = token.split('.');
+                if (parts.length !== 3) return true;
+                const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
+                const payload = JSON.parse(atob(padded));
+                if (!payload || typeof payload.exp !== 'number') return false;
+                return Date.now() >= payload.exp * 1000;
+            } catch (_) {
+                return true;
+            }
+        }
+        window._isJwtExpired = _isJwtExpired;
+
+        function _clearAuthStorage() {
+            try {
+                ['cj_payload_key', 'cj_access_token', 'cj_current_user'].forEach(k => {
+                    sessionStorage.removeItem(k);
+                    localStorage.removeItem(k);
+                });
+            } catch (_) {}
+        }
+        window._clearAuthStorage = _clearAuthStorage;
+
+        // PURGE UN-AUTHENTICATED OR EXPIRED SESSION KEYS (ZERO-TRUST STRICT)
         (function() {
             try {
                 localStorage.removeItem('cj_app_users');
@@ -6,14 +33,11 @@
                 localStorage.removeItem('cj_users');
                 localStorage.removeItem('cj_deleted_users');
                 const isLoggedOut = localStorage.getItem('cj_logged_out') === '1';
-                const hasActiveSession = !isLoggedOut && (localStorage.getItem('cj_current_user') || sessionStorage.getItem('cj_current_user'));
+                const storedToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
+                const tokenExpired = storedToken ? _isJwtExpired(storedToken) : false;
+                const hasActiveSession = !isLoggedOut && !tokenExpired && (localStorage.getItem('cj_current_user') || sessionStorage.getItem('cj_current_user'));
                 if (!hasActiveSession) {
-                    sessionStorage.removeItem('cj_payload_key');
-                    localStorage.removeItem('cj_payload_key');
-                    sessionStorage.removeItem('cj_access_token');
-                    localStorage.removeItem('cj_access_token');
-                    sessionStorage.removeItem('cj_current_user');
-                    localStorage.removeItem('cj_current_user');
+                    _clearAuthStorage();
                 }
             } catch (_) {}
         })();
@@ -357,8 +381,35 @@
             return JSON.parse(jsonStr);
         }
 
+        window.handleSessionExpired = function(reason) {
+            if (window._sessionExpiryHandled) return;
+            window._sessionExpiryHandled = true;
+            _clearAuthStorage();
+            for (const k in _payloadCache) delete _payloadCache[k];
+            if (typeof _rlsCache !== 'undefined') {
+                for (const k in _rlsCache) delete _rlsCache[k];
+            }
+            window.currentUser = null;
+            try { if (typeof currentUser !== 'undefined') currentUser = null; } catch (_) {}
+            if (typeof state !== 'undefined') state.currentUser = null;
+            if (typeof applyUnauthenticatedState === 'function') applyUnauthenticatedState();
+            if (typeof showLoginModal === 'function') showLoginModal();
+            const errEl = document.getElementById('login-error-msg');
+            const errTxt = document.getElementById('login-error-text');
+            if (errEl && errTxt) {
+                errTxt.textContent = reason || 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.';
+                errEl.classList.remove('hidden');
+            }
+        };
+
         async function _loadPayloadAsync(propName) {
+            if (window._sessionExpiryHandled) return null;
             if (typeof currentUser === 'undefined' || !currentUser) return null;
+            const curToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
+            if (curToken && _isJwtExpired(curToken)) {
+                window.handleSessionExpired();
+                return null;
+            }
             if (_payloadCache[propName]) return _payloadCache[propName];
             if (_payloadInflight[propName]) return _payloadInflight[propName];
 
@@ -377,6 +428,10 @@
                         credentials: 'same-origin',
                         headers: _getAuthHeaders()
                     });
+                    if (resp.status === 401) {
+                        window.handleSessionExpired();
+                        return null;
+                    }
                     if (resp.ok) {
                         const parsed = await resp.json();
                         _payloadCache[propName] = parsed;
@@ -749,10 +804,15 @@
         function defineLazyPayload(propName) {
             Object.defineProperty(window, propName, {
                 get: function() {
-                    if (!currentUser) return [];
+                    if (window._sessionExpiryHandled || typeof currentUser === 'undefined' || !currentUser) return [];
                     if (!_payloadCache[propName]) {
                         // Never block UI with sync XHR during boot/Stage-1 render or while an async fetch is in flight
                         if (window._isStage1Render || _payloadInflight[propName]) {
+                            return [];
+                        }
+                        const curToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
+                        if (curToken && _isJwtExpired(curToken)) {
+                            window.handleSessionExpired();
                             return [];
                         }
                         try {
@@ -765,6 +825,10 @@
                             }
                             xhr.send(null);
 
+                            if (xhr.status === 401) {
+                                window.handleSessionExpired();
+                                return [];
+                            }
                             if (xhr.status === 200 && xhr.responseText) {
                                 const parsed = JSON.parse(xhr.responseText);
                                 _payloadCache[propName] = parsed;
