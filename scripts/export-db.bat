@@ -62,9 +62,6 @@ if not "%SYNC_DIR%"=="" (
     if exist "%SYNC_DIR%\" (
         echo [*] Dang dong bo sang thu muc Google Drive: "%SYNC_DIR%" ...
         copy /Y "%OUT_FILE%" "%SYNC_DIR%\cj_enterprise_latest.dump" >nul
-        if exist "web_app\apps\routemap\dms_data.js" (
-            copy /Y "web_app\apps\routemap\dms_data.js" "%SYNC_DIR%\dms_data.js" >nul
-        )
         echo [OK] Da copy vao Google Drive Sync: "%SYNC_DIR%\cj_enterprise_latest.dump"
     ) else (
         echo [WARN] Khong truy cap duoc thu muc sync: "%SYNC_DIR%". Ban co the upload thu cong file "%OUT_FILE%".

@@ -40,22 +40,8 @@ echo   CJ ENTERPRISE SNS - KHOI PHUC DATABASE POSTGRESQL TU FILE .DUMP
 echo =====================================================================
 echo [*] File nguon: "%DUMP_FILE%"
 
-set "NEED_NGINX_REBUILD=0"
-for %%I in ("%DUMP_FILE%") do set "DUMP_DIR=%%~dpI"
-if exist "%DUMP_DIR%dms_data.js" (
-    if not exist "web_app\apps\routemap\dms_data.js" (
-        echo [*] Phat hien dms_data.js trong thu muc dong bo -> copy vao web_app\apps\routemap\...
-        copy /Y "%DUMP_DIR%dms_data.js" "web_app\apps\routemap\dms_data.js" >nul
-        set "NEED_NGINX_REBUILD=1"
-    )
-)
-
 echo [1/4] Kiem tra va dam bao Docker stack dang chay...
-if "%NEED_NGINX_REBUILD%"=="1" (
-    docker compose up -d --build standard_postgres standard_redis standard_nginx >nul 2>&1
-) else (
-    docker compose up -d standard_postgres standard_redis >nul 2>&1
-)
+docker compose up -d standard_postgres standard_redis >nul 2>&1
 timeout /t 3 /nobreak >nul
 
 echo [2/4] Tam dung standard_backend de tranh giu lock DB...

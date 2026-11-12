@@ -269,6 +269,54 @@ const DATASET_CONFIGS: Record<string, DatasetQueryConfig> = {
     implicitChannel: 'GT',
     geoCols: { mien: 'mien', vung: 'vung', gsbh: 'gsbh', office: 'office', nppCode: 'npp_code', nppName: 'npp_name' },
   },
+  DMS_CJ_DATA: {
+    table: 'datamart.fact_dms_cj_outlets',
+    selectSql:
+      'row_seq, outlet_code, outlet_name, lat, lon, salesman, distributor, route_code, route_name, vung, gsbh, freq, week, t2, t3, t4, t5, t6, t7, cn, addr, phone, province',
+    rowMode: 'array',
+    orderBy: 'id',
+    implicitChannel: 'GT',
+    geoCols: { vung: 'vung', gsbh: 'gsbh', nppName: 'distributor' },
+  },
+  DMS_POT_DATA: {
+    table: 'datamart.fact_dms_pot_outlets',
+    selectSql:
+      'row_seq, outlet_code, outlet_name, lat, lon, salesman, distributor, province, addr, score::float8, vung',
+    rowMode: 'array',
+    orderBy: 'id',
+    implicitChannel: 'GT',
+    geoCols: { vung: 'vung', nppName: 'distributor' },
+  },
+  CTKM_TIEN_DATA: {
+    table: 'datamart.fact_ctkm_tien',
+    selectSql:
+      'nam::int AS nam, thang::int AS thang, khu_vuc, mien, vung, office, area, group_ct, ten_ct, code_npp, ten_npp, full_name_npp, code_gsbh, ten_gsbh, amount::float8 AS amount, reason, reason_detail, missing_docs, aging',
+    orderBy: 'id',
+    implicitChannel: 'GT',
+    geoCols: {
+      mien: 'mien',
+      vung: 'vung',
+      gsbh: 'ten_gsbh',
+      office: 'office',
+      nppCode: 'code_npp',
+      nppName: 'ten_npp',
+    },
+  },
+  CTKM_HANG_DATA: {
+    table: 'datamart.fact_ctkm_hang',
+    selectSql:
+      'nam::int AS nam, thang::int AS thang, khu_vuc, mien, vung, office, area, group_ct, ten_ct, code_npp, ten_npp, full_name_npp, code_gsbh, ten_gsbh, ea::float8 AS ea, gia_npp::float8 AS gia_npp, amount::float8 AS amount, ma_sp, ten_sp, storage, cate, reason, reason_detail, missing_docs, aging',
+    orderBy: 'id',
+    implicitChannel: 'GT',
+    geoCols: {
+      mien: 'mien',
+      vung: 'vung',
+      gsbh: 'ten_gsbh',
+      office: 'office',
+      nppCode: 'code_npp',
+      nppName: 'ten_npp',
+    },
+  },
 };
 
 @Injectable()
@@ -378,15 +426,16 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
     const hasGeoConstraint =
       scopeLvl !== 'all' && scopeVal && scopeVal.toLowerCase() !== 'all' && scopeVal !== 'Toàn Quốc';
     if (hasGeoConstraint && cfg.geoCols) {
-      if (scopeLvl === 'npp' && cfg.geoCols.nppCode) {
+      if (scopeLvl === 'npp' && (cfg.geoCols.nppCode || cfg.geoCols.nppName)) {
         params.push(scopeVal);
-        const colExpr = cfg.geoCols.nppName
-          ? `(LOWER(TRIM(${cfg.geoCols.nppCode})) = LOWER($${params.length}) OR LOWER(TRIM(${cfg.geoCols.nppName})) = LOWER($${params.length}))`
-          : `LOWER(TRIM(${cfg.geoCols.nppCode})) = LOWER($${params.length})`;
-        clauses.push(colExpr);
+        const pIdx = `$${params.length}`;
+        const parts: string[] = [];
+        if (cfg.geoCols.nppCode) parts.push(`LOWER(TRIM(${cfg.geoCols.nppCode})) = LOWER(${pIdx})`);
+        if (cfg.geoCols.nppName) parts.push(`LOWER(TRIM(${cfg.geoCols.nppName})) = LOWER(${pIdx})`);
+        clauses.push(`(${parts.join(' OR ')})`);
       } else if (
         (scopeLvl === 'office' || scopeLvl === 'gsbh') &&
-        (cfg.geoCols.office || cfg.geoCols.gsbh || cfg.geoCols.nppCode)
+        (cfg.geoCols.office || cfg.geoCols.gsbh || cfg.geoCols.nppCode || cfg.geoCols.vung)
       ) {
         params.push(scopeVal);
         const pIdx = `$${params.length}`;
@@ -396,6 +445,10 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
         if (cfg.geoCols.nppCode) {
           parts.push(
             `${cfg.geoCols.nppCode} IN (SELECT npp_code FROM datamart.dim_geo_distributors WHERE LOWER(TRIM(gsbh)) = LOWER(${pIdx}))`,
+          );
+        } else if (!cfg.geoCols.gsbh && cfg.geoCols.vung) {
+          parts.push(
+            `${cfg.geoCols.vung} IN (SELECT DISTINCT vung FROM datamart.dim_geo_distributors WHERE LOWER(TRIM(gsbh)) = LOWER(${pIdx}))`,
           );
         }
         clauses.push(`(${parts.join(' OR ')})`);
@@ -410,7 +463,10 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
           );
         }
         clauses.push(`(${parts.join(' OR ')})`);
-      } else if ((scopeLvl === 'region' || scopeLvl === 'mien') && (cfg.geoCols.mien || cfg.geoCols.nppCode)) {
+      } else if (
+        (scopeLvl === 'region' || scopeLvl === 'mien') &&
+        (cfg.geoCols.mien || cfg.geoCols.nppCode || cfg.geoCols.vung)
+      ) {
         params.push(scopeVal);
         const pIdx = `$${params.length}`;
         const parts: string[] = [];
@@ -418,6 +474,10 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
         if (cfg.geoCols.nppCode) {
           parts.push(
             `${cfg.geoCols.nppCode} IN (SELECT npp_code FROM datamart.dim_geo_distributors WHERE LOWER(TRIM(mien)) = LOWER(${pIdx}))`,
+          );
+        } else if (!cfg.geoCols.mien && cfg.geoCols.vung) {
+          parts.push(
+            `${cfg.geoCols.vung} IN (SELECT DISTINCT vung FROM datamart.dim_geo_distributors WHERE LOWER(TRIM(mien)) = LOWER(${pIdx}))`,
           );
         }
         clauses.push(`(${parts.join(' OR ')})`);
@@ -483,6 +543,20 @@ export class DatamartService implements OnModuleInit, OnModuleDestroy {
       rowMode: 'array',
     });
     return res.rows;
+  }
+
+  async getCtkmData(user?: AuthenticatedUser) {
+    const [metaRes, tienRows, hangRows] = await Promise.all([
+      this.pool.query('SELECT metadata_json FROM datamart.app_ctkm_metadata WHERE id = 1'),
+      this.queryDataset('CTKM_TIEN_DATA', user),
+      this.queryDataset('CTKM_HANG_DATA', user),
+    ]);
+
+    return {
+      metadata: metaRes.rows[0]?.metadata_json || {},
+      tien_data: tienRows,
+      hang_data: hangRows,
+    };
   }
 
   async getOverviewSummary(filters: OverviewFilterParams, user?: AuthenticatedUser) {

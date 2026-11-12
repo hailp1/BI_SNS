@@ -12,12 +12,11 @@ window.adminToggleUserStatus = async function(username, makeActive) {
     if (!confirm(confirmMsg)) return;
     
     try {
-        const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token') || localStorage.getItem('token') || sessionStorage.getItem('token');
         const res = await fetch(`/api/v1/users/${encodeURIComponent(username)}/status`, {
             method: 'PATCH',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ isActive: Boolean(makeActive) })
         });
@@ -279,10 +278,8 @@ function getUserPassword(u) {
 
 async function syncUsersFromDatabase() {
     try {
-        const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-        if (!token) return [];
         const res = await fetch('/api/v1/users', {
-            headers: { 'Authorization': 'Bearer ' + token }
+            credentials: 'same-origin'
         });
         if (res.ok) {
             const json = await res.json();
@@ -2872,21 +2869,17 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
 
 
         async function initAuth() {
-    let token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-    if (token && typeof window._isJwtExpired === 'function' && window._isJwtExpired(token)) {
+    if (typeof window._isSessionExpired === 'function' && window._isSessionExpired()) {
         if (typeof window._clearAuthStorage === 'function') window._clearAuthStorage();
-        token = null;
     }
 
-    // 1. Luôn xác thực phiên hiện tại với Backend (/api/v1/auth/me) qua HttpOnly Cookie hoặc Bearer Token
+    // 1. Luôn xác thực phiên hiện tại với Backend (/api/v1/auth/me) qua HttpOnly Cookie
     const isLoggedOut = localStorage.getItem('cj_logged_out') === '1';
     let backendAuthenticated = false;
     if (!isLoggedOut) {
         try {
-            const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
             const meRes = await fetch('/api/v1/auth/me', {
-                credentials: 'same-origin',
-                headers
+                credentials: 'same-origin'
             });
             if (meRes.ok) {
                 const meData = await meRes.json();
@@ -2905,11 +2898,15 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                     if (localStorage.getItem('cj_current_user')) {
                         localStorage.setItem('cj_current_user', JSON.stringify(safeUser));
                     }
-                    if (meData.payload_key) {
-                        sessionStorage.setItem('cj_payload_key', meData.payload_key);
+                    if (meData.expires_at) {
+                        const expVal = String(meData.expires_at);
+                        sessionStorage.setItem('cj_session_exp', expVal);
+                        if (localStorage.getItem('cj_current_user')) {
+                            localStorage.setItem('cj_session_exp', expVal);
+                        }
                     }
                 } else {
-                    // Phiên backend đã hết hạn hoặc bị thu hồi -> xóa triệt để token cũ
+                    // Phiên backend đã hết hạn hoặc bị thu hồi -> xóa triệt để phiên cũ
                     if (typeof window._clearAuthStorage === 'function') window._clearAuthStorage();
                 }
             } else if (meRes.status === 401 || meRes.status === 403) {
@@ -2919,10 +2916,9 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
     }
 
     let savedUserJson = sessionStorage.getItem('cj_current_user') || localStorage.getItem('cj_current_user');
-    token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
     let user = null;
 
-    if (savedUserJson && (backendAuthenticated || (token && (typeof window._isJwtExpired !== 'function' || !window._isJwtExpired(token))))) {
+    if (savedUserJson && (backendAuthenticated || typeof window._isSessionExpired !== 'function' || !window._isSessionExpired())) {
         try {
             user = JSON.parse(savedUserJson);
         } catch(e) {
@@ -6643,45 +6639,40 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
 
 
 
-        function logout() {
-            try { fetch('/api/v1/auth/logout', { method: 'POST' }).catch(() => {}); } catch(_) {}
+        async function logout() {
+            const logoutTasks = [];
+            try {
+                logoutTasks.push(fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {}));
+            } catch(_) {}
 
             try {
-
-                sessionStorage.removeItem('cj_access_token');
-
-                localStorage.removeItem('cj_access_token');
-
-                localStorage.removeItem('cj_payload_key');
-
-                sessionStorage.removeItem('cj_payload_key');
-
-                localStorage.removeItem('cj_current_user');
-
-                sessionStorage.removeItem('cj_current_user');
+                if (typeof window._clearAuthStorage === 'function') {
+                    window._clearAuthStorage();
+                } else {
+                    ['cj_access_token', 'cj_payload_key', 'cj_current_user', 'cj_session_exp'].forEach(k => {
+                        sessionStorage.removeItem(k);
+                        localStorage.removeItem(k);
+                    });
+                }
 
                 localStorage.setItem('cj_logged_out', '1');
 
                 Object.keys(localStorage).forEach(k => {
-
                     if (k.startsWith('cj_snap_') || k.startsWith('CJ_Enterprise_Cache_')) {
-
                         localStorage.removeItem(k);
-
                     }
-
                 });
 
+                if (typeof window._clearEnterpriseIDB === 'function') {
+                    logoutTasks.push(window._clearEnterpriseIDB());
+                }
+
                 if (typeof _payloadCache !== 'undefined') {
-
                     for (const k in _payloadCache) delete _payloadCache[k];
-
                 }
 
                 if (typeof _rlsCache !== 'undefined') {
-
                     for (const k in _rlsCache) delete _rlsCache[k];
-
                 }
 
                 window.currentUser = null;
@@ -6692,6 +6683,13 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
 
                 console.warn('Logout cleanup warning:', e);
 
+            }
+
+            if (logoutTasks.length > 0) {
+                await Promise.race([
+                    Promise.allSettled(logoutTasks),
+                    new Promise(resolve => setTimeout(resolve, 400))
+                ]);
             }
 
             window.location.hash = '';
@@ -6754,6 +6752,7 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
     try {
         const res = await fetch('/api/v1/auth/login', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 username, 
@@ -6830,6 +6829,7 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                     try {
                         const rRes = await fetch('/api/v1/auth/email-otp/resend', {
                             method: 'POST',
+                            credentials: 'same-origin',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ temp_token: window._pending2FaToken })
                         });
@@ -6859,6 +6859,7 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                     try {
                         const otpRes = await fetch('/api/v1/auth/email-otp/verify', {
                             method: 'POST',
+                            credentials: 'same-origin',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ temp_token: window._pending2FaToken, code })
                         });
@@ -6885,12 +6886,14 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
                         };
                         localStorage.removeItem('cj_logged_out');
                         sessionStorage.removeItem('cj_logged_out');
+                        localStorage.removeItem('cj_access_token');
+                        sessionStorage.removeItem('cj_access_token');
+                        localStorage.removeItem('cj_payload_key');
+                        sessionStorage.removeItem('cj_payload_key');
                         window._sessionExpiryHandled = false;
+                        const otpExpMs = String(otpData.expires_at || (Date.now() + 8 * 3600 * 1000));
+                        sessionStorage.setItem('cj_session_exp', otpExpMs);
                         sessionStorage.setItem('cj_current_user', JSON.stringify(safeUser));
-                        sessionStorage.setItem('cj_access_token', otpData.access_token);
-                        if (otpData.payload_key) {
-                            sessionStorage.setItem('cj_payload_key', otpData.payload_key);
-                        }
                         currentUser = safeUser;
                         window.currentUser = safeUser;
                         if (typeof closeLoginModal === 'function') closeLoginModal();
@@ -6946,21 +6949,20 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
             return;
         }
 
-        // Login SUCCESS: Store token and user in sessionStorage (NO PASSWORDS!)
+        // Login SUCCESS: Server sets HttpOnly JWT cookie; store non-sensitive user profile & expiry only!
         const rememberMe = document.getElementById('login-remember')?.checked;
         const storage = rememberMe ? localStorage : sessionStorage;
 
-        // Clean any legacy plain passwords & stale logout/expiry flags
-        localStorage.removeItem('cj_app_users');
-        localStorage.removeItem('cj_custom_passwords');
-        localStorage.removeItem('cj_logged_out');
-        sessionStorage.removeItem('cj_logged_out');
+        // Clean any legacy plain passwords, tokens & stale logout/expiry flags
+        ['cj_app_users', 'cj_custom_passwords', 'cj_logged_out', 'cj_access_token', 'cj_payload_key'].forEach(k => {
+            localStorage.removeItem(k);
+            sessionStorage.removeItem(k);
+        });
         window._sessionExpiryHandled = false;
 
-        storage.setItem('cj_access_token', data.access_token);
-        if (data.payload_key) {
-            storage.setItem('cj_payload_key', data.payload_key);
-        }
+        const sessionExpMs = String(data.expires_at || (Date.now() + 8 * 3600 * 1000));
+        storage.setItem('cj_session_exp', sessionExpMs);
+        sessionStorage.setItem('cj_session_exp', sessionExpMs);
         const safeUser = {
             username: data.user.username,
             full_name: data.user.fullName || data.user.full_name || data.user.username,
@@ -6971,7 +6973,6 @@ Dữ liệu đã được đồng nhất hoàn toàn!`
         };
         storage.setItem('cj_current_user', JSON.stringify(safeUser));
         sessionStorage.setItem('cj_current_user', JSON.stringify(safeUser));
-        sessionStorage.setItem('cj_access_token', data.access_token);
         currentUser = safeUser;
         window.currentUser = safeUser;
 
@@ -7295,12 +7296,11 @@ window.submitLogin = submitLogin;
     }
 
     try {
-        const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
         const res = await fetch('/api/v1/auth/change-password', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ currentPassword: currPass, newPassword: newPass })
         });
@@ -16958,12 +16958,11 @@ const isLocked = (u.is_active === 0 || u.is_active === false || (u.failed_attemp
 
             // Sync to PostgreSQL backend
             try {
-                const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-                if (token && savedRecord) {
+                if (savedRecord) {
                     fetch('/api/v1/users/upsert', {
                         method: 'POST',
+                        credentials: 'same-origin',
                         headers: {
-                            'Authorization': 'Bearer ' + token,
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
@@ -17207,17 +17206,12 @@ const isLocked = (u.is_active === 0 || u.is_active === false || (u.failed_attemp
 
             // Sync delete to PostgreSQL backend
             try {
-                const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-                if (token) {
-                    fetch('/api/v1/users/' + encodeURIComponent(username), {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': 'Bearer ' + token
-                        }
-                    }).then(r => r.json()).then(resp => {
-                        console.log('✅ PostgreSQL Delete Result:', resp);
-                    }).catch(e => console.warn('PostgreSQL Delete Warning:', e));
-                }
+                fetch('/api/v1/users/' + encodeURIComponent(username), {
+                    method: 'DELETE',
+                    credentials: 'same-origin'
+                }).then(r => r.json()).then(resp => {
+                    console.log('✅ PostgreSQL Delete Result:', resp);
+                }).catch(e => console.warn('PostgreSQL Delete Warning:', e));
             } catch (err) {
                 console.warn('Delete from PostgreSQL warning:', err);
             }
@@ -20028,19 +20022,17 @@ const isLocked = (u.is_active === 0 || u.is_active === false || (u.failed_attemp
 
             try {
 
-                const jwtToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-
-                if (jwtToken && validRows.length > 0) {
+                if (validRows.length > 0) {
 
                     fetch('/api/v1/users/bulk-import', {
 
                         method: 'POST',
 
+                        credentials: 'same-origin',
+
                         headers: {
 
-                            'Content-Type': 'application/json',
-
-                            'Authorization': 'Bearer ' + jwtToken
+                            'Content-Type': 'application/json'
 
                         },
 
@@ -23031,12 +23023,11 @@ async function adminPromptResetPass(username) {
         return;
     }
     try {
-        const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
         const res = await fetch(`/api/v1/users/${encodeURIComponent(username)}/reset-password`, {
             method: 'POST',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ newPassword: newPass.trim() })
         });
@@ -23069,12 +23060,11 @@ window.adminSaveUserEmail = async function() {
     const btn = document.getElementById('ud-btn-save-email');
     if (btn) { btn.disabled = true; btn.innerText = 'Đang lưu...'; }
     try {
-        const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
         const res = await fetch(`/api/v1/users/${encodeURIComponent(selectedDetailUser.username)}/email`, {
             method: 'PATCH',
+            credentials: 'same-origin',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': token ? `Bearer ${token}` : ''
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({ email: newEmail })
         });

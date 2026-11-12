@@ -15,6 +15,9 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
+  // Trust immediate reverse proxy (Nginx) so req.ip and secure cookie detection use X-Forwarded-* accurately.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.enableShutdownHooks();
   app.use(helmet());
   app.use(cookieParser());
@@ -42,15 +45,19 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ProblemDetailsFilter());
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('CJ Enterprise SNS API')
-    .setDescription('CJ Foods Vietnam - Enterprise Sales Network System API (Clean Architecture)')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .addCookieAuth('cj_auth_token')
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api/docs', app, document);
+  const nodeEnv = configService.get<string>('NODE_ENV', 'development');
+  const enableSwagger = configService.get<string>('ENABLE_SWAGGER') === 'true';
+  if (nodeEnv !== 'production' || enableSwagger) {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('CJ Enterprise SNS API')
+      .setDescription('CJ Foods Vietnam - Enterprise Sales Network System API (Clean Architecture)')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .addCookieAuth('cj_auth_token')
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document);
+  }
 
   const port = configService.get<number>('PORT', 3000);
   await app.listen(port);

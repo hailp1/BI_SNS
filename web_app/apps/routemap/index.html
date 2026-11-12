@@ -2096,9 +2096,7 @@
 
 
 
-  <!-- Nạp dữ liệu Offline dms_data.js -->
-
-  <script src="dms_data.js?v=20261101_v7"></script>
+  <!-- Dữ liệu Bản đồ Tuyến được nạp bảo mật trực tiếp từ PostgreSQL API (JwtAuthGuard + RLS) -->
 
 
 
@@ -2565,7 +2563,7 @@
     // Populate Filters
     function populateFilters(cascade = false) {
       if (!window.DMS_RAW_DATA || !window.DMS_RAW_DATA.cj) {
-        alert("Chưa tìm thấy dữ liệu 'dms_data.js'. Hãy kiểm tra file dms_data.js cùng thư mục với index.html.");
+        alert("Chưa nạp được dữ liệu Bản đồ Tuyến từ máy chủ PostgreSQL. Vui lòng kiểm tra phiên đăng nhập và thử tải lại trang!");
         return;
       }
 
@@ -4044,15 +4042,46 @@
 
     // Event Listeners
 
-    document.addEventListener('DOMContentLoaded', () => {
+    async function loadRouteMapFromPostgres() {
+      if (window.DMS_RAW_DATA && Array.isArray(window.DMS_RAW_DATA.cj)) {
+        return true;
+      }
+      const opts = { credentials: 'same-origin' };
+      const [cjRes, potRes] = await Promise.all([
+        fetch('/api/v1/sales/datasets/DMS_CJ_DATA', opts),
+        fetch('/api/v1/sales/datasets/DMS_POT_DATA', opts),
+      ]);
+      if (cjRes.status === 401 || potRes.status === 401) {
+        alert('Phiên đăng nhập đã hết hạn hoặc chưa đăng nhập. Hệ thống sẽ chuyển về màn hình đăng nhập.');
+        (window.top || window).location.href = '/';
+        return false;
+      }
+      if (!cjRes.ok || !potRes.ok) {
+        throw new Error(`HTTP ${cjRes.status}/${potRes.status} khi tải dữ liệu Route Map từ PostgreSQL`);
+      }
+      const [cj, pot] = await Promise.all([cjRes.json(), potRes.json()]);
+      window.DMS_RAW_DATA = {
+        cj: Array.isArray(cj) ? cj : [],
+        pot: Array.isArray(pot) ? pot : [],
+      };
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
 
       initMap();
 
-      populateFilters(false);
-
-      populateFilters(true);
-
-      applyFilters();
+      try {
+        const loaded = await loadRouteMapFromPostgres();
+        if (loaded) {
+          populateFilters(false);
+          populateFilters(true);
+          applyFilters();
+        }
+      } catch (err) {
+        console.error('Lỗi nạp Route Map từ PostgreSQL:', err);
+        alert('Không thể nạp dữ liệu Bản đồ Tuyến từ máy chủ PostgreSQL. Vui lòng thử tải lại trang!');
+      }
 
 
 

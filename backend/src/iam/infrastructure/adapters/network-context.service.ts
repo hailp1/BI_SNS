@@ -1,18 +1,30 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../shared/database/prisma.service';
 
 @Injectable()
 export class NetworkContextService {
   private readonly logger = new Logger(NetworkContextService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly configService?: ConfigService,
+  ) {}
 
   async checkNetworkContext(ip: string, simulatedMode?: string): Promise<{ isCompany: boolean; networkName: string }> {
+    const nodeEnv = this.configService?.get<string>('NODE_ENV') ?? process.env.NODE_ENV ?? 'development';
+    const allowSimulation =
+      (this.configService?.get<string>('ALLOW_NETWORK_SIMULATION') ?? process.env.ALLOW_NETWORK_SIMULATION) === 'true';
+    const canSimulateCompany = nodeEnv !== 'production' && allowSimulation;
+
     if (simulatedMode === 'external') {
       return { isCompany: false, networkName: 'Mạng Ngoài Công Ty (External Internet / 4G)' };
     }
     if (simulatedMode === 'company') {
-      return { isCompany: true, networkName: 'Mạng Nội Bộ Công Ty (LAN / Wi-Fi Trụ Sở)' };
+      if (canSimulateCompany) {
+        return { isCompany: true, networkName: 'Mạng Nội Bộ Công Ty (LAN / Wi-Fi Trụ Sở)' };
+      }
+      this.logger.warn(`Blocked client-supplied network_mode=company bypass attempt from IP ${ip}`);
     }
 
     const cleanIp = ip.replace(/^::ffff:/, '');

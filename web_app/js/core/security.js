@@ -1,23 +1,20 @@
-        // JWT EXPIRATION & AUTH STORAGE HELPERS
-        function _isJwtExpired(token) {
-            if (!token || typeof token !== 'string') return true;
+        // SESSION EXPIRATION & AUTH STORAGE HELPERS (HttpOnly Cookie Session)
+        function _isSessionExpired() {
             try {
-                const parts = token.split('.');
-                if (parts.length !== 3) return true;
-                const b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-                const padded = b64 + '='.repeat((4 - (b64.length % 4)) % 4);
-                const payload = JSON.parse(atob(padded));
-                if (!payload || typeof payload.exp !== 'number') return false;
-                return Date.now() >= payload.exp * 1000;
+                const raw = sessionStorage.getItem('cj_session_exp') || localStorage.getItem('cj_session_exp');
+                if (!raw) return false;
+                const expMs = Number(raw);
+                if (!Number.isFinite(expMs) || expMs <= 0) return true;
+                return Date.now() >= expMs;
             } catch (_) {
                 return true;
             }
         }
-        window._isJwtExpired = _isJwtExpired;
+        window._isSessionExpired = _isSessionExpired;
 
         function _clearAuthStorage() {
             try {
-                ['cj_payload_key', 'cj_access_token', 'cj_current_user'].forEach(k => {
+                ['cj_payload_key', 'cj_access_token', 'cj_current_user', 'cj_session_exp'].forEach(k => {
                     sessionStorage.removeItem(k);
                     localStorage.removeItem(k);
                 });
@@ -28,14 +25,13 @@
         // PURGE UN-AUTHENTICATED OR EXPIRED SESSION KEYS (ZERO-TRUST STRICT)
         (function() {
             try {
-                localStorage.removeItem('cj_app_users');
-                localStorage.removeItem('cj_custom_passwords');
-                localStorage.removeItem('cj_users');
-                localStorage.removeItem('cj_deleted_users');
+                ['cj_app_users', 'cj_custom_passwords', 'cj_users', 'cj_deleted_users', 'cj_access_token', 'cj_payload_key'].forEach(k => {
+                    localStorage.removeItem(k);
+                    sessionStorage.removeItem(k);
+                });
                 const isLoggedOut = localStorage.getItem('cj_logged_out') === '1';
-                const storedToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-                const tokenExpired = storedToken ? _isJwtExpired(storedToken) : false;
-                const hasActiveSession = !isLoggedOut && !tokenExpired && (localStorage.getItem('cj_current_user') || sessionStorage.getItem('cj_current_user'));
+                const sessionExpired = _isSessionExpired();
+                const hasActiveSession = !isLoggedOut && !sessionExpired && (localStorage.getItem('cj_current_user') || sessionStorage.getItem('cj_current_user'));
                 if (!hasActiveSession) {
                     _clearAuthStorage();
                 }
@@ -277,12 +273,7 @@
         }
 
         function _getAuthHeaders() {
-            const h = {};
-            try {
-                const tok = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-                if (tok) h['Authorization'] = 'Bearer ' + tok;
-            } catch (_) {}
-            return h;
+            return {};
         }
 
         function _openEnterpriseIDB() {
@@ -330,10 +321,28 @@
             } catch (_) {}
         }
 
+        async function _clearEnterpriseIDB() {
+            try {
+                if (typeof indexedDB === 'undefined') return;
+                const db = await _openEnterpriseIDB();
+                if (db && db.objectStoreNames && db.objectStoreNames.contains(_IDB_STORE)) {
+                    await new Promise((resolve) => {
+                        try {
+                            const tx = db.transaction(_IDB_STORE, 'readwrite');
+                            tx.objectStore(_IDB_STORE).clear();
+                            tx.oncomplete = () => resolve();
+                            tx.onerror = () => resolve();
+                        } catch (_) {
+                            resolve();
+                        }
+                    });
+                }
+            } catch (_) {}
+        }
+        window._clearEnterpriseIDB = _clearEnterpriseIDB;
+
         function _getPayloadKeyHex() {
-            return sessionStorage.getItem('cj_payload_key') || 
-                   localStorage.getItem('cj_payload_key') || 
-                   '';
+            return '';
         }
 
         function _buildKeystreamTable(keyHexStr, ivBytes) {
@@ -385,6 +394,7 @@
             if (window._sessionExpiryHandled) return;
             window._sessionExpiryHandled = true;
             _clearAuthStorage();
+            _clearEnterpriseIDB();
             for (const k in _payloadCache) delete _payloadCache[k];
             if (typeof _rlsCache !== 'undefined') {
                 for (const k in _rlsCache) delete _rlsCache[k];
@@ -405,8 +415,7 @@
         async function _loadPayloadAsync(propName) {
             if (window._sessionExpiryHandled) return null;
             if (typeof currentUser === 'undefined' || !currentUser) return null;
-            const curToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-            if (curToken && _isJwtExpired(curToken)) {
+            if (_isSessionExpired()) {
                 window.handleSessionExpired();
                 return null;
             }
@@ -810,8 +819,7 @@
                         if (window._isStage1Render || _payloadInflight[propName]) {
                             return [];
                         }
-                        const curToken = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-                        if (curToken && _isJwtExpired(curToken)) {
+                        if (_isSessionExpired()) {
                             window.handleSessionExpired();
                             return [];
                         }
@@ -819,10 +827,6 @@
                             const xhr = new XMLHttpRequest();
                             xhr.open('GET', '/api/v1/sales/datasets/' + encodeURIComponent(propName), false);
                             xhr.withCredentials = true;
-                            const authHeaders = _getAuthHeaders();
-                            if (authHeaders['Authorization']) {
-                                xhr.setRequestHeader('Authorization', authHeaders['Authorization']);
-                            }
                             xhr.send(null);
 
                             if (xhr.status === 401) {

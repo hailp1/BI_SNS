@@ -36,14 +36,10 @@ echo "[OK] Da xuat thanh cong: ${PROJECT_ROOT}/${OUT_FILE} (${DUMP_BYTES} bytes)
 if [[ -n "$SYNC_TARGET" ]]; then
   mkdir -p "$SYNC_TARGET"
   cp -f "$OUT_FILE" "${SYNC_TARGET}/cj_enterprise_latest.dump"
-  [[ -f "web_app/apps/routemap/dms_data.js" ]] && cp -f "web_app/apps/routemap/dms_data.js" "${SYNC_TARGET}/dms_data.js"
   echo "[OK] Da copy vao thu muc sync: ${SYNC_TARGET}"
 elif RCLONE_REMOTE="$(detect_rclone_drive_remote)"; then
   echo "[*] Phat hien rclone Google Drive (${RCLONE_REMOTE}) -> dang upload len ${RCLONE_REMOTE}BI_SNS_Sync ..."
   rclone copy "$OUT_FILE" "${RCLONE_REMOTE}BI_SNS_Sync" --progress
-  if [[ -f "web_app/apps/routemap/dms_data.js" ]]; then
-    rclone copy "web_app/apps/routemap/dms_data.js" "${RCLONE_REMOTE}BI_SNS_Sync" --progress
-  fi
   echo "[OK] Da dong bo len Google Drive qua rclone (${RCLONE_REMOTE}BI_SNS_Sync)"
 else
   echo "[INFO] Chua cau hinh rclone Google Drive. File dump da luu tai: ${PROJECT_ROOT}/${OUT_FILE}"

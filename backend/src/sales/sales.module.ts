@@ -5,10 +5,11 @@ import { GetOverviewQuery } from './application/queries/get-overview.query';
 import { DatamartService } from './infrastructure/persistence/datamart.service';
 import { PrismaPerformanceRepository } from './infrastructure/persistence/performance.repository';
 import { DashboardController } from './presentation/http/dashboard.controller';
+import { SalesAppsController } from './presentation/http/sales-apps.controller';
 import { SalesDatasetController } from './presentation/http/sales-dataset.controller';
 
 @Module({
-  controllers: [DashboardController, SalesDatasetController],
+  controllers: [DashboardController, SalesDatasetController, SalesAppsController],
   providers: [
     { provide: PERFORMANCE_REPOSITORY_PORT, useClass: PrismaPerformanceRepository },
     DatamartService,

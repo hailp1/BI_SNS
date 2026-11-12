@@ -104,4 +104,34 @@ describe('DatamartService', () => {
       }),
     );
   });
+
+  it('whitelists Route Map and CTKM datasets and loads CTKM data with RLS without users', async () => {
+    expect(service.isAllowedDataset('DMS_CJ_DATA')).toBe(true);
+    expect(service.isAllowedDataset('DMS_POT_DATA')).toBe(true);
+    expect(service.isAllowedDataset('CTKM_TIEN_DATA')).toBe(true);
+    expect(service.isAllowedDataset('CTKM_HANG_DATA')).toBe(true);
+
+    mockQuery
+      .mockResolvedValueOnce({ rows: [{ metadata_json: { count_tien: 1, count_hang: 1 } }] })
+      .mockResolvedValueOnce({ rows: [{ nam: 2026, thang: 4, vung: 'Hải Phòng', amount: 1000 }] })
+      .mockResolvedValueOnce({ rows: [{ nam: 2026, thang: 1, vung: 'Cần Thơ', amount: 2000 }] });
+
+    const res = await service.getCtkmData({
+      id: '10',
+      username: 'vung_hp',
+      fullName: 'Vung HP',
+      role: 'vung',
+      channel: 'GT',
+      scopeLevel: 'vung',
+      scopeValue: 'Hải Phòng',
+    });
+
+    expect(res.metadata).toEqual({ count_tien: 1, count_hang: 1 });
+    expect(res.tien_data).toHaveLength(1);
+    expect(res.hang_data).toHaveLength(1);
+    expect((res as unknown as Record<string, unknown>).users).toBeUndefined();
+    expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('LOWER(TRIM(vung)) = LOWER($1)'), [
+      'Hải Phòng',
+    ]);
+  });
 });

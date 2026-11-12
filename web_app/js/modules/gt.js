@@ -1041,7 +1041,7 @@
                     }
                 }
             }
-            const cacheBuster = 'v=20261101_v11';
+            const cacheBuster = 'v=20261112b';
             url += (url.includes('?') ? '&' : '?') + cacheBuster;
             return url;
         }
@@ -33257,12 +33257,10 @@
 
                     // Tự động lưu cấu hình chuẩn vào máy chủ Enterprise nếu có kết nối backend
                     try {
-                        const token = sessionStorage.getItem('cj_access_token') || localStorage.getItem('cj_access_token');
-                        const headers = { 'Content-Type': 'application/json' };
-                        if (token) headers['Authorization'] = 'Bearer ' + token;
                         await fetch('/api/v1/reports/table-config', {
                             method: 'POST',
-                            headers: headers,
+                            credentials: 'same-origin',
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(fullConfig)
                         });
                     } catch (_) {}

@@ -36,7 +36,6 @@ sync_from_google_drive() {
     echo "[*] Dang tai du lieu tu Google Drive qua rclone (${remote}${folder_name}) ..."
     rclone copy "${remote}${folder_name}" "backups" \
       --include "cj_enterprise_latest.dump" \
-      --include "dms_data.js" \
       --progress
     [[ -f "backups/cj_enterprise_latest.dump" ]] && return 0
   fi
@@ -46,7 +45,7 @@ sync_from_google_drive() {
     files_json="$(gdrive readonly ls "$folder_id" --json 2>/dev/null || true)"
     if [[ -n "$files_json" ]] && command -v python3 >/dev/null 2>&1; then
       while IFS=$'\t' read -r fid fname; do
-        if [[ "$fname" == "cj_enterprise_latest.dump" || "$fname" == "dms_data.js" ]]; then
+        if [[ "$fname" == "cj_enterprise_latest.dump" ]]; then
           echo "    -> Downloading ${fname} (${fid})..."
           gdrive readonly download "$fid" --out "backups/${fname}.tmp"
           mv -f "backups/${fname}.tmp" "backups/${fname}"
@@ -104,7 +103,7 @@ if [[ -z "$DUMP_FILE" || ! -f "$DUMP_FILE" ]]; then
   echo "  rclone config   # tao remote Google Drive ten 'gdrive'" >&2
   echo "  ./scripts/restore-db.sh --sync" >&2
   echo "Cach 2 (Tai thu cong tu Google Drive -> thu muc BI_SNS_Sync):" >&2
-  echo "  Dat cj_enterprise_latest.dump (va dms_data.js neu co) vao ./backups/ roi chay lai: ./scripts/restore-db.sh" >&2
+  echo "  Dat cj_enterprise_latest.dump vao ./backups/ roi chay lai: ./scripts/restore-db.sh" >&2
   exit 1
 fi
 
@@ -112,17 +111,6 @@ echo "====================================================================="
 echo "  CJ ENTERPRISE SNS - KHOI PHUC DATABASE POSTGRESQL [UBUNTU]"
 echo "====================================================================="
 echo "[*] File nguon: ${DUMP_FILE}"
-
-DUMP_DIR="$(cd "$(dirname "$DUMP_FILE")" && pwd)"
-NEED_NGINX_REBUILD=0
-if [[ -f "${DUMP_DIR}/dms_data.js" ]]; then
-  if [[ ! -f "web_app/apps/routemap/dms_data.js" ]] || ! cmp -s "${DUMP_DIR}/dms_data.js" "web_app/apps/routemap/dms_data.js"; then
-    echo "[*] Phat hien dms_data.js moi -> copy vao web_app/apps/routemap/dms_data.js ..."
-    mkdir -p "web_app/apps/routemap"
-    cp -f "${DUMP_DIR}/dms_data.js" "web_app/apps/routemap/dms_data.js"
-    NEED_NGINX_REBUILD=1
-  fi
-fi
 
 echo "[1/4] Kiem tra va khoi dong PostgreSQL + Redis..."
 "${COMPOSE_CMD[@]}" up -d standard_postgres standard_redis

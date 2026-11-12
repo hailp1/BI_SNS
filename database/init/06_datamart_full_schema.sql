@@ -619,3 +619,116 @@ CREATE TABLE IF NOT EXISTS datamart.fact_gt_standee (
 );
 CREATE INDEX IF NOT EXISTS idx_gt_standee_m ON datamart.fact_gt_standee (month, npp_code, c_code);
 
+-- =============================================================================
+-- 4. SUB-APP DATASETS (ROUTE MAP & CTKM TRACKER — MIGRATED FROM STATIC FILES)
+-- =============================================================================
+
+-- DMS_CJ_DATA (57.6k+ rows)
+CREATE TABLE IF NOT EXISTS datamart.fact_dms_cj_outlets (
+    id           BIGSERIAL PRIMARY KEY,
+    row_seq      INT NOT NULL DEFAULT 0,
+    outlet_code  VARCHAR(50) NOT NULL DEFAULT '',
+    outlet_name  VARCHAR(150) NOT NULL DEFAULT '',
+    lat          DOUBLE PRECISION NOT NULL DEFAULT 0,
+    lon          DOUBLE PRECISION NOT NULL DEFAULT 0,
+    salesman     VARCHAR(100) NOT NULL DEFAULT '',
+    distributor  VARCHAR(150) NOT NULL DEFAULT '',
+    route_code   VARCHAR(40) NOT NULL DEFAULT '',
+    route_name   VARCHAR(100) NOT NULL DEFAULT '',
+    vung         VARCHAR(80) NOT NULL DEFAULT '',
+    gsbh         VARCHAR(100) NOT NULL DEFAULT '',
+    freq         VARCHAR(20) NOT NULL DEFAULT '',
+    week         VARCHAR(20) NOT NULL DEFAULT '',
+    t2           SMALLINT NOT NULL DEFAULT 0,
+    t3           SMALLINT NOT NULL DEFAULT 0,
+    t4           SMALLINT NOT NULL DEFAULT 0,
+    t5           SMALLINT NOT NULL DEFAULT 0,
+    t6           SMALLINT NOT NULL DEFAULT 0,
+    t7           SMALLINT NOT NULL DEFAULT 0,
+    cn           SMALLINT NOT NULL DEFAULT 0,
+    addr         TEXT NOT NULL DEFAULT '',
+    phone        VARCHAR(60) NOT NULL DEFAULT '',
+    province     VARCHAR(100) NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_dms_cj_vung_gsbh ON datamart.fact_dms_cj_outlets (vung, gsbh);
+
+-- DMS_POT_DATA (61.7k+ rows)
+CREATE TABLE IF NOT EXISTS datamart.fact_dms_pot_outlets (
+    id           BIGSERIAL PRIMARY KEY,
+    row_seq      INT NOT NULL DEFAULT 0,
+    outlet_code  VARCHAR(50) NOT NULL DEFAULT '',
+    outlet_name  VARCHAR(150) NOT NULL DEFAULT '',
+    lat          DOUBLE PRECISION NOT NULL DEFAULT 0,
+    lon          DOUBLE PRECISION NOT NULL DEFAULT 0,
+    salesman     VARCHAR(100) NOT NULL DEFAULT '',
+    distributor  VARCHAR(150) NOT NULL DEFAULT '',
+    province     VARCHAR(100) NOT NULL DEFAULT '',
+    addr         TEXT NOT NULL DEFAULT '',
+    score        BIGINT NOT NULL DEFAULT 0,
+    vung         VARCHAR(80) NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_dms_pot_vung ON datamart.fact_dms_pot_outlets (vung);
+
+-- CTKM Metadata (1 singleton row — excludes legacy client-side users map)
+CREATE TABLE IF NOT EXISTS datamart.app_ctkm_metadata (
+    id            SMALLINT PRIMARY KEY DEFAULT 1,
+    metadata_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- CTKM Tien Data (311+ rows)
+CREATE TABLE IF NOT EXISTS datamart.fact_ctkm_tien (
+    id            BIGSERIAL PRIMARY KEY,
+    nam           SMALLINT NOT NULL,
+    thang         SMALLINT NOT NULL,
+    khu_vuc       VARCHAR(100) NOT NULL DEFAULT '',
+    mien          VARCHAR(100) NOT NULL DEFAULT '',
+    vung          VARCHAR(100) NOT NULL DEFAULT '',
+    office        VARCHAR(120) NOT NULL DEFAULT '',
+    area          VARCHAR(120) NOT NULL DEFAULT '',
+    group_ct      VARCHAR(120) NOT NULL DEFAULT '',
+    ten_ct        TEXT NOT NULL DEFAULT '',
+    code_npp      VARCHAR(50) NOT NULL DEFAULT '',
+    ten_npp       VARCHAR(255) NOT NULL DEFAULT '',
+    full_name_npp VARCHAR(255) NOT NULL DEFAULT '',
+    code_gsbh     VARCHAR(50) NOT NULL DEFAULT '',
+    ten_gsbh      VARCHAR(120) NOT NULL DEFAULT '',
+    amount        NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    reason        TEXT NOT NULL DEFAULT '',
+    reason_detail TEXT NOT NULL DEFAULT '',
+    missing_docs  JSONB NOT NULL DEFAULT '[]'::jsonb,
+    aging         VARCHAR(100) NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_ctkm_tien_rls ON datamart.fact_ctkm_tien (nam, thang, mien, vung, code_npp, ten_gsbh);
+
+-- CTKM Hang Data (3.5k+ rows)
+CREATE TABLE IF NOT EXISTS datamart.fact_ctkm_hang (
+    id            BIGSERIAL PRIMARY KEY,
+    nam           SMALLINT NOT NULL,
+    thang         SMALLINT NOT NULL,
+    khu_vuc       VARCHAR(100) NOT NULL DEFAULT '',
+    mien          VARCHAR(100) NOT NULL DEFAULT '',
+    vung          VARCHAR(100) NOT NULL DEFAULT '',
+    office        VARCHAR(120) NOT NULL DEFAULT '',
+    area          VARCHAR(120) NOT NULL DEFAULT '',
+    group_ct      VARCHAR(120) NOT NULL DEFAULT '',
+    ten_ct        TEXT NOT NULL DEFAULT '',
+    code_npp      VARCHAR(50) NOT NULL DEFAULT '',
+    ten_npp       VARCHAR(255) NOT NULL DEFAULT '',
+    full_name_npp VARCHAR(255) NOT NULL DEFAULT '',
+    code_gsbh     VARCHAR(50) NOT NULL DEFAULT '',
+    ten_gsbh      VARCHAR(120) NOT NULL DEFAULT '',
+    ea            NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    gia_npp       NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    amount        NUMERIC(18, 2) NOT NULL DEFAULT 0,
+    ma_sp         VARCHAR(80) NOT NULL DEFAULT '',
+    ten_sp        TEXT NOT NULL DEFAULT '',
+    storage       VARCHAR(80) NOT NULL DEFAULT '',
+    cate          VARCHAR(120) NOT NULL DEFAULT '',
+    reason        TEXT NOT NULL DEFAULT '',
+    reason_detail TEXT NOT NULL DEFAULT '',
+    missing_docs  JSONB NOT NULL DEFAULT '[]'::jsonb,
+    aging         VARCHAR(100) NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_ctkm_hang_rls ON datamart.fact_ctkm_hang (nam, thang, mien, vung, code_npp, ten_gsbh);
+

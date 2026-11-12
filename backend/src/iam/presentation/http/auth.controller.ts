@@ -60,8 +60,10 @@ export class AuthController {
       networkMode: body.network_mode,
     });
 
+    let expiresAt: number | undefined;
     if (result.access_token) {
       this.setAuthCookie(req, res, result.access_token);
+      expiresAt = this.resolveTokenExpiresAt(result.access_token);
     }
 
     return {
@@ -72,8 +74,7 @@ export class AuthController {
       network_type: result.network_type,
       network_name: result.network_name,
       temp_token: result.temp_token,
-      access_token: result.access_token,
-      payload_key: result.require2fa ? undefined : result.payload_key,
+      expires_at: expiresAt,
       user: result.user,
       message: result.message || 'Đăng nhập hệ thống thành công (Phiên làm việc bảo vệ bởi HttpOnly Cookie).',
     };
@@ -116,10 +117,10 @@ export class AuthController {
     }
 
     try {
-      const decoded = this.tokenService.verify<JwtPayload>(token);
+      const decoded = this.tokenService.verify<JwtPayload & { exp?: number }>(token);
       return {
         authenticated: true,
-        payload_key: this.configService.get<string>('PAYLOAD_KEY'),
+        expires_at: typeof decoded.exp === 'number' ? decoded.exp * 1000 : undefined,
         user: decoded,
       };
     } catch {
@@ -143,6 +144,32 @@ export class AuthController {
     return this.verifyOtpUseCase.verifyAndEnable2fa(user.id, body.code);
   }
 
+  private resolveTokenExpiresAt(token: string): number {
+    try {
+      const decoded = this.tokenService.verify<{ exp?: number }>(token);
+      if (typeof decoded?.exp === 'number') {
+        return decoded.exp * 1000;
+      }
+    } catch {
+      // Fallback to 8h default window if token lacks exp claim
+    }
+    return Date.now() + 8 * 3600 * 1000;
+  }
+
+  private buildOtpHttpResponse(
+    req: Request,
+    res: Response,
+    result: { access_token?: string; payload_key?: string; [key: string]: unknown },
+  ) {
+    let expiresAt: number | undefined;
+    if (result.access_token) {
+      this.setAuthCookie(req, res, result.access_token);
+      expiresAt = this.resolveTokenExpiresAt(result.access_token);
+    }
+    const { access_token: _ignoredToken, payload_key: _ignoredKey, ...safeResult } = result;
+    return expiresAt ? { ...safeResult, expires_at: expiresAt } : safeResult;
+  }
+
   @Post('2fa/verify-login')
   @Public()
   @Throttle({ default: { limit: 10, ttl: 60000 } })
@@ -157,12 +184,7 @@ export class AuthController {
     const userAgent = String(req.headers['user-agent'] || '');
 
     const result = await this.verifyOtpUseCase.verify2faLogin(body.temp_token, body.code, ip, userAgent);
-
-    if (result.access_token) {
-      this.setAuthCookie(req, res, result.access_token);
-    }
-
-    return result;
+    return this.buildOtpHttpResponse(req, res, result as unknown as Record<string, unknown>);
   }
 
   @Post('email-otp/verify')
@@ -179,12 +201,7 @@ export class AuthController {
     const userAgent = String(req.headers['user-agent'] || '');
 
     const result = await this.verifyOtpUseCase.verifyEmailOtp(body.temp_token, body.code, ip, userAgent);
-
-    if (result.access_token) {
-      this.setAuthCookie(req, res, result.access_token);
-    }
-
-    return result;
+    return this.buildOtpHttpResponse(req, res, result as unknown as Record<string, unknown>);
   }
 
   @Post('email-otp/resend')

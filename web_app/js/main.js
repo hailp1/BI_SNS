@@ -13,19 +13,20 @@
                 updateMonthChipsUI();
 
                 let savedUserJson = localStorage.getItem('cj_current_user') || sessionStorage.getItem('cj_current_user');
-                let savedToken = localStorage.getItem('cj_access_token') || sessionStorage.getItem('cj_access_token');
-                const tokenValid = Boolean(savedToken && (typeof window._isJwtExpired !== 'function' || !window._isJwtExpired(savedToken)));
-                const hasSavedSession = Boolean(savedUserJson && tokenValid && !localStorage.getItem('cj_logged_out'));
+                const sessionValid = typeof window._isSessionExpired !== 'function' || !window._isSessionExpired();
+                const hasSavedSession = Boolean(savedUserJson && sessionValid && !localStorage.getItem('cj_logged_out'));
 
                 if (!hasSavedSession) {
-                    try {
-                        localStorage.removeItem('cj_access_token');
-                        sessionStorage.removeItem('cj_access_token');
-                        localStorage.removeItem('cj_payload_key');
-                        sessionStorage.removeItem('cj_payload_key');
-                        localStorage.removeItem('cj_current_user');
-                        sessionStorage.removeItem('cj_current_user');
-                    } catch (_) {}
+                    if (typeof window._clearAuthStorage === 'function') {
+                        window._clearAuthStorage();
+                    } else {
+                        try {
+                            ['cj_access_token', 'cj_payload_key', 'cj_current_user', 'cj_session_exp'].forEach(k => {
+                                localStorage.removeItem(k);
+                                sessionStorage.removeItem(k);
+                            });
+                        } catch (_) {}
+                    }
                     window._appBooted = true;
                     initAuth();
                     return;
