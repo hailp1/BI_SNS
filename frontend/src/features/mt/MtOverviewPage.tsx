@@ -61,7 +61,7 @@ export function MtOverviewPage() {
   const mtChain = useFiltersStore((s) => s.mtChain);
   const setMtFilter = useFiltersStore((s) => s.setMtFilter);
   const loadPayload = usePayloadsStore((s) => s.loadPayload);
-  const loading = usePayloadsStore((s) => Boolean(s.loading.MT_TREE));
+  const loading = usePayloadsStore((s) => Boolean(s.loading.MT_TREE || s.loading.MT_STORE_DATA || s.loading.MT_DAILY_DATA));
 
   const [mtTree, setMtTree] = useState<MtTreeRow[]>([]);
   const [mtStores, setMtStores] = useState<MtStoreRow[]>([]);

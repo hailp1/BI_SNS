@@ -70,7 +70,9 @@ export function GtProductivityPage() {
   const geoGsbh = useFiltersStore((s) => s.geoGsbh);
   const geoNpp = useFiltersStore((s) => s.geoNpp);
   const loadPayload = usePayloadsStore((s) => s.loadPayload);
-  const loading = usePayloadsStore((s) => Boolean(s.loading.GT_NVBH_M));
+  const loading = usePayloadsStore((s) =>
+    Boolean(s.loading.GT_NVBH_M || s.loading.GT_NVBH_MCP_M || s.loading.GT_SALESMAN_ACTIVE || s.loading.GT_SUBCHAN_M),
+  );
 
   const [nvbhRows, setNvbhRows] = useState<GtNvbhRow[]>([]);
   const [mcpRows, setMcpRows] = useState<GtNvbhMcpRow[]>([]);

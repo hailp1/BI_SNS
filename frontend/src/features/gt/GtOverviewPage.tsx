@@ -96,7 +96,17 @@ export function GtOverviewPage() {
   const geoGsbh = useFiltersStore((s) => s.geoGsbh);
   const geoNpp = useFiltersStore((s) => s.geoNpp);
   const loadPayload = usePayloadsStore((s) => s.loadPayload);
-  const loading = usePayloadsStore((s) => Boolean(s.loading.GT_TREE));
+  const loading = usePayloadsStore((s) =>
+    Boolean(
+      s.loading.GT_TREE ||
+        s.loading.GT_SI ||
+        s.loading.GT_STOCK ||
+        s.loading.GT_ASO_M ||
+        s.loading.GT_MCP_M ||
+        s.loading.GT_DAILY_SI ||
+        s.loading.GT_DAILY_SO,
+    ),
+  );
 
   const [gtTree, setGtTree] = useState<GtTreeRow[]>([]);
   const [gtAso, setGtAso] = useState<GtAsoRow[]>([]);
@@ -275,6 +285,9 @@ export function GtOverviewPage() {
   }, [gtTree, gtAso, gtMcp, gtSi, targetSo, year, selectedMonths, geoMien, geoVung, geoGsbh, geoNpp]);
 
   const allowedNppSet = useMemo(() => {
+    if (geoMien === 'ALL' && geoVung === 'ALL' && geoGsbh === 'ALL' && geoNpp === 'ALL') {
+      return null;
+    }
     const s = new Set<string>();
     for (const r of gtTree) {
       if (
@@ -296,21 +309,21 @@ export function GtOverviewPage() {
 
     for (const r of gtTree) {
       if (String(r.year) !== year) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const idx = parseInt(String(r.month_num || '0'), 10) - 1;
       if (idx >= 0 && idx < 12) soM[idx] += (Number(r.sellout_val) || 0) / 1e9;
     }
     for (const r of gtSi) {
       const mStr = String(r.month || '');
       if (!mStr.startsWith(year)) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const idx = parseInt(mStr.slice(5, 7), 10) - 1;
       if (idx >= 0 && idx < 12) siM[idx] += (Number(r.sellin_val) || 0) / 1e9;
     }
     for (const r of gtStock) {
       const mStr = String(r.month || '');
       if (!mStr.startsWith(year)) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const idx = parseInt(mStr.slice(5, 7), 10) - 1;
       if (idx >= 0 && idx < 12) stkM[idx] += (Number(r.stock_val) || 0) / 1e9;
     }
@@ -337,13 +350,13 @@ export function GtOverviewPage() {
     const mcpM = new Array<number>(12).fill(0);
     for (const r of gtAso) {
       if (String(r.year) !== year) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const idx = parseInt(String(r.month_num || '0'), 10) - 1;
       if (idx >= 0 && idx < 12) asoM[idx] += Number(r.aso_count || 0);
     }
     for (const r of gtMcp) {
       if (String(r.year) !== year) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const idx = parseInt(String(r.month_num || '0'), 10) - 1;
       if (idx >= 0 && idx < 12) mcpM[idx] += Number(r.mcp_count || 0);
     }
@@ -370,7 +383,7 @@ export function GtOverviewPage() {
     for (const r of gtDailySi) {
       const dt = String(r.date_val || '');
       if (!dt.startsWith(year) || !matchMonthNum(dt.slice(5, 7), selectedMonths)) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const e = map.get(dt) || { si: 0, so: 0 };
       e.si += (Number(r.daily_si) || 0) / 1e9;
       map.set(dt, e);
@@ -378,7 +391,7 @@ export function GtOverviewPage() {
     for (const r of gtDailySo) {
       const dt = String(r.date_val || '');
       if (!dt.startsWith(year) || !matchMonthNum(dt.slice(5, 7), selectedMonths)) continue;
-      if (allowedNppSet.size > 0 && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
+      if (allowedNppSet && r.npp_code && !allowedNppSet.has(String(r.npp_code))) continue;
       const e = map.get(dt) || { si: 0, so: 0 };
       e.so += (Number(r.daily_so) || 0) / 1e9;
       map.set(dt, e);

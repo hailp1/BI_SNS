@@ -31,7 +31,7 @@ export function EChartsCard({
               Đang tải biểu đồ...
             </div>
           ) : (
-            <ReactECharts option={option} style={{ height, width: '100%' }} notMerge lazyUpdate />
+            <ReactECharts option={option} style={{ height, width: '100%' }} notMerge />
           )}
         </div>
         <div className="flex items-start justify-between px-2 pt-3">
@@ -59,7 +59,7 @@ export function EChartsCard({
           Đang tải biểu đồ...
         </div>
       ) : (
-        <ReactECharts option={option} style={{ height, width: '100%' }} notMerge lazyUpdate />
+        <ReactECharts option={option} style={{ height, width: '100%' }} notMerge />
       )}
     </div>
   );

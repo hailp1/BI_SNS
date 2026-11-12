@@ -239,6 +239,29 @@ export function AppLayout() {
                 <span>📥</span> <span>Xuất Báo Cáo</span>
               </button>
 
+              {/* Language Switcher (VI / EN / KO) */}
+              <div
+                id="lang-switcher-container"
+                className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-100 p-0.5"
+              >
+                {(['vi', 'en', 'ko'] as const).map((lang) => {
+                  const active = i18n.language.startsWith(lang);
+                  return (
+                    <button
+                      key={lang}
+                      type="button"
+                      onClick={() => void i18n.changeLanguage(lang)}
+                      className={`rounded-md px-2 py-1 text-[11px] font-black uppercase transition-all ${
+                        active ? 'bg-[#004B91] text-white shadow-sm' : 'text-slate-600 hover:bg-white hover:text-slate-900'
+                      }`}
+                      title={lang === 'vi' ? 'Tiếng Việt' : lang === 'en' ? 'English' : '한국어'}
+                    >
+                      {lang}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* User Account Dropdown (IAM, 2FA, Language, Classic, Logout) */}
               <div className="relative">
                 <button
