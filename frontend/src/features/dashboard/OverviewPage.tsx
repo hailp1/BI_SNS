@@ -550,10 +550,9 @@ export function OverviewPage() {
   const dailyChartOption = useMemo(() => {
     let labels: string[] = [];
     let sellinVals: number[] = [];
-    let selloutVals: number[] = [];
 
     if (dailyRows.length > 0) {
-      const byDate = new Map<string, { si: number; so: number }>();
+      const byDate = new Map<string, number>();
       for (const d of dailyRows) {
         const dtStr = String(d.date_val || '');
         if (!dtStr.startsWith(year)) continue;
@@ -563,25 +562,23 @@ export function OverviewPage() {
         if (prodStorage !== 'ALL' && d.storage !== prodStorage) continue;
         if (prodCate !== 'ALL' && d.cate !== prodCate) continue;
         if (prodPh1 !== 'ALL' && d.ph1 !== prodPh1) continue;
-        const entry = byDate.get(dtStr) || { si: 0, so: 0 };
-        entry.si += (Number(d.daily_sellin) || 0) / 1e9;
-        entry.so += (Number(d.daily_sellout) || 0) / 1e9;
-        byDate.set(dtStr, entry);
+        byDate.set(dtStr, (byDate.get(dtStr) || 0) + (Number(d.daily_sellin) || 0) / 1e9);
       }
       const sorted = Array.from(byDate.keys()).sort();
       labels = sorted.map((dt) => dt.substring(5));
-      sellinVals = sorted.map((dt) => Number((byDate.get(dt)?.si || 0).toFixed(2)));
-      selloutVals = sorted.map((dt) => Number((byDate.get(dt)?.so || 0).toFixed(2)));
+      sellinVals = sorted.map((dt) => Number((byDate.get(dt) || 0).toFixed(2)));
     } else {
       const pts = trendQuery.data || [];
       labels = pts.map((p) => p.date_str.slice(5));
       sellinVals = pts.map((p) => Number((p.sellin_revenue || 0).toFixed(2)));
-      selloutVals = pts.map((p) => Number((p.sellout_revenue || 0).toFixed(2)));
     }
+
+    const chLabel = dashChannel === 'ALL' ? '4 Kênh' : dashChannel;
+    const legendName = `Sell-in Hàng Ngày (${chLabel}) (B ₫)`;
 
     return {
       tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Sell-in', 'Sell-out'], top: 4, textStyle: { color: '#ffffff', fontSize: 11 } },
+      legend: { data: [legendName], top: 4, textStyle: { color: '#ffffff', fontSize: 11, fontWeight: 'bold' as const } },
       grid: { left: 48, right: 16, top: 36, bottom: 32 },
       xAxis: {
         type: 'category' as const,
@@ -598,18 +595,27 @@ export function OverviewPage() {
       },
       series: [
         {
-          name: 'Sell-in',
-          type: 'bar' as const,
-          data: sellinVals,
-          itemStyle: { color: 'rgba(255,255,255,0.88)', borderRadius: [3, 3, 0, 0] },
-        },
-        {
-          name: 'Sell-out',
+          name: legendName,
           type: 'line' as const,
           smooth: true,
-          data: selloutVals,
+          data: sellinVals,
           itemStyle: { color: '#fde047' },
           lineStyle: { width: 2.5, color: '#fde047' },
+          areaStyle: {
+            color: {
+              type: 'linear' as const,
+              x: 0,
+              y: 0,
+              x2: 0,
+              y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(253, 224, 71, 0.35)' },
+                { offset: 1, color: 'rgba(253, 224, 71, 0.02)' },
+              ],
+            },
+          },
+          label: { show: true, position: 'top' as const, color: '#FEF08A', fontSize: 9 },
+          labelLayout: { hideOverlap: true },
         },
       ],
     };
@@ -653,18 +659,20 @@ export function OverviewPage() {
       },
       series: [
         {
+          name: lyYear,
+          type: 'bar' as const,
+          data: lyMonths.map((v) => Number(v.toFixed(2))),
+          itemStyle: { color: 'rgba(255,255,255,0.35)', borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: 'top' as const, color: 'rgba(255,255,255,0.85)', fontSize: 8.5 },
+          labelLayout: { hideOverlap: true },
+        },
+        {
           name: year,
           type: 'bar' as const,
           data: cyMonths.map((v) => Number(v.toFixed(2))),
-          itemStyle: { color: 'rgba(255,255,255,0.92)', borderRadius: [3, 3, 0, 0] },
-        },
-        {
-          name: lyYear,
-          type: 'line' as const,
-          smooth: true,
-          data: lyMonths.map((v) => Number(v.toFixed(2))),
-          itemStyle: { color: '#fef08a' },
-          lineStyle: { width: 2.5, color: '#fef08a', type: 'dashed' as const },
+          itemStyle: { color: '#FDE047', borderRadius: [4, 4, 0, 0] },
+          label: { show: true, position: 'top' as const, color: '#FEF08A', fontSize: 9, fontWeight: 'bold' as const },
+          labelLayout: { hideOverlap: true },
         },
       ],
     };
