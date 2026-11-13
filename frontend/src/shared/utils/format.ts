@@ -1,3 +1,8 @@
+export function formatNumber(val: number | undefined | null): string {
+  const num = Number(val) || 0;
+  return num.toLocaleString('vi-VN');
+}
+
 export function formatBillion(val: number | undefined | null): string {
   const num = Number(val) || 0;
   return `${num.toFixed(2)} B`;
