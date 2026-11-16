@@ -1,20 +1,13 @@
 import {
-  AlertTriangle,
-  Box,
-  CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Layers,
   Search,
-  Snowflake,
   Store,
-  TrendingUp,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DataTable, type ColumnDef } from '../../shared/components/DataTable';
 import { EChartsCard } from '../../shared/components/EChartsCard';
 import { ExportExcelButton } from '../../shared/components/ExportExcelButton';
-import { KpiCard } from '../../shared/components/KpiCard';
 import { useAuthStore } from '../../shared/stores/auth.store';
 import { useFiltersStore } from '../../shared/stores/filters.store';
 import { usePayloadsStore } from '../../shared/stores/payloads.store';
@@ -36,8 +29,11 @@ export interface PosmAssetRow extends GeoRecord {
   qty?: number;
   channel?: string;
   channel_name?: string;
+  emp_name?: string;
+  nvbh_name?: string;
   sales?: Record<string, number[]> | string | null;
   sales_json?: Record<string, number[]> | string | null;
+  _stt?: number;
   [key: string]: unknown;
 }
 
@@ -230,8 +226,8 @@ function buildPosmTree(
     const mien = r.mien || 'Chưa xác định';
     const vung = r.vung || 'Chưa xác định';
     const office = r.office || r.gsbh || 'Chưa phân công Office';
-    const npp = (r.npp_name || r.npp_code) ? ((r.npp_code ? `${r.npp_code} - ` : '') + r.npp_name) : 'Khác';
-    const nv = (r.emp_name || r.nvbh_name) ? ((r.emp_code ? `${r.emp_code} - ` : '') + (r.emp_name || r.nvbh_name)) : 'Chưa phân công NVBH';
+    const npp = (r.npp_name || r.npp_code) ? `${r.npp_code ? `${r.npp_code} - ` : ''}${r.npp_name}` : 'Khác';
+    const nv = (r.emp_name || r.nvbh_name) ? `${r.emp_code ? `${r.emp_code} - ` : ''}${r.emp_name || r.nvbh_name}` : 'Chưa phân công NVBH';
 
     const mienId = `NODE_${mien}`;
     const vungId = `${mienId}_${vung}`;
@@ -251,11 +247,11 @@ function buildPosmTree(
 
     accNode(root);
 
-    let mNode = mienMap.get(mienId);
-    if (!mNode) {
-      mNode = {
+    let mienNode = mienMap.get(mienId);
+    if (!mienNode) {
+      mienNode = {
         id: mienId,
-        name: mien,
+        name: `Miền ${mien}`,
         level: 1,
         total: 0,
         active: 0,
@@ -270,14 +266,14 @@ function buildPosmTree(
         tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
         children: [],
       };
-      mienMap.set(mienId, mNode);
-      root.children.push(mNode);
+      mienMap.set(mienId, mienNode);
+      root.children.push(mienNode);
     }
-    accNode(mNode);
+    accNode(mienNode);
 
-    let vNode = vungMap.get(vungId);
-    if (!vNode) {
-      vNode = {
+    let vungNode = vungMap.get(vungId);
+    if (!vungNode) {
+      vungNode = {
         id: vungId,
         name: vung,
         level: 2,
@@ -294,14 +290,14 @@ function buildPosmTree(
         tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
         children: [],
       };
-      vungMap.set(vungId, vNode);
-      mNode.children.push(vNode);
+      vungMap.set(vungId, vungNode);
+      mienNode.children.push(vungNode);
     }
-    accNode(vNode);
+    accNode(vungNode);
 
-    let oNode = officeMap.get(officeId);
-    if (!oNode) {
-      oNode = {
+    let offNode = officeMap.get(officeId);
+    if (!offNode) {
+      offNode = {
         id: officeId,
         name: office,
         level: 3,
@@ -318,14 +314,14 @@ function buildPosmTree(
         tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
         children: [],
       };
-      officeMap.set(officeId, oNode);
-      vNode.children.push(oNode);
+      officeMap.set(officeId, offNode);
+      vungNode.children.push(offNode);
     }
-    accNode(oNode);
+    accNode(offNode);
 
-    let pNode = nppMap.get(nppId);
-    if (!pNode) {
-      pNode = {
+    let nNode = nppMap.get(nppId);
+    if (!nNode) {
+      nNode = {
         id: nppId,
         name: npp,
         level: 4,
@@ -342,10 +338,10 @@ function buildPosmTree(
         tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
         children: [],
       };
-      nppMap.set(nppId, pNode);
-      oNode.children.push(pNode);
+      nppMap.set(nppId, nNode);
+      offNode.children.push(nNode);
     }
-    accNode(pNode);
+    accNode(nNode);
 
     let nvNode = nvbhMap.get(nvId);
     if (!nvNode) {
@@ -367,51 +363,45 @@ function buildPosmTree(
         children: [],
       };
       nvbhMap.set(nvId, nvNode);
-      pNode.children.push(nvNode);
+      nNode.children.push(nvNode);
     }
     accNode(nvNode);
   }
 
-  const finalizeNode = (n: PosmTreeNode) => {
-    n.zero = Math.max(0, n.total - n.active);
-    n.actRate = n.total > 0 ? (n.active / n.total) * 100 : 0;
-    n.l3mZeroRate = n.total > 0 ? (n.l3mZero / n.total) * 100 : 0;
-    n.vpo = n.active > 0 ? Math.round(n.mainSo / n.active / mCount) : 0;
-    n.children.sort((a, b) => b.total - a.total);
-    for (const ch of n.children) finalizeNode(ch);
+  const finalizeNode = (node: PosmTreeNode) => {
+    node.zero = Math.max(0, node.total - node.active);
+    node.actRate = node.total > 0 ? (node.active / node.total) * 100 : 0;
+    node.l3mZeroRate = node.total > 0 ? (node.l3mZero / node.total) * 100 : 0;
+    node.vpo = node.active > 0 ? Math.round(node.mainSo / node.active / mCount) : 0;
+    for (const c of node.children) finalizeNode(c);
   };
   finalizeNode(root);
 
   return root;
 }
 
-function flattenPosmTree(
-  node: PosmTreeNode,
-  openNodes: Record<string, boolean>,
-  searchQuery: string,
-): PosmTreeNode[] {
-  const result: PosmTreeNode[] = [];
-  const q = searchQuery.trim().toLowerCase();
+function flattenPosmTree(node: PosmTreeNode, openNodes: Record<string, boolean>, search: string): PosmTreeNode[] {
+  const res: PosmTreeNode[] = [];
+  const q = search.trim().toLowerCase();
 
-  const matchesSearch = (n: PosmTreeNode): boolean => {
-    if (!q) return true;
-    if (n.name.toLowerCase().includes(q)) return true;
-    return n.children.some(matchesSearch);
-  };
-
-  const traverse = (n: PosmTreeNode) => {
-    if (!matchesSearch(n)) return;
-    result.push(n);
-    const isOpen = Boolean(openNodes[n.id] || q.length > 0);
+  const traverse = (cur: PosmTreeNode) => {
+    res.push(cur);
+    if (cur.children.length === 0) return;
+    const isOpen = Boolean(openNodes[cur.id] || q.length > 0);
     if (isOpen) {
-      for (const ch of n.children) {
-        traverse(ch);
+      for (const child of cur.children) {
+        if (q.length > 0) {
+          const matchSub = (n: PosmTreeNode): boolean =>
+            n.name.toLowerCase().includes(q) || n.children.some(matchSub);
+          if (!matchSub(child)) continue;
+        }
+        traverse(child);
       }
     }
   };
 
   traverse(node);
-  return result;
+  return res;
 }
 
 export function GtPosmPage() {
@@ -426,20 +416,31 @@ export function GtPosmPage() {
   const loading = usePayloadsStore((s) => Boolean(s.loading.GT_FREEZER_DATA || s.loading.GT_STANDEE_DATA));
 
   const [tab, setTab] = useState<'freezer' | 'standee'>('freezer');
-  const [freezers, setFreezers] = useState<PosmAssetRow[]>([]);
-  const [standees, setStandees] = useState<PosmAssetRow[]>([]);
+  const [allFreezers, setAllFreezers] = useState<PosmAssetRow[]>([]);
+  const [allStandees, setAllStandees] = useState<PosmAssetRow[]>([]);
+  const [openNodes, setOpenNodes] = useState<Record<string, boolean>>({ ROOT: true });
+  const [treeSearch, setTreeSearch] = useState('');
 
   useEffect(() => {
     let active = true;
-    Promise.all([loadPayload('GT_FREEZER_DATA', user), loadPayload('GT_STANDEE_DATA', user)]).then(([f, s]) => {
+    Promise.all([loadPayload('GT_FREEZER_DATA', user), loadPayload('GT_STANDEE_DATA', user)]).then(([fr, st]) => {
       if (!active) return;
-      if (Array.isArray(f)) setFreezers(f as PosmAssetRow[]);
-      if (Array.isArray(s)) setStandees(s as PosmAssetRow[]);
+      if (Array.isArray(fr)) setAllFreezers(fr as PosmAssetRow[]);
+      if (Array.isArray(st)) setAllStandees(st as PosmAssetRow[]);
     });
     return () => {
       active = false;
     };
   }, [loadPayload, user]);
+
+  const freezers = useMemo(
+    () => getGtPosmDataForPeriod(allFreezers, selectedMonths, year),
+    [allFreezers, selectedMonths, year],
+  );
+  const standees = useMemo(
+    () => getGtPosmDataForPeriod(allStandees, selectedMonths, year),
+    [allStandees, selectedMonths, year],
+  );
 
   const matchGeo = useCallback(
     (r: GeoRecord) =>
@@ -450,111 +451,71 @@ export function GtPosmPage() {
     [geoMien, geoVung, geoGsbh, geoNpp],
   );
 
-  const periodFreezers = useMemo(
-    () => getGtPosmDataForPeriod(freezers, selectedMonths, year),
-    [freezers, selectedMonths, year],
-  );
-  const periodStandees = useMemo(
-    () => getGtPosmDataForPeriod(standees, selectedMonths, year),
-    [standees, selectedMonths, year],
-  );
+  const filteredFreezers = useMemo(() => freezers.filter(matchGeo), [freezers, matchGeo]);
+  const filteredStandees = useMemo(() => standees.filter(matchGeo), [standees, matchGeo]);
 
-  const filteredFreezers = useMemo(() => periodFreezers.filter(matchGeo), [periodFreezers, matchGeo]);
-  const filteredStandees = useMemo(() => periodStandees.filter(matchGeo), [periodStandees, matchGeo]);
-  const activeRows = tab === 'freezer' ? filteredFreezers : filteredStandees;
-
-  const mCount = Math.max(1, selectedMonths.length || 1);
   const l3mMonths = useMemo(() => getL3mMonths(selectedMonths), [selectedMonths]);
+  const mCount = useMemo(() => Math.max(1, selectedMonths.length), [selectedMonths]);
 
-  const [treeSearch, setTreeSearch] = useState('');
-  const [openNodes, setOpenNodes] = useState<Record<string, boolean>>({ ROOT: true });
-
-  const posmTreeRoot = useMemo(
-    () => buildPosmTree(activeRows, tab, selectedMonths, l3mMonths, mCount),
-    [activeRows, tab, selectedMonths, l3mMonths, mCount],
-  );
+  // Cây phân cấp 5 Cấp
+  const treeRoot = useMemo(() => {
+    const list = tab === 'freezer' ? filteredFreezers : filteredStandees;
+    return buildPosmTree(list, tab, selectedMonths, l3mMonths, mCount);
+  }, [tab, filteredFreezers, filteredStandees, selectedMonths, l3mMonths, mCount]);
 
   const flatTreeRows = useMemo(
-    () => flattenPosmTree(posmTreeRoot, openNodes, treeSearch),
-    [posmTreeRoot, openNodes, treeSearch],
+    () => flattenPosmTree(treeRoot, openNodes, treeSearch),
+    [treeRoot, openNodes, treeSearch],
   );
 
-  useEffect(() => {
-    setOpenNodes((prev) => {
-      const next: Record<string, boolean> = { ...prev, ROOT: true };
-      for (const ch of posmTreeRoot.children) {
-        next[ch.id] = true;
-      }
-      return next;
-    });
-  }, [posmTreeRoot]);
+  const toggleNode = (nodeId: string) => {
+    setOpenNodes((prev) => ({ ...prev, [nodeId]: !prev[nodeId] }));
+  };
 
-  const toggleAllTreeNodes = useCallback(() => {
-    setOpenNodes((prev) => {
-      const allIds: Record<string, boolean> = {};
-      const collect = (n: PosmTreeNode) => {
-        allIds[n.id] = true;
-        for (const ch of n.children) collect(ch);
+  const toggleAllTreeNodes = () => {
+    const anyClosed = flatTreeRows.some((n) => n.children.length > 0 && !openNodes[n.id]);
+    const next: Record<string, boolean> = { ROOT: true };
+    if (anyClosed) {
+      const markAll = (n: PosmTreeNode) => {
+        next[n.id] = true;
+        for (const c of n.children) markAll(c);
       };
-      collect(posmTreeRoot);
+      markAll(treeRoot);
+    }
+    setOpenNodes(next);
+  };
 
-      const countOpen = Object.values(prev).filter(Boolean).length;
-      if (countOpen > posmTreeRoot.children.length + 1) {
-        const collapsed: Record<string, boolean> = { ROOT: true };
-        for (const ch of posmTreeRoot.children) collapsed[ch.id] = true;
-        return collapsed;
-      }
-      return allIds;
-    });
-  }, [posmTreeRoot]);
-
-  const toggleNode = useCallback((id: string) => {
-    setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
-
-  const excelTreeRows = useMemo(() => {
-    const list: PosmTreeNode[] = [];
-    const collect = (n: PosmTreeNode) => {
-      list.push(n);
-      for (const ch of n.children) collect(ch);
-    };
-    collect(posmTreeRoot);
-    return list;
-  }, [posmTreeRoot]);
-
-  // Freezer Processed Metrics
+  // Metrics for Freezer
   const freezerMetrics = useMemo(() => {
     let totalFreezers = 0;
     let freezeCnt = 0;
     let coolCnt = 0;
     let activeFreezers = 0;
+    let l3mZeroFreezers = 0;
     let totalFrozenSo = 0;
     let totalAllSo = 0;
-    let l3mZeroFreezers = 0;
     const outletSet = new Set<string>();
-
-    const byCap = new Map<string, { qty: number; frozenSo: number; active: number }>();
-    const byChan = new Map<string, { qty: number; frozenSo: number; active: number }>();
-    const byYear = new Map<string, { qty: number; active: number; frozenSo: number }>();
-    const tierCounts = new Array(FREEZER_TIER_CONFIG.length).fill(0);
+    const tierCounts = new Array(7).fill(0);
+    const byCap = new Map<string, { qty: number; active: number; frozenSo: number }>();
+    const byChan = new Map<string, { qty: number; active: number; frozenSo: number }>();
 
     for (const r of filteredFreezers) {
       const q = Number(r.qty || 1);
       totalFreezers += q;
       if (r.c_code) outletSet.add(r.c_code);
 
-      const dType = String(r.dev_type || '').toLowerCase();
-      if (dType.includes('mát')) coolCnt += q;
+      const dType = String(r.dev_type || r.dev_name || '').toLowerCase();
+      if (dType.includes('mát') || dType.includes('cool')) coolCnt += q;
       else freezeCnt += q;
 
       const salesMap = parseSalesMap(r.sales || r.sales_json);
-      let rFrozen = 0;
-      let rTotal = 0;
+      let periodFrozen = 0;
+      let periodAll = 0;
       for (const m of selectedMonths) {
         const arr = salesMap[m] || salesMap[String(parseInt(m, 10)).padStart(2, '0')];
         if (arr) {
-          rFrozen += Number(arr[0]) || 0;
-          rTotal += Number(arr[1]) || 0;
+          periodFrozen += Number(arr[0]) || 0;
+          periodAll += Number(arr[1]) || 0;
         }
       }
 
@@ -563,113 +524,96 @@ export function GtPosmPage() {
         const arr = salesMap[m] || salesMap[String(parseInt(m, 10)).padStart(2, '0')];
         if (arr) l3mSum += Number(arr[0]) || 0;
       }
+
+      if (periodFrozen > 0) activeFreezers += q;
       if (l3mSum === 0) l3mZeroFreezers += q;
+      totalFrozenSo += periodFrozen;
+      totalAllSo += periodAll;
 
-      totalFrozenSo += rFrozen;
-      totalAllSo += rTotal;
-      const isActive = rFrozen > 0;
-      if (isActive) activeFreezers += q;
+      const monthlySo = Math.round(periodFrozen / mCount);
+      let tIdx = 0;
+      if (monthlySo <= 0) tIdx = 0;
+      else if (monthlySo < 500_000) tIdx = 1;
+      else if (monthlySo < 1_500_000) tIdx = 2;
+      else if (monthlySo < 3_000_000) tIdx = 3;
+      else if (monthlySo < 5_000_000) tIdx = 4;
+      else if (monthlySo <= 10_000_000) tIdx = 5;
+      else tIdx = 6;
+      tierCounts[tIdx] += q;
 
-      // Tier
-      const monthlySo = rFrozen / mCount;
-      let tierIdx = 0;
-      if (monthlySo <= 0) tierIdx = 0;
-      else if (monthlySo < 500_000) tierIdx = 1;
-      else if (monthlySo < 1_500_000) tierIdx = 2;
-      else if (monthlySo < 3_000_000) tierIdx = 3;
-      else if (monthlySo < 5_000_000) tierIdx = 4;
-      else if (monthlySo <= 10_000_000) tierIdx = 5;
-      else tierIdx = 6;
-      tierCounts[tierIdx] += q;
-
-      // By Capacity
-      const capKey = r.cap_group || r.capacity || 'Khác';
-      const curCap = byCap.get(capKey) || { qty: 0, frozenSo: 0, active: 0 };
+      const cap = r.capacity || r.cap_group || 'Khác';
+      const curCap = byCap.get(cap) || { qty: 0, active: 0, frozenSo: 0 };
       curCap.qty += q;
-      curCap.frozenSo += rFrozen;
-      if (isActive) curCap.active += q;
-      byCap.set(capKey, curCap);
+      if (periodFrozen > 0) curCap.active += q;
+      curCap.frozenSo += periodFrozen;
+      byCap.set(cap, curCap);
 
-      // By Channel
-      const chanKey = r.channel_name || r.channel || 'Khác';
-      const curChan = byChan.get(chanKey) || { qty: 0, frozenSo: 0, active: 0 };
+      const chan = r.channel || r.channel_name || 'Khác';
+      const curChan = byChan.get(chan) || { qty: 0, active: 0, frozenSo: 0 };
       curChan.qty += q;
-      curChan.frozenSo += rFrozen;
-      if (isActive) curChan.active += q;
-      byChan.set(chanKey, curChan);
-
-      // By Year
-      const yrKey = String(r.model_year || 'N/A');
-      const curYr = byYear.get(yrKey) || { qty: 0, active: 0, frozenSo: 0 };
-      curYr.qty += q;
-      if (isActive) curYr.active += q;
-      curYr.frozenSo += rFrozen;
-      byYear.set(yrKey, curYr);
+      if (periodFrozen > 0) curChan.active += q;
+      curChan.frozenSo += periodFrozen;
+      byChan.set(chan, curChan);
     }
 
-    const zeroFreezers = Math.max(0, totalFreezers - activeFreezers);
     const activeRate = totalFreezers > 0 ? (activeFreezers / totalFreezers) * 100 : 0;
+    const zeroFreezers = Math.max(0, totalFreezers - activeFreezers);
     const zeroRate = totalFreezers > 0 ? (zeroFreezers / totalFreezers) * 100 : 0;
-    const vpo = activeFreezers > 0 ? totalFrozenSo / activeFreezers / mCount : 0;
     const coldShare = totalAllSo > 0 ? (totalFrozenSo / totalAllSo) * 100 : 0;
+    const vpo = activeFreezers > 0 ? Math.round(totalFrozenSo / activeFreezers / mCount) : 0;
 
     return {
       totalFreezers,
       freezeCnt,
       coolCnt,
+      uniqueOutlets: outletSet.size,
       activeFreezers,
-      zeroFreezers,
-      l3mZeroFreezers,
       activeRate,
+      zeroFreezers,
       zeroRate,
+      l3mZeroFreezers,
       totalFrozenSo,
       totalAllSo,
       coldShare,
       vpo,
-      uniqueOutlets: outletSet.size,
+      tierCounts,
       byCap,
       byChan,
-      byYear,
-      tierCounts,
     };
-  }, [filteredFreezers, selectedMonths, mCount, l3mMonths]);
+  }, [filteredFreezers, selectedMonths, l3mMonths, mCount]);
 
-  // Standee Processed Metrics
+  // Metrics for Standee
   const standeeMetrics = useMemo(() => {
     let totalRacks = 0;
     let ironCnt = 0;
     let miniCnt = 0;
     let cnt2026 = 0;
     let activeRacks = 0;
+    let l3mZeroRacks = 0;
     let totalAmbientSo = 0;
     let totalSnackSo = 0;
-    let totalAllSo = 0;
-    let l3mZeroRacks = 0;
     const outletSet = new Set<string>();
-
-    const byChan = new Map<string, { qty: number; ambientSo: number; active: number }>();
-    const tierCounts = new Array(STANDEE_TIER_CONFIG.length).fill(0);
+    const tierCounts = new Array(6).fill(0);
+    const byChan = new Map<string, { qty: number; active: number; ambientSo: number }>();
 
     for (const r of filteredStandees) {
       const q = Number(r.qty || 1);
       totalRacks += q;
       if (r.c_code) outletSet.add(r.c_code);
 
-      const dName = String(r.dev_name || r.dev_type || '').toUpperCase();
-      if (dName.includes('MINI')) miniCnt += q;
-      else if (dName.includes('2026') || r.model_year === 2026) cnt2026 += q;
+      const dType = String(r.dev_type || r.dev_name || '').toLowerCase();
+      if (dType.includes('mini')) miniCnt += q;
       else ironCnt += q;
+      if (Number(r.model_year) === 2026) cnt2026 += q;
 
       const salesMap = parseSalesMap(r.sales || r.sales_json);
-      let rAmbient = 0;
-      let rSnack = 0;
-      let rTotal = 0;
+      let periodAmbient = 0;
+      let periodSnack = 0;
       for (const m of selectedMonths) {
         const arr = salesMap[m] || salesMap[String(parseInt(m, 10)).padStart(2, '0')];
         if (arr) {
-          rAmbient += Number(arr[0]) || 0;
-          rSnack += Number(arr[1]) || 0;
-          rTotal += Number(arr[2]) || 0;
+          periodAmbient += Number(arr[0]) || 0;
+          periodSnack += Number(arr[1]) || 0;
         }
       }
 
@@ -678,78 +622,71 @@ export function GtPosmPage() {
         const arr = salesMap[m] || salesMap[String(parseInt(m, 10)).padStart(2, '0')];
         if (arr) l3mSum += Number(arr[0]) || 0;
       }
+
+      if (periodAmbient > 0) activeRacks += q;
       if (l3mSum === 0) l3mZeroRacks += q;
+      totalAmbientSo += periodAmbient;
+      totalSnackSo += periodSnack;
 
-      totalAmbientSo += rAmbient;
-      totalSnackSo += rSnack;
-      totalAllSo += rTotal;
-      const isActive = rAmbient > 0;
-      if (isActive) activeRacks += q;
+      const monthlySo = Math.round(periodAmbient / mCount);
+      let tIdx = 0;
+      if (monthlySo <= 0) tIdx = 0;
+      else if (monthlySo < 200_000) tIdx = 1;
+      else if (monthlySo < 500_000) tIdx = 2;
+      else if (monthlySo < 1_000_000) tIdx = 3;
+      else if (monthlySo < 2_000_000) tIdx = 4;
+      else tIdx = 5;
+      tierCounts[tIdx] += q;
 
-      // Tier
-      const avgM = rAmbient / mCount;
-      let tierIdx = 0;
-      if (avgM <= 0) tierIdx = 0;
-      else if (avgM < 200_000) tierIdx = 1;
-      else if (avgM < 500_000) tierIdx = 2;
-      else if (avgM < 1_000_000) tierIdx = 3;
-      else if (avgM < 2_000_000) tierIdx = 4;
-      else tierIdx = 5;
-      tierCounts[tierIdx] += q;
-
-      // By Channel
-      const chanKey = r.channel_name || r.channel || 'Khác';
-      const curChan = byChan.get(chanKey) || { qty: 0, ambientSo: 0, active: 0 };
+      const chan = r.channel || r.channel_name || 'Khác';
+      const curChan = byChan.get(chan) || { qty: 0, active: 0, ambientSo: 0 };
       curChan.qty += q;
-      curChan.ambientSo += rAmbient;
-      if (isActive) curChan.active += q;
-      byChan.set(chanKey, curChan);
+      if (periodAmbient > 0) curChan.active += q;
+      curChan.ambientSo += periodAmbient;
+      byChan.set(chan, curChan);
     }
 
-    const zeroRacks = Math.max(0, totalRacks - activeRacks);
     const activeRate = totalRacks > 0 ? (activeRacks / totalRacks) * 100 : 0;
+    const zeroRacks = Math.max(0, totalRacks - activeRacks);
     const zeroRate = totalRacks > 0 ? (zeroRacks / totalRacks) * 100 : 0;
-    const vpo = activeRacks > 0 ? totalAmbientSo / activeRacks / mCount : 0;
     const snackShare = totalAmbientSo > 0 ? (totalSnackSo / totalAmbientSo) * 100 : 0;
+    const vpo = activeRacks > 0 ? Math.round(totalAmbientSo / activeRacks / mCount) : 0;
 
     return {
       totalRacks,
       ironCnt,
       miniCnt,
       cnt2026,
+      uniqueOutlets: outletSet.size,
       activeRacks,
-      zeroRacks,
-      l3mZeroRacks,
       activeRate,
+      zeroRacks,
       zeroRate,
+      l3mZeroRacks,
       totalAmbientSo,
       totalSnackSo,
-      totalAllSo,
       snackShare,
       vpo,
-      uniqueOutlets: outletSet.size,
-      byChan,
       tierCounts,
+      byChan,
     };
-  }, [filteredStandees, selectedMonths, mCount, l3mMonths]);
+  }, [filteredStandees, selectedMonths, l3mMonths, mCount]);
 
   // Chart 1 Freezer: Capacity (Dual-axis Bar + Line)
   const freezerCapacityOption = useMemo(() => {
-    const entries = Array.from(freezerMetrics.byCap.entries()).sort((a, b) => b[1].qty - a[1].qty).slice(0, 10);
+    const entries = Array.from(freezerMetrics.byCap.entries()).sort((a, b) => b[1].qty - a[1].qty);
     return {
       tooltip: { trigger: 'axis' as const },
       legend: { data: ['Số Lượng Tủ', 'Năng Suất (Tr/Tủ/Tháng)'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
-      grid: { left: 48, right: 44, top: 34, bottom: 32 },
+      grid: { left: 48, right: 48, top: 32, bottom: 28 },
       xAxis: {
         type: 'category' as const,
         data: entries.map((e) => e[0]),
-        axisLabel: { color: '#FFFFFF', fontSize: 9.5, rotate: 12 },
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5, rotate: entries.length > 5 ? 15 : 0 },
       },
       yAxis: [
         {
           type: 'value' as const,
-          name: 'Số Tủ',
-          nameTextStyle: { color: 'rgba(255,255,255,0.7)', fontSize: 9 },
           axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
         },
@@ -813,27 +750,65 @@ export function GtPosmPage() {
     };
   }, [freezerMetrics.byChan]);
 
-  // Chart 3 Freezer: Model Year (Dual Bar + Line)
-  const freezerYearOption = useMemo(() => {
-    const entries = Array.from(freezerMetrics.byYear.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+  // Chart 3 Freezer: Xu Hướng Quy Mô & Năng Suất Tủ Đông Theo Tháng (12 Tháng 2026)
+  const freezerMonthlyTrendOption = useMemo(() => {
+    const monthLabels = ['T01', 'T02', 'T03', 'T04', 'T05', 'T06', 'T07', 'T08', 'T09', 'T10', 'T11', 'T12'];
+    const monthKeys = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    const baseTotal = filteredFreezers.length;
+
+    const monthlyActive: number[] = [];
+    const monthlyRate: number[] = [];
+    const monthlyVpo: number[] = [];
+
+    monthKeys.forEach((m) => {
+      let mSo = 0;
+      let mActive = 0;
+      for (const d of filteredFreezers) {
+        const sm = parseSalesMap(d.sales || d.sales_json);
+        const fVal = Number(sm[m]?.[0]) || 0;
+        if (fVal > 0) {
+          mActive++;
+          mSo += fVal;
+        }
+      }
+      monthlyActive.push(mActive);
+      const rate = baseTotal > 0 ? Number(((mActive / baseTotal) * 100).toFixed(1)) : 0;
+      monthlyRate.push(rate);
+      const vpoMil = mActive > 0 ? Number((mSo / mActive / 1e6).toFixed(1)) : 0;
+      monthlyVpo.push(vpoMil);
+    });
+
     return {
-      tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Tổng Tủ', 'Tủ Active', 'DS/Tủ (Tr)'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
-      grid: { left: 48, right: 44, top: 34, bottom: 28 },
+      tooltip: {
+        trigger: 'axis' as const,
+        axisPointer: { type: 'cross' as const },
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        borderColor: '#0284c7',
+        borderWidth: 1,
+        textStyle: { color: '#FFFFFF', fontSize: 11 },
+      },
+      legend: {
+        data: ['Tủ Active (Có Mua)', 'Tỷ Lệ Active (%)', 'Doanh Số TB/Tủ (Tr)'],
+        top: 6,
+        textStyle: { color: '#FFFFFF', fontSize: 10, fontWeight: 'bold' as const },
+      },
+      grid: { left: 48, right: 48, top: 44, bottom: 28 },
       xAxis: {
         type: 'category' as const,
-        data: entries.map((e) => e[0]),
-        axisLabel: { color: '#FFFFFF', fontSize: 9.5, fontWeight: 'bold' as const },
+        data: monthLabels,
+        axisLabel: { color: 'rgba(255,255,255,0.9)', fontSize: 10, fontWeight: 'bold' as const },
       },
       yAxis: [
         {
           type: 'value' as const,
+          name: 'Số Tủ',
+          nameTextStyle: { color: '#CBD5E1', fontSize: 9 },
           axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
         },
         {
           type: 'value' as const,
-          name: 'Tr/Tủ',
+          name: '% / Tr',
           nameTextStyle: { color: '#fde047', fontSize: 9 },
           axisLabel: { color: '#fde047', fontSize: 9.5 },
           splitLine: { show: false },
@@ -841,32 +816,34 @@ export function GtPosmPage() {
       ],
       series: [
         {
-          name: 'Tổng Tủ',
+          name: 'Tủ Active (Có Mua)',
           type: 'bar' as const,
           barMaxWidth: 16,
-          data: entries.map((e) => e[1].qty),
-          itemStyle: { color: 'rgba(255,255,255,0.5)', borderRadius: [3, 3, 0, 0] },
-        },
-        {
-          name: 'Tủ Active',
-          type: 'bar' as const,
-          barMaxWidth: 16,
-          data: entries.map((e) => e[1].active),
-          itemStyle: { color: '#38BDF8', borderRadius: [3, 3, 0, 0] },
+          data: monthlyActive,
+          itemStyle: { color: '#0ea5e9', borderRadius: [3, 3, 0, 0] },
           label: { show: true, position: 'top' as const, color: '#BAE6FD', fontSize: 8.5 },
         },
         {
-          name: 'DS/Tủ (Tr)',
+          name: 'Tỷ Lệ Active (%)',
           type: 'line' as const,
           yAxisIndex: 1,
           smooth: true,
-          data: entries.map((e) => (e[1].active > 0 ? Number((e[1].frozenSo / e[1].active / mCount / 1e6).toFixed(1)) : 0)),
+          data: monthlyRate,
+          itemStyle: { color: '#34d399' },
+          lineStyle: { width: 2.2, color: '#34d399' },
+        },
+        {
+          name: 'Doanh Số TB/Tủ (Tr)',
+          type: 'line' as const,
+          yAxisIndex: 1,
+          smooth: true,
+          data: monthlyVpo,
           itemStyle: { color: '#fde047' },
-          lineStyle: { width: 2.2, color: '#fde047' },
+          lineStyle: { width: 2.2, color: '#fde047', type: 'dashed' as const },
         },
       ],
     };
-  }, [freezerMetrics.byYear, mCount]);
+  }, [filteredFreezers]);
 
   // Chart 4 Freezer: Tiers (Horizontal Bar)
   const freezerTierOption = useMemo(() => {
@@ -933,27 +910,24 @@ export function GtPosmPage() {
 
     return {
       tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Kệ Active', 'Tỷ Lệ Active %'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
-      grid: { left: 44, right: 44, top: 34, bottom: 28 },
+      legend: { data: ['Kệ Active', 'Tỷ Lệ Active (%)'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
+      grid: { left: 48, right: 44, top: 32, bottom: 28 },
       xAxis: {
         type: 'category' as const,
         data: monthLabels,
-        axisLabel: { color: '#FFFFFF', fontSize: 9.5, fontWeight: 'bold' as const },
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5 },
       },
       yAxis: [
         {
           type: 'value' as const,
-          name: 'Số Kệ',
-          nameTextStyle: { color: 'rgba(255,255,255,0.7)', fontSize: 9 },
           axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5 },
           splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
         },
         {
           type: 'value' as const,
           name: '%',
-          max: 100,
-          nameTextStyle: { color: '#38BDF8', fontSize: 9 },
-          axisLabel: { color: '#38BDF8', fontSize: 9.5 },
+          nameTextStyle: { color: '#fde047', fontSize: 9 },
+          axisLabel: { color: '#fde047', fontSize: 9.5, formatter: '{value}%' },
           splitLine: { show: false },
         },
       ],
@@ -963,117 +937,70 @@ export function GtPosmPage() {
           type: 'bar' as const,
           barMaxWidth: 16,
           data: monthlyActive,
-          itemStyle: { color: '#34D399', borderRadius: [3, 3, 0, 0] },
-          label: { show: true, position: 'top' as const, color: '#D1FAE5', fontSize: 8 },
+          itemStyle: { color: '#818CF8', borderRadius: [3, 3, 0, 0] },
+          label: { show: true, position: 'top' as const, color: '#C7D2FE', fontSize: 8.5 },
         },
         {
-          name: 'Tỷ Lệ Active %',
+          name: 'Tỷ Lệ Active (%)',
           type: 'line' as const,
           yAxisIndex: 1,
           smooth: true,
           data: monthlyRate,
-          itemStyle: { color: '#38BDF8' },
-          lineStyle: { width: 2.2, color: '#38BDF8' },
+          itemStyle: { color: '#34D399' },
+          lineStyle: { width: 2.2, color: '#34D399' },
+          label: { show: true, position: 'top' as const, color: '#A7F3D0', fontSize: 8.5 },
         },
       ],
     };
-  }, [filteredStandees, standeeMetrics.totalRacks]);
+  }, [standeeMetrics.totalRacks, filteredStandees]);
 
-  // Chart 2 Standee: Channel (Bar + Năng suất k/kệ)
+  // Chart 2 Standee: Channel (Horizontal Bar)
   const standeeChannelOption = useMemo(() => {
-    const entries = Array.from(standeeMetrics.byChan.entries()).sort((a, b) => b[1].qty - a[1].qty).slice(0, 8);
+    const entries = Array.from(standeeMetrics.byChan.entries()).sort((a, b) => a[1].qty - b[1].qty).slice(-8);
     return {
-      tooltip: { trigger: 'axis' as const },
-      legend: { data: ['Số Kệ', 'Năng Suất (k/kệ/tháng)'], top: 2, textStyle: { color: '#fff', fontSize: 10 } },
-      grid: { left: 44, right: 44, top: 34, bottom: 32 },
+      tooltip: { trigger: 'axis' as const, axisPointer: { type: 'shadow' as const } },
+      grid: { left: 96, right: 48, top: 16, bottom: 24 },
       xAxis: {
+        type: 'value' as const,
+        axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
+      },
+      yAxis: {
         type: 'category' as const,
         data: entries.map((e) => e[0]),
-        axisLabel: { color: '#FFFFFF', fontSize: 9.5, rotate: 12 },
+        axisLabel: { color: '#FFFFFF', fontSize: 9.5, fontWeight: 'bold' as const },
       },
-      yAxis: [
-        {
-          type: 'value' as const,
-          axisLabel: { color: 'rgba(255,255,255,0.85)', fontSize: 9.5 },
-          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.18)', type: 'dashed' as const } },
-        },
-        {
-          type: 'value' as const,
-          name: 'k/Kệ',
-          nameTextStyle: { color: '#fde047', fontSize: 9 },
-          axisLabel: { color: '#fde047', fontSize: 9.5 },
-          splitLine: { show: false },
-        },
-      ],
       series: [
         {
-          name: 'Số Kệ',
+          name: 'Số Lượng Kệ',
           type: 'bar' as const,
           barMaxWidth: 20,
           data: entries.map((e) => e[1].qty),
-          itemStyle: { color: '#A78BFA', borderRadius: [3, 3, 0, 0] },
-          label: { show: true, position: 'top' as const, color: '#EDE9FE', fontSize: 8.5 },
-        },
-        {
-          name: 'Năng Suất (k/kệ/tháng)',
-          type: 'line' as const,
-          yAxisIndex: 1,
-          smooth: true,
-          data: entries.map((e) => (e[1].active > 0 ? Number((e[1].ambientSo / e[1].active / mCount / 1e3).toFixed(1)) : 0)),
-          itemStyle: { color: '#fde047' },
-          lineStyle: { width: 2.2, color: '#fde047' },
+          itemStyle: { color: '#818cf8', borderRadius: [0, 4, 4, 0] },
+          label: { show: true, position: 'right' as const, color: '#FFFFFF', fontSize: 9.5, fontWeight: 'bold' as const },
         },
       ],
     };
-  }, [standeeMetrics.byChan, mCount]);
+  }, [standeeMetrics.byChan]);
 
-  // Chart 3 Standee: Category (6 Ngành hàng Khô)
+  // Chart 3 Standee: Category Share (Pie/Donut)
   const standeeCategoryOption = useMemo(() => {
-    const catTotals: Record<string, number> = {
-      '03. Snack': 0,
-      '06. Seasoning & Sauce': 0,
-      '12. Noodles': 0,
-      '09. ETC': 0,
-      '08. Healthy Food': 0,
-      '07. Processed Rice': 0,
-    };
-    const selM = selectedMonths.length > 0 ? selectedMonths : ['10'];
-    selM.forEach((m) => {
-      const padM = m.padStart(2, '0');
-      const mData = GT_STANDEE_CAT_DATA[padM] || {};
-      Object.keys(catTotals).forEach((cat) => {
-        catTotals[cat] += mData[cat] || 0;
-      });
-    });
-
-    const categories = Object.keys(catTotals);
-    const colorMap: Record<string, string> = {
-      '03. Snack': '#10b981',
-      '06. Seasoning & Sauce': '#f59e0b',
-      '12. Noodles': '#3b82f6',
-      '09. ETC': '#94a3b8',
-      '08. Healthy Food': '#ec4899',
-      '07. Processed Rice': '#8b5cf6',
-    };
-
+    const lastM = selectedMonths.length > 0 ? selectedMonths[selectedMonths.length - 1] : '10';
+    const catMap = GT_STANDEE_CAT_DATA[lastM] || GT_STANDEE_CAT_DATA['10'];
+    const data = Object.entries(catMap).map(([name, val]) => ({ name, value: Math.round(val / 1e6) }));
     return {
-      tooltip: {
-        trigger: 'item' as const,
-        formatter: '{b}: {c} ({d}%)',
-      },
-      legend: { top: 2, textStyle: { color: '#fff', fontSize: 9.5 } },
+      tooltip: { trigger: 'item' as const, formatter: '{b}: {c} Tr ({d}%)' },
+      legend: { bottom: 0, textStyle: { color: '#fff', fontSize: 9.5 }, itemWidth: 10, itemHeight: 10 },
       series: [
         {
-          name: 'Cơ Cấu Ngành Hàng Khô',
+          name: 'Ngành Hàng',
           type: 'pie' as const,
-          radius: ['40%', '70%'],
-          center: ['50%', '55%'],
-          data: categories.map((c) => ({
-            name: c,
-            value: catTotals[c],
-            itemStyle: { color: colorMap[c] || '#CBD5E1' },
-          })),
-          label: { color: '#FFFFFF', fontSize: 9.5, formatter: '{b}: {d}%' },
+          radius: ['38%', '68%'],
+          center: ['50%', '42%'],
+          avoidLabelOverlap: true,
+          itemStyle: { borderRadius: 4, borderColor: '#1e293b', borderWidth: 2 },
+          label: { show: true, position: 'outside' as const, color: '#fff', fontSize: 9, formatter: '{b}: {d}%' },
+          data,
         },
       ],
     };
@@ -1122,78 +1049,338 @@ export function GtPosmPage() {
     };
   }, [standeeMetrics.tierCounts, standeeMetrics.totalRacks]);
 
-  const columns: ColumnDef<PosmAssetRow>[] = [
-    { key: 'c_code', header: 'Mã KH', sortValue: (r) => r.c_code || '', render: (r) => <span className="font-mono-num font-semibold text-slate-900">{r.c_code}</span> },
-    { key: 'c_name', header: 'Tên điểm bán', sortValue: (r) => r.c_name || '', render: (r) => r.c_name || '-' },
-    { key: 'npp', header: 'NPP', sortValue: (r) => r.npp_name || '', render: (r) => r.npp_name || r.npp_code || '-' },
-    { key: 'vung', header: 'Vùng', sortValue: (r) => r.vung || '', render: (r) => r.vung || '-' },
-    { key: 'dev_type', header: 'Loại thiết bị', sortValue: (r) => r.dev_type || '', render: (r) => r.dev_type || r.dev_name || '-' },
-    { key: 'cap', header: tab === 'freezer' ? 'Dung tích' : 'Số lượng', align: 'right', sortValue: (r) => String(r.capacity || r.qty || ''), render: (r) => (tab === 'freezer' ? r.capacity || '-' : String(r.qty || 1)) },
-    { key: 'year', header: 'Model', align: 'center', sortValue: (r) => r.model_year || 0, render: (r) => String(r.model_year || '-') },
-    { key: 'qr', header: 'QR / Serial', sortValue: (r) => r.qr || '', render: (r) => <span className="font-mono-num text-xs text-slate-500">{r.qr || r.serial || r.dev_code || '-'}</span> },
-  ];
+  // Full 16-Column Enterprise Detail Table matching web_app
+  const detailColumns: ColumnDef<PosmAssetRow>[] = useMemo(() => {
+    const l3m = l3mMonths;
+    const mHead1 = `DS T${parseInt(l3m[0] || '8', 10)}`;
+    const mHead2 = `DS T${parseInt(l3m[1] || '9', 10)}`;
+    const mHead3 = `DS T${parseInt(l3m[2] || '10', 10)}`;
+
+    return [
+      {
+        key: 'stt',
+        header: '#',
+        align: 'center',
+        render: (r) => <span className="font-mono text-slate-400 text-xs">{(r as any)._stt || '•'}</span>,
+      },
+      {
+        key: 'outlet',
+        header: 'Khách Hàng (Outlet)',
+        sortValue: (r) => r.c_name || r.c_code || '',
+        render: (r) => (
+          <div>
+            <span className="font-bold text-slate-900 block text-xs">{r.c_name || 'N/A'}</span>
+            <span className="font-mono-num text-[10.5px] text-sky-800 font-semibold">{r.c_code}</span>
+          </div>
+        ),
+      },
+      {
+        key: 'addr',
+        header: 'Địa Chỉ',
+        sortValue: (r) => r.addr || '',
+        render: (r) => (
+          <span className="text-slate-600 text-[11px] line-clamp-1 max-w-[180px] block" title={r.addr}>
+            {r.addr || '-'}
+          </span>
+        ),
+      },
+      {
+        key: 'chan',
+        header: 'Kênh',
+        align: 'center',
+        sortValue: (r) => r.channel || '',
+        render: (r) => (
+          <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">
+            {r.channel || '-'}
+          </span>
+        ),
+      },
+      {
+        key: 'dev',
+        header: 'Thiết Bị & Dung Tích',
+        sortValue: (r) => r.dev_name || r.capacity || '',
+        render: (r) => (
+          <div>
+            <span className="font-semibold text-slate-800 block text-xs">{r.dev_name || r.dev_type || '-'}</span>
+            <span className="text-[10.5px] text-slate-500 font-medium">
+              {tab === 'freezer' ? r.capacity || '-' : `SL: ${r.qty || 1}`}
+            </span>
+          </div>
+        ),
+      },
+      {
+        key: 'year',
+        header: 'Năm SX',
+        align: 'center',
+        sortValue: (r) => r.model_year || 0,
+        render: (r) => <span className="font-mono text-xs text-slate-600">{r.model_year || '-'}</span>,
+      },
+      {
+        key: 'qr',
+        header: 'QR / Seri',
+        sortValue: (r) => r.qr || r.serial || '',
+        render: (r) => (
+          <span className="font-mono text-[10.5px] text-slate-500 block">
+            {r.qr || r.serial || r.dev_code || '-'}
+          </span>
+        ),
+      },
+      {
+        key: 'salesman',
+        header: 'NVBH & NPP',
+        sortValue: (r) => r.emp_name || r.npp_name || '',
+        render: (r) => (
+          <div className="text-xs">
+            <span className="font-bold text-slate-800 block">{r.emp_name || r.nvbh_name || '-'}</span>
+            <span className="text-[10.5px] text-slate-500">{r.npp_name || r.npp_code || '-'}</span>
+          </div>
+        ),
+      },
+      {
+        key: 'status',
+        header: 'Trạng Thái',
+        align: 'center',
+        sortValue: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let so = 0;
+          for (const m of selectedMonths) so += Number(sm[m]?.[0]) || 0;
+          return so;
+        },
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let mainVal = 0;
+          for (const m of selectedMonths) mainVal += Number(sm[m]?.[0]) || 0;
+          let l3mSum = 0;
+          for (const m of l3m) l3mSum += Number(sm[m]?.[0]) || 0;
+
+          if (mainVal > 0) {
+            return (
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                Active
+              </span>
+            );
+          }
+          if (l3mSum === 0) {
+            return (
+              <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 border border-rose-300">
+                ⚠️ 3T Không Mua
+              </span>
+            );
+          }
+          return (
+            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
+              0 Bán
+            </span>
+          );
+        },
+      },
+      {
+        key: 'tier',
+        header: 'Mức Doanh Số',
+        align: 'center',
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let mainVal = 0;
+          for (const m of selectedMonths) mainVal += Number(sm[m]?.[0]) || 0;
+          const monthlySo = Math.round(mainVal / mCount);
+
+          if (tab === 'freezer') {
+            if (monthlySo <= 0) return <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">= 0</span>;
+            if (monthlySo < 500_000) return <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">&lt; 500k</span>;
+            if (monthlySo < 1_500_000) return <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">500k~1.5M</span>;
+            if (monthlySo < 3_000_000) return <span className="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200">1.5M~3M</span>;
+            if (monthlySo < 5_000_000) return <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">3M~5M</span>;
+            if (monthlySo <= 10_000_000) return <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">5M~10M</span>;
+            return <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">&gt; 10M</span>;
+          }
+          if (monthlySo <= 0) return <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">= 0</span>;
+          if (monthlySo < 200_000) return <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200">&lt; 200k</span>;
+          if (monthlySo < 500_000) return <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">200k~500k</span>;
+          if (monthlySo < 1_000_000) return <span className="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200">500k~1M</span>;
+          if (monthlySo < 2_000_000) return <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">1M~2M</span>;
+          return <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">&gt; 2M</span>;
+        },
+      },
+      {
+        key: 'm1',
+        header: mHead1,
+        align: 'right',
+        sortValue: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          return Number(sm[l3m[0]]?.[0]) || 0;
+        },
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          const v = Number(sm[l3m[0]]?.[0]) || 0;
+          return <span className="font-mono-num text-xs text-slate-700">{formatPosmShort(v)}</span>;
+        },
+      },
+      {
+        key: 'm2',
+        header: mHead2,
+        align: 'right',
+        sortValue: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          return Number(sm[l3m[1]]?.[0]) || 0;
+        },
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          const v = Number(sm[l3m[1]]?.[0]) || 0;
+          return <span className="font-mono-num text-xs text-slate-700">{formatPosmShort(v)}</span>;
+        },
+      },
+      {
+        key: 'm3',
+        header: `${mHead3} ⭐`,
+        align: 'right',
+        sortValue: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          return Number(sm[l3m[2]]?.[0]) || 0;
+        },
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          const v = Number(sm[l3m[2]]?.[0]) || 0;
+          return <span className="font-mono-num text-xs font-bold text-purple-700">{formatPosmShort(v)}</span>;
+        },
+      },
+      {
+        key: 'l3mAvg',
+        header: tab === 'freezer' ? 'TB 3T Đông' : 'TB 3T Khô',
+        align: 'right',
+        sortValue: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let sum = 0;
+          for (const m of l3m) sum += Number(sm[m]?.[0]) || 0;
+          return sum;
+        },
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let sum = 0;
+          for (const m of l3m) sum += Number(sm[m]?.[0]) || 0;
+          const avg = l3m.length > 0 ? Math.round(sum / l3m.length) : 0;
+          return <span className="font-mono-num text-xs font-bold text-amber-800">{formatPosmShort(avg)}</span>;
+        },
+      },
+      {
+        key: 'weight',
+        header: tab === 'freezer' ? '% Trọng Số Đông' : '% Trọng Số Snack',
+        align: 'right',
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let main = 0;
+          let sub = 0;
+          for (const m of selectedMonths) {
+            main += Number(sm[m]?.[0]) || 0;
+            sub += Number(sm[m]?.[1]) || 0;
+          }
+          const pct = sub > 0 ? (main / sub) * 100 : (main > 0 ? 100 : 0);
+          return <span className="font-mono-num text-xs font-semibold text-slate-700">{pct.toFixed(1)}%</span>;
+        },
+      },
+      {
+        key: 'soPerDev',
+        header: tab === 'freezer' ? 'Doanh Số / Tủ' : 'Doanh Số / Kệ',
+        align: 'right',
+        sortValue: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let main = 0;
+          for (const m of selectedMonths) main += Number(sm[m]?.[0]) || 0;
+          return main;
+        },
+        render: (r) => {
+          const sm = parseSalesMap(r.sales || r.sales_json);
+          let main = 0;
+          for (const m of selectedMonths) main += Number(sm[m]?.[0]) || 0;
+          return <span className="font-mono-num text-xs font-black text-sky-900">{formatPosmShort(main)}</span>;
+        },
+      },
+    ];
+  }, [l3mMonths, selectedMonths, tab, mCount]);
+
+  const activeRows: PosmAssetRow[] = useMemo(() => {
+    const list = tab === 'freezer' ? filteredFreezers : filteredStandees;
+    return list.map((r, i) => ({ ...r, _stt: i + 1 }));
+  }, [tab, filteredFreezers, filteredStandees]);
 
   const periodLabel = `Kỳ T${selectedMonths.join(', T')}/${year}`;
 
+  const excelTreeRows = useMemo(() => {
+    return flatTreeRows.map((n) => ({
+      ...n,
+      indentName: `${'  '.repeat(n.level)}${n.name}`,
+    }));
+  }, [flatTreeRows]);
+
   return (
     <div className="space-y-4">
-      {/* Title & Tab Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-[#004B91] shadow-sm">
-            {tab === 'freezer' ? <Snowflake className="h-5 w-5" /> : <Layers className="h-5 w-5" />}
+      {/* Title & Stylish Sub-tab Switcher matching web_app */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-2xl text-blue-600 border border-blue-100 shadow-2xs">
+            {tab === 'freezer' ? '❄️' : '🧺'}
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-black tracking-tight text-slate-900">
-                {tab === 'freezer' ? 'BÁO CÁO HIỆU QUẢ KHAI THÁC TỦ ĐÔNG & TỦ MÁT KÊNH GT' : 'BÁO CÁO HIỆU QUẢ KHAI THÁC STANDEE (KỆ SẮT) KÊNH GT'}
+              <h1 className="text-sm font-black tracking-tight text-slate-900 md:text-base">
+                {tab === 'freezer'
+                  ? 'BÁO CÁO HIỆU QUẢ KHAI THÁC TỦ ĐÔNG & TỦ MÁT KÊNH GT'
+                  : 'BÁO CÁO HIỆU QUẢ KHAI THÁC STANDEE (KỆ SẮT) KÊNH GT'}
               </h1>
               <span className="rounded-full border border-sky-200 bg-sky-50 px-2.5 py-0.5 font-mono text-[11px] font-bold text-sky-800">
                 {periodLabel}
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 mt-0.5">
               Dữ liệu liên kết đồng bộ với bộ lọc Địa Lý GT (Miền/Vùng/Office/NPP/NVBH) và Tháng trên thanh điều khiển chung
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-slate-200 bg-white p-0.5 shadow-xs text-xs font-bold">
+          {/* Sub-tab Pill Switcher */}
+          <div className="inline-flex items-center gap-1.5 p-1 bg-slate-100/95 rounded-2xl border-2 border-slate-300 shadow-inner">
             <button
               type="button"
               onClick={() => setTab('freezer')}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
-                tab === 'freezer' ? 'bg-[#004B91] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center gap-1.5 ${
+                tab === 'freezer'
+                  ? 'shadow-md bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-600 text-white border border-blue-500 ring-2 ring-blue-400/50 scale-[1.02]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
               }`}
             >
-              <span>❄️</span>
-              <span>Tủ Đông &amp; Tủ Mát ({filteredFreezers.length})</span>
+              <span className="text-sm">❄️</span>
+              <span>Hiệu Quả Tủ Đông ({filteredFreezers.length})</span>
             </button>
             <button
               type="button"
               onClick={() => setTab('standee')}
-              className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 transition-all ${
-                tab === 'standee' ? 'bg-[#7c3aed] text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
+              className={`px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 ${
+                tab === 'standee'
+                  ? 'shadow-md bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white border border-purple-500 ring-2 ring-purple-400/50 scale-[1.02]'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/70'
               }`}
             >
-              <span>🧺</span>
-              <span>Standee Kệ Sắt ({filteredStandees.length})</span>
+              <span className="text-sm">🧺</span>
+              <span>Hiệu Quả Standee (Kệ sắt) ({filteredStandees.length})</span>
             </button>
           </div>
 
           <ExportExcelButton
-            filename={`GT_POSM_${tab}_${year}.xlsx`}
+            filename={`GT_POSM_Detail_${tab}_${year}.xlsx`}
             sheetName={tab.toUpperCase()}
             rows={activeRows}
             columns={[
               { header: 'Mã KH', key: (r) => r.c_code || '' },
-              { header: 'Tên điểm bán', key: (r) => r.c_name || '' },
+              { header: 'Tên Điểm Bán', key: (r) => r.c_name || '' },
+              { header: 'Địa Chỉ', key: (r) => r.addr || '' },
+              { header: 'Kênh KH', key: (r) => r.channel || '' },
+              { header: 'Thiết Bị', key: (r) => r.dev_name || r.dev_type || '' },
+              { header: 'Dung Tích / SL', key: (r) => r.capacity || r.qty || '' },
+              { header: 'Năm SX', key: (r) => r.model_year || '' },
+              { header: 'QR / Seri', key: (r) => r.qr || r.serial || '' },
+              { header: 'NVBH', key: (r) => r.emp_name || r.nvbh_name || '' },
               { header: 'NPP', key: (r) => r.npp_name || '' },
               { header: 'Vùng', key: (r) => r.vung || '' },
-              { header: 'Loại thiết bị', key: (r) => r.dev_type || r.dev_name || '' },
-              { header: 'Model Year', key: (r) => r.model_year || '' },
-              { header: 'QR / Seri', key: (r) => r.qr || r.serial || '' },
             ]}
           />
         </div>
@@ -1201,94 +1388,223 @@ export function GtPosmPage() {
 
       <GeoFilterBar records={tab === 'freezer' ? freezers : standees} />
 
-      {/* 5 KPI Cards matching web_app */}
+      {/* 5 Enterprise KPI Cards (Exact Parity với web_app) */}
       {tab === 'freezer' ? (
         <div className="grid grid-cols-2 gap-2 sm:gap-3.5 lg:grid-cols-5">
-          <KpiCard
-            title="QUY MÔ TỦ ĐẦU TƯ"
-            value={loading ? '...' : formatNumber(freezerMetrics.totalFreezers)}
-            subtitle={`Đông: ${formatNumber(freezerMetrics.freezeCnt)} | Mát: ${formatNumber(freezerMetrics.coolCnt)}`}
-            badge={`${formatNumber(freezerMetrics.uniqueOutlets)} Điểm`}
-            accent="blue"
-            icon={<Snowflake className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="TỦ ACTIVE (CÓ DOANH SỐ)"
-            value={loading ? '...' : formatNumber(freezerMetrics.activeFreezers)}
-            subtitle="Tỷ lệ điểm đặt tủ có phát sinh sell-out tháng"
-            badge={`${freezerMetrics.activeRate.toFixed(1)}%`}
-            badgeTone="positive"
-            accent="emerald"
-            icon={<CheckCircle2 className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="TỦ ZERO-SALES (0 BÁN)"
-            value={loading ? '...' : formatNumber(freezerMetrics.zeroFreezers)}
-            subtitle={`⚠️ 3T không lấy hàng: ${formatNumber(freezerMetrics.l3mZeroFreezers)} tủ`}
-            badge={`${freezerMetrics.zeroRate.toFixed(1)}%`}
-            badgeTone="negative"
-            accent="red"
-            icon={<AlertTriangle className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="DOANH SỐ HÀNG ĐÔNG"
-            value={loading ? '...' : formatCurrencyVnd(freezerMetrics.totalFrozenSo)}
-            subtitle={`Tổng SO điểm tủ: ${formatCurrencyVnd(freezerMetrics.totalAllSo)}`}
-            badge={`${freezerMetrics.coldShare.toFixed(1)}% SO`}
-            accent="blue"
-            icon={<TrendingUp className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="NĂNG SUẤT TB / TỦ / THÁNG"
-            value={loading ? '...' : formatCurrencyVnd(freezerMetrics.vpo)}
-            subtitle="Bình quân doanh số đông / 1 tủ có mua / tháng"
-            accent="amber"
-            icon={<Box className="h-4 w-4" />}
-          />
+          {/* Card 1: Quy Mô Tủ */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #2563eb' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-blue-600">QUY MÔ TỦ ĐẦU TƯ</span>
+                <span className="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-extrabold text-blue-700">
+                  {formatNumber(freezerMetrics.uniqueOutlets)} Điểm
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-slate-900">
+                {loading ? '...' : formatNumber(freezerMetrics.totalFreezers)}
+              </div>
+            </div>
+            <div className="flex justify-between border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span>
+                Tủ đông: <b className="font-bold text-slate-800">{formatNumber(freezerMetrics.freezeCnt)}</b>
+              </span>
+              <span>
+                Tủ mát: <b className="font-bold text-slate-800">{formatNumber(freezerMetrics.coolCnt)}</b>
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Tủ Active */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #16a34a' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600">TỦ ACTIVE (CÓ DOANH SỐ)</span>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
+                  {freezerMetrics.activeRate.toFixed(1)}%
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-slate-900">
+                {loading ? '...' : formatNumber(freezerMetrics.activeFreezers)}
+              </div>
+            </div>
+            <div className="border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span className="truncate block">Tỷ lệ điểm đặt tủ có phát sinh sell-out tháng</span>
+            </div>
+          </div>
+
+          {/* Card 3: Tủ Zero-Sales */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #dc2626' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">TỦ ZERO-SALES (0 BÁN)</span>
+                <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-extrabold text-rose-700">
+                  {freezerMetrics.zeroRate.toFixed(1)}%
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-rose-600">
+                {loading ? '...' : formatNumber(freezerMetrics.zeroFreezers)}
+              </div>
+            </div>
+            <div className="flex justify-between border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span>⚠️ 3T không lấy hàng:</span>
+              <b className="font-bold text-rose-700">{formatNumber(freezerMetrics.l3mZeroFreezers)} tủ</b>
+            </div>
+          </div>
+
+          {/* Card 4: Doanh Số Hàng Đông */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #0891b2' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-cyan-700">DOANH SỐ HÀNG ĐÔNG</span>
+                <span className="rounded-full border border-cyan-200 bg-cyan-50 px-2 py-0.5 text-[10px] font-extrabold text-cyan-700">
+                  {freezerMetrics.coldShare.toFixed(1)}% SO
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-cyan-700">
+                {loading ? '...' : formatCurrencyVnd(freezerMetrics.totalFrozenSo)}
+              </div>
+            </div>
+            <div className="border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span>
+                Tổng SO điểm tủ: <b className="font-bold text-cyan-800">{formatCurrencyVnd(freezerMetrics.totalAllSo)}</b>
+              </span>
+            </div>
+          </div>
+
+          {/* Card 5: Năng Suất TB / Tủ */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md col-span-2 lg:col-span-1"
+            style={{ borderLeft: '5px solid #9333ea' }}
+          >
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wider text-purple-700">NĂNG SUẤT TB / TỦ / THÁNG</span>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-purple-700">
+                {loading ? '...' : formatCurrencyVnd(freezerMetrics.vpo)}
+              </div>
+            </div>
+            <div className="border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span className="truncate block">Bình quân doanh số đông / 1 tủ có mua / tháng</span>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-2 sm:gap-3.5 lg:grid-cols-5">
-          <KpiCard
-            title="QUY MÔ KỆ ĐẦU TƯ"
-            value={loading ? '...' : formatNumber(standeeMetrics.totalRacks)}
-            subtitle={`RB: ${formatNumber(standeeMetrics.ironCnt)} | Mini: ${formatNumber(standeeMetrics.miniCnt)} | 2026: ${formatNumber(standeeMetrics.cnt2026)}`}
-            badge={`${formatNumber(standeeMetrics.uniqueOutlets)} Điểm`}
-            accent="blue"
-            icon={<Layers className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="KỆ ACTIVE (CÓ DOANH SỐ)"
-            value={loading ? '...' : formatNumber(standeeMetrics.activeRacks)}
-            subtitle="Tỷ lệ điểm đặt kệ có phát sinh sell-out khô"
-            badge={`${standeeMetrics.activeRate.toFixed(1)}%`}
-            badgeTone="positive"
-            accent="emerald"
-            icon={<CheckCircle2 className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="KỆ ZERO-SALES (0 BÁN KHÔ)"
-            value={loading ? '...' : formatNumber(standeeMetrics.zeroRacks)}
-            subtitle={`⚠️ 3T không lấy hàng khô: ${formatNumber(standeeMetrics.l3mZeroRacks)} kệ`}
-            badge={`${standeeMetrics.zeroRate.toFixed(1)}%`}
-            badgeTone="negative"
-            accent="red"
-            icon={<AlertTriangle className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="DOANH SỐ HÀNG KHÔ"
-            value={loading ? '...' : formatCurrencyVnd(standeeMetrics.totalAmbientSo)}
-            subtitle={`Snack: ${formatCurrencyVnd(standeeMetrics.totalSnackSo)}`}
-            badge={`03. Snack: ${standeeMetrics.snackShare.toFixed(0)}%`}
-            accent="blue"
-            icon={<TrendingUp className="h-4 w-4" />}
-          />
-          <KpiCard
-            title="NĂNG SUẤT TB / KỆ / THÁNG"
-            value={loading ? '...' : formatCurrencyVnd(standeeMetrics.vpo)}
-            subtitle="Bình quân doanh số khô / 1 kệ có mua / tháng"
-            accent="amber"
-            icon={<Box className="h-4 w-4" />}
-          />
+          {/* Card 1: Quy Mô Kệ */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #7c3aed' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-purple-700">QUY MÔ KỆ ĐẦU TƯ</span>
+                <span className="rounded-full border border-purple-200 bg-purple-50 px-2 py-0.5 text-[10px] font-extrabold text-purple-700">
+                  {formatNumber(standeeMetrics.uniqueOutlets)} Điểm
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-slate-900">
+                {loading ? '...' : formatNumber(standeeMetrics.totalRacks)}
+              </div>
+            </div>
+            <div className="flex justify-between border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span>RB: <b className="font-bold text-slate-800">{formatNumber(standeeMetrics.ironCnt)}</b></span>
+              <span>Mini: <b className="font-bold text-slate-800">{formatNumber(standeeMetrics.miniCnt)}</b></span>
+              <span>2026: <b className="font-bold text-purple-700">{formatNumber(standeeMetrics.cnt2026)}</b></span>
+            </div>
+          </div>
+
+          {/* Card 2: Kệ Active */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #16a34a' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-emerald-600">KỆ ACTIVE (CÓ DOANH SỐ)</span>
+                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">
+                  {standeeMetrics.activeRate.toFixed(1)}%
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-slate-900">
+                {loading ? '...' : formatNumber(standeeMetrics.activeRacks)}
+              </div>
+            </div>
+            <div className="border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span className="truncate block">Tỷ lệ điểm đặt kệ có phát sinh sell-out khô</span>
+            </div>
+          </div>
+
+          {/* Card 3: Kệ Zero-Sales */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #dc2626' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-rose-600">KỆ ZERO-SALES (0 BÁN)</span>
+                <span className="rounded-full border border-rose-200 bg-rose-50 px-2 py-0.5 text-[10px] font-extrabold text-rose-700">
+                  {standeeMetrics.zeroRate.toFixed(1)}%
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-rose-600">
+                {loading ? '...' : formatNumber(standeeMetrics.zeroRacks)}
+              </div>
+            </div>
+            <div className="flex justify-between border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span>⚠️ 3T không lấy hàng khô:</span>
+              <b className="font-bold text-rose-700">{formatNumber(standeeMetrics.l3mZeroRacks)} kệ</b>
+            </div>
+          </div>
+
+          {/* Card 4: Doanh Số Hàng Khô */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md"
+            style={{ borderLeft: '5px solid #d97706' }}
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black uppercase tracking-wider text-amber-700">DOANH SỐ HÀNG KHÔ</span>
+                <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold text-amber-700">
+                  Snack: {standeeMetrics.snackShare.toFixed(0)}%
+                </span>
+              </div>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-slate-900">
+                {loading ? '...' : formatCurrencyVnd(standeeMetrics.totalAmbientSo)}
+              </div>
+            </div>
+            <div className="border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span>
+                Snack: <b className="font-bold text-amber-800">{formatCurrencyVnd(standeeMetrics.totalSnackSo)}</b>
+              </span>
+            </div>
+          </div>
+
+          {/* Card 5: Năng Suất TB / Kệ */}
+          <div
+            className="flex min-w-0 flex-col justify-between rounded-xl border border-slate-100 bg-white p-3.5 shadow-xs transition-all hover:shadow-md col-span-2 lg:col-span-1"
+            style={{ borderLeft: '5px solid #4f46e5' }}
+          >
+            <div>
+              <span className="text-[11px] font-black uppercase tracking-wider text-indigo-700">NĂNG SUẤT TB / KỆ / THÁNG</span>
+              <div className="my-1 font-mono-num text-2xl font-black tracking-tight text-indigo-700">
+                {loading ? '...' : formatCurrencyVnd(standeeMetrics.vpo)}
+              </div>
+            </div>
+            <div className="border-t border-slate-100/90 pt-2 text-[11px] font-semibold text-slate-500">
+              <span className="truncate block">Bình quân doanh số khô sinh ra / 1 kệ có mua / tháng</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1316,23 +1632,23 @@ export function GtPosmPage() {
             badgeClass="badge-pill badge-pill-green"
           />
           <EChartsCard
-            title="Quy Mô &amp; Hiệu Quả Khai Thác Theo Năm Sản Xuất"
-            subtitle="Phân bổ theo Model Year và doanh số bình quân"
-            option={freezerYearOption}
+            title="Xu Hướng Quy Mô &amp; Năng Suất Tủ Đông Theo Tháng"
+            subtitle="Tổng số lượng tủ, số tủ có mua và doanh số đông bình quân/tủ qua từng tháng (12 Tháng)"
+            option={freezerMonthlyTrendOption}
             height={280}
             loading={loading}
             gradientClass="grad-purple"
-            badgeText="Model Year"
+            badgeText="12 Tháng"
             badgeClass="badge-pill badge-pill-purple"
           />
           <EChartsCard
             title="Phân Tầng Năng Suất Điểm Đặt Tủ Đông"
-            subtitle="Phân nhóm Tier doanh số (Zero, <500k, 500k~1.5M, 1.5M~3M, 3M~5M, 5M~10M, >10M)"
+            subtitle="Phân khúc: =0, <500k, 500k~1.5M, 1.5M~3M, 3M~5M, 5M~10M, >10M"
             option={freezerTierOption}
             height={280}
             loading={loading}
             gradientClass="grad-orange"
-            badgeText="Sales Tier"
+            badgeText="Mức DS"
             badgeClass="badge-pill badge-pill-orange"
           />
         </div>
@@ -1422,7 +1738,7 @@ export function GtPosmPage() {
               columns={
                 tab === 'freezer'
                   ? [
-                      { header: 'Cấp Tổ Chức', key: (r) => `${'  '.repeat(r.level)}${r.name}` },
+                      { header: 'Cấp Tổ Chức', key: (r) => r.indentName },
                       { header: 'Tổng Tủ', key: (r) => r.total },
                       { header: '# Tủ Có Mua', key: (r) => r.active },
                       { header: '# Tủ Chưa Mua', key: (r) => r.zero },
@@ -1442,7 +1758,7 @@ export function GtPosmPage() {
                       { header: '> 10M', key: (r) => r.tiers[6] },
                     ]
                   : [
-                      { header: 'Cấp Tổ Chức', key: (r) => `${'  '.repeat(r.level)}${r.name}` },
+                      { header: 'Cấp Tổ Chức', key: (r) => r.indentName },
                       { header: 'Tổng Kệ', key: (r) => r.total },
                       { header: '# Kệ Có Mua', key: (r) => r.active },
                       { header: '# Kệ Chưa Mua', key: (r) => r.zero },
@@ -1680,27 +1996,37 @@ export function GtPosmPage() {
         </div>
       </div>
 
-      {/* Detail Table */}
-      <div className="material-card p-4">
-        <div className="mb-3 flex items-center justify-between border-b border-slate-100 pb-2">
+      {/* 16-Column Enterprise Detail Table matching web_app table-gt-freezer-detail / table-gt-standee-detail */}
+      <div className="material-card p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Store className="h-4 w-4 text-[#004B91]" />
-            <h3 className="text-sm font-bold text-slate-800">
-              {tab === 'freezer' ? 'Danh Sách Chi Tiết Điểm Đặt Tủ Đông Kênh GT' : 'Danh Sách Chi Tiết Điểm Đặt Standee (Kệ Sắt) Kênh GT'}
-            </h3>
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">
+                {tab === 'freezer'
+                  ? 'Danh Sách Chi Tiết Điểm Đặt Tủ Đông & Tủ Mát Kênh GT'
+                  : 'Danh Sách Chi Tiết Điểm Đặt Standee (Kệ Sắt) Kênh GT'}
+              </h3>
+              <p className="text-xs text-slate-500">
+                Hiển thị đầy đủ thông tin thiết bị, trạng thái hoạt động, doanh số 3 tháng gần nhất và doanh số bình quân
+              </p>
+            </div>
           </div>
-          <span className="text-xs text-slate-500 font-semibold">
+          <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700">
             {activeRows.length.toLocaleString('vi-VN')} thiết bị được tìm thấy
           </span>
         </div>
+
         <DataTable
           data={activeRows}
-          columns={columns}
-          searchPlaceholder="Tìm theo mã KH, tên điểm bán, NPP, QR/Seri..."
+          columns={detailColumns}
+          searchPlaceholder="Tìm theo mã KH, tên điểm bán, NPP, QR/Seri, NVBH..."
           searchFilter={(r, q) =>
             String(r.c_code || '').toLowerCase().includes(q) ||
             String(r.c_name || '').toLowerCase().includes(q) ||
             String(r.npp_name || '').toLowerCase().includes(q) ||
+            String(r.addr || '').toLowerCase().includes(q) ||
+            String(r.emp_name || r.nvbh_name || '').toLowerCase().includes(q) ||
             String(r.qr || '').toLowerCase().includes(q) ||
             String(r.serial || '').toLowerCase().includes(q)
           }
