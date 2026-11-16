@@ -1,4 +1,15 @@
-import { AlertTriangle, Box, CheckCircle2, Layers, Snowflake, Store, TrendingUp } from 'lucide-react';
+import {
+  AlertTriangle,
+  Box,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Layers,
+  Search,
+  Snowflake,
+  Store,
+  TrendingUp,
+} from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DataTable, type ColumnDef } from '../../shared/components/DataTable';
 import { EChartsCard } from '../../shared/components/EChartsCard';
@@ -87,6 +98,322 @@ function getL3mMonths(selMonths: string[]): string[] {
   return res;
 }
 
+function getGtPosmDataForPeriod(allData: PosmAssetRow[], selMonths: string[], curYear: string): PosmAssetRow[] {
+  if (!allData || !Array.isArray(allData) || allData.length === 0) return [];
+  const year = Number(curYear) || 2026;
+  const monthsNum = (selMonths || []).map((m) => parseInt(m, 10)).filter((n) => !Number.isNaN(n));
+  const maxSelectedMonth = monthsNum.length > 0 ? Math.max(...monthsNum) : 10;
+
+  const getT10Snapshot = () => {
+    const t10 = allData.filter(
+      (d) =>
+        (Number(d.month_num) === 10 || !d.month_num) &&
+        (Number(d.year) === 2026 || !d.year),
+    );
+    return t10.length > 0 ? t10 : allData;
+  };
+
+  if (year < 2026 || (year === 2026 && maxSelectedMonth <= 10)) {
+    return getT10Snapshot();
+  }
+
+  const monthRecords = allData.filter(
+    (d) =>
+      (Number(d.month_num) === maxSelectedMonth && Number(d.year) === year) ||
+      d.month === `${year}-${String(maxSelectedMonth).padStart(2, '0')}`,
+  );
+  if (monthRecords.length > 0) return monthRecords;
+
+  return getT10Snapshot();
+}
+
+function formatPosmShort(val: number): string {
+  if (!val || val === 0) return '-';
+  if (Math.abs(val) >= 1e9) return `${(val / 1e9).toFixed(2)} B`;
+  if (Math.abs(val) >= 1e6) return `${(val / 1e6).toFixed(1)} M`;
+  if (Math.abs(val) >= 1e3) return `${(val / 1e3).toFixed(0)} k`;
+  return val.toLocaleString('vi-VN');
+}
+
+export interface PosmTreeNode {
+  id: string;
+  name: string;
+  level: number;
+  total: number;
+  active: number;
+  zero: number;
+  actRate: number;
+  mainSo: number;
+  subSo: number;
+  vpo: number;
+  l3mZero: number;
+  l3mZeroRate: number;
+  l3mAvg: number;
+  tiers: number[];
+  children: PosmTreeNode[];
+}
+
+function buildPosmTree(
+  rows: PosmAssetRow[],
+  type: 'freezer' | 'standee',
+  selectedMonths: string[],
+  l3mMonths: string[],
+  mCount: number,
+): PosmTreeNode {
+  const root: PosmTreeNode = {
+    id: 'ROOT',
+    name: type === 'freezer' ? 'TOÀN QUỐC (KÊNH GT)' : 'TOÀN QUỐC',
+    level: 0,
+    total: 0,
+    active: 0,
+    zero: 0,
+    actRate: 0,
+    mainSo: 0,
+    subSo: 0,
+    vpo: 0,
+    l3mZero: 0,
+    l3mZeroRate: 0,
+    l3mAvg: 0,
+    tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
+    children: [],
+  };
+
+  const mienMap = new Map<string, PosmTreeNode>();
+  const vungMap = new Map<string, PosmTreeNode>();
+  const officeMap = new Map<string, PosmTreeNode>();
+  const nppMap = new Map<string, PosmTreeNode>();
+  const nvbhMap = new Map<string, PosmTreeNode>();
+
+  for (const r of rows) {
+    const q = Number(r.qty || 1);
+    const salesMap = parseSalesMap(r.sales || r.sales_json);
+
+    let mainVal = 0;
+    let subVal = 0;
+    for (const m of selectedMonths) {
+      const arr = salesMap[m] || salesMap[String(parseInt(m, 10)).padStart(2, '0')];
+      if (arr) {
+        mainVal += Number(arr[0]) || 0;
+        subVal += Number(arr[1]) || 0;
+      }
+    }
+
+    let l3mSum = 0;
+    for (const m of l3mMonths) {
+      const arr = salesMap[m] || salesMap[String(parseInt(m, 10)).padStart(2, '0')];
+      if (arr) l3mSum += Number(arr[0]) || 0;
+    }
+
+    const isActive = mainVal > 0 ? 1 : 0;
+    const isL3mZero = l3mSum === 0 ? 1 : 0;
+    const l3mAvg = l3mMonths.length > 0 ? Math.round(l3mSum / l3mMonths.length) : 0;
+    const monthlySo = Math.round(mainVal / mCount);
+
+    let tIdx = 0;
+    if (type === 'freezer') {
+      if (monthlySo <= 0) tIdx = 0;
+      else if (monthlySo < 500_000) tIdx = 1;
+      else if (monthlySo < 1_500_000) tIdx = 2;
+      else if (monthlySo < 3_000_000) tIdx = 3;
+      else if (monthlySo < 5_000_000) tIdx = 4;
+      else if (monthlySo <= 10_000_000) tIdx = 5;
+      else tIdx = 6;
+    } else {
+      if (monthlySo <= 0) tIdx = 0;
+      else if (monthlySo < 200_000) tIdx = 1;
+      else if (monthlySo < 500_000) tIdx = 2;
+      else if (monthlySo < 1_000_000) tIdx = 3;
+      else if (monthlySo < 2_000_000) tIdx = 4;
+      else tIdx = 5;
+    }
+
+    const mien = r.mien || 'Chưa xác định';
+    const vung = r.vung || 'Chưa xác định';
+    const office = r.office || r.gsbh || 'Chưa phân công Office';
+    const npp = (r.npp_name || r.npp_code) ? ((r.npp_code ? `${r.npp_code} - ` : '') + r.npp_name) : 'Khác';
+    const nv = (r.emp_name || r.nvbh_name) ? ((r.emp_code ? `${r.emp_code} - ` : '') + (r.emp_name || r.nvbh_name)) : 'Chưa phân công NVBH';
+
+    const mienId = `NODE_${mien}`;
+    const vungId = `${mienId}_${vung}`;
+    const officeId = `${vungId}_${office}`;
+    const nppId = `${officeId}_${npp}`;
+    const nvId = `${nppId}_${nv}`;
+
+    const accNode = (node: PosmTreeNode) => {
+      node.total += q;
+      node.active += (isActive ? q : 0);
+      node.l3mZero += (isL3mZero ? q : 0);
+      node.mainSo += mainVal;
+      node.subSo += subVal;
+      node.l3mAvg += l3mAvg;
+      node.tiers[tIdx] += q;
+    };
+
+    accNode(root);
+
+    let mNode = mienMap.get(mienId);
+    if (!mNode) {
+      mNode = {
+        id: mienId,
+        name: mien,
+        level: 1,
+        total: 0,
+        active: 0,
+        zero: 0,
+        actRate: 0,
+        mainSo: 0,
+        subSo: 0,
+        vpo: 0,
+        l3mZero: 0,
+        l3mZeroRate: 0,
+        l3mAvg: 0,
+        tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
+        children: [],
+      };
+      mienMap.set(mienId, mNode);
+      root.children.push(mNode);
+    }
+    accNode(mNode);
+
+    let vNode = vungMap.get(vungId);
+    if (!vNode) {
+      vNode = {
+        id: vungId,
+        name: vung,
+        level: 2,
+        total: 0,
+        active: 0,
+        zero: 0,
+        actRate: 0,
+        mainSo: 0,
+        subSo: 0,
+        vpo: 0,
+        l3mZero: 0,
+        l3mZeroRate: 0,
+        l3mAvg: 0,
+        tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
+        children: [],
+      };
+      vungMap.set(vungId, vNode);
+      mNode.children.push(vNode);
+    }
+    accNode(vNode);
+
+    let oNode = officeMap.get(officeId);
+    if (!oNode) {
+      oNode = {
+        id: officeId,
+        name: office,
+        level: 3,
+        total: 0,
+        active: 0,
+        zero: 0,
+        actRate: 0,
+        mainSo: 0,
+        subSo: 0,
+        vpo: 0,
+        l3mZero: 0,
+        l3mZeroRate: 0,
+        l3mAvg: 0,
+        tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
+        children: [],
+      };
+      officeMap.set(officeId, oNode);
+      vNode.children.push(oNode);
+    }
+    accNode(oNode);
+
+    let pNode = nppMap.get(nppId);
+    if (!pNode) {
+      pNode = {
+        id: nppId,
+        name: npp,
+        level: 4,
+        total: 0,
+        active: 0,
+        zero: 0,
+        actRate: 0,
+        mainSo: 0,
+        subSo: 0,
+        vpo: 0,
+        l3mZero: 0,
+        l3mZeroRate: 0,
+        l3mAvg: 0,
+        tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
+        children: [],
+      };
+      nppMap.set(nppId, pNode);
+      oNode.children.push(pNode);
+    }
+    accNode(pNode);
+
+    let nvNode = nvbhMap.get(nvId);
+    if (!nvNode) {
+      nvNode = {
+        id: nvId,
+        name: nv,
+        level: 5,
+        total: 0,
+        active: 0,
+        zero: 0,
+        actRate: 0,
+        mainSo: 0,
+        subSo: 0,
+        vpo: 0,
+        l3mZero: 0,
+        l3mZeroRate: 0,
+        l3mAvg: 0,
+        tiers: new Array(type === 'freezer' ? 7 : 6).fill(0),
+        children: [],
+      };
+      nvbhMap.set(nvId, nvNode);
+      pNode.children.push(nvNode);
+    }
+    accNode(nvNode);
+  }
+
+  const finalizeNode = (n: PosmTreeNode) => {
+    n.zero = Math.max(0, n.total - n.active);
+    n.actRate = n.total > 0 ? (n.active / n.total) * 100 : 0;
+    n.l3mZeroRate = n.total > 0 ? (n.l3mZero / n.total) * 100 : 0;
+    n.vpo = n.active > 0 ? Math.round(n.mainSo / n.active / mCount) : 0;
+    n.children.sort((a, b) => b.total - a.total);
+    for (const ch of n.children) finalizeNode(ch);
+  };
+  finalizeNode(root);
+
+  return root;
+}
+
+function flattenPosmTree(
+  node: PosmTreeNode,
+  openNodes: Record<string, boolean>,
+  searchQuery: string,
+): PosmTreeNode[] {
+  const result: PosmTreeNode[] = [];
+  const q = searchQuery.trim().toLowerCase();
+
+  const matchesSearch = (n: PosmTreeNode): boolean => {
+    if (!q) return true;
+    if (n.name.toLowerCase().includes(q)) return true;
+    return n.children.some(matchesSearch);
+  };
+
+  const traverse = (n: PosmTreeNode) => {
+    if (!matchesSearch(n)) return;
+    result.push(n);
+    const isOpen = Boolean(openNodes[n.id] || q.length > 0);
+    if (isOpen) {
+      for (const ch of n.children) {
+        traverse(ch);
+      }
+    }
+  };
+
+  traverse(node);
+  return result;
+}
+
 export function GtPosmPage() {
   const user = useAuthStore((s) => s.user);
   const year = useFiltersStore((s) => s.year);
@@ -123,12 +450,77 @@ export function GtPosmPage() {
     [geoMien, geoVung, geoGsbh, geoNpp],
   );
 
-  const filteredFreezers = useMemo(() => freezers.filter(matchGeo), [freezers, matchGeo]);
-  const filteredStandees = useMemo(() => standees.filter(matchGeo), [standees, matchGeo]);
+  const periodFreezers = useMemo(
+    () => getGtPosmDataForPeriod(freezers, selectedMonths, year),
+    [freezers, selectedMonths, year],
+  );
+  const periodStandees = useMemo(
+    () => getGtPosmDataForPeriod(standees, selectedMonths, year),
+    [standees, selectedMonths, year],
+  );
+
+  const filteredFreezers = useMemo(() => periodFreezers.filter(matchGeo), [periodFreezers, matchGeo]);
+  const filteredStandees = useMemo(() => periodStandees.filter(matchGeo), [periodStandees, matchGeo]);
   const activeRows = tab === 'freezer' ? filteredFreezers : filteredStandees;
 
   const mCount = Math.max(1, selectedMonths.length || 1);
   const l3mMonths = useMemo(() => getL3mMonths(selectedMonths), [selectedMonths]);
+
+  const [treeSearch, setTreeSearch] = useState('');
+  const [openNodes, setOpenNodes] = useState<Record<string, boolean>>({ ROOT: true });
+
+  const posmTreeRoot = useMemo(
+    () => buildPosmTree(activeRows, tab, selectedMonths, l3mMonths, mCount),
+    [activeRows, tab, selectedMonths, l3mMonths, mCount],
+  );
+
+  const flatTreeRows = useMemo(
+    () => flattenPosmTree(posmTreeRoot, openNodes, treeSearch),
+    [posmTreeRoot, openNodes, treeSearch],
+  );
+
+  useEffect(() => {
+    setOpenNodes((prev) => {
+      const next: Record<string, boolean> = { ...prev, ROOT: true };
+      for (const ch of posmTreeRoot.children) {
+        next[ch.id] = true;
+      }
+      return next;
+    });
+  }, [posmTreeRoot]);
+
+  const toggleAllTreeNodes = useCallback(() => {
+    setOpenNodes((prev) => {
+      const allIds: Record<string, boolean> = {};
+      const collect = (n: PosmTreeNode) => {
+        allIds[n.id] = true;
+        for (const ch of n.children) collect(ch);
+      };
+      collect(posmTreeRoot);
+
+      const countOpen = Object.values(prev).filter(Boolean).length;
+      if (countOpen > posmTreeRoot.children.length + 1) {
+        const collapsed: Record<string, boolean> = { ROOT: true };
+        for (const ch of posmTreeRoot.children) collapsed[ch.id] = true;
+        return collapsed;
+      }
+      return allIds;
+    });
+  }, [posmTreeRoot]);
+
+  const toggleNode = useCallback((id: string) => {
+    setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
+
+  const excelTreeRows = useMemo(() => {
+    const list: PosmTreeNode[] = [];
+    const collect = (n: PosmTreeNode) => {
+      list.push(n);
+      for (const ch of n.children) collect(ch);
+    };
+    collect(posmTreeRoot);
+    return list;
+  }, [posmTreeRoot]);
 
   // Freezer Processed Metrics
   const freezerMetrics = useMemo(() => {
@@ -988,6 +1380,305 @@ export function GtPosmPage() {
           />
         </div>
       )}
+
+      {/* 5-Level Hierarchical Drilldown Tree Table matching web_app table-gt-freezer / table-gt-standee */}
+      <div className="material-card p-4 space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-6 bg-purple-600 rounded-full inline-block" />
+            <div>
+              <h3 className="text-sm font-bold text-slate-800">
+                {tab === 'freezer'
+                  ? 'Bảng Phân Tích Hiệu Quả Tủ Đông Kênh GT (Cây Phân Cấp)'
+                  : 'Bảng Phân Tích Hiệu Quả Standee (Kệ Sắt) Kênh GT (Cây Phân Cấp)'}
+              </h3>
+              <p className="text-xs text-slate-500">
+                Phân tích 5 cấp (Miền → Vùng → Office → NPP → NVBH) kèm chỉ số 1 tháng, L3M và phân tầng doanh số
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
+              <input
+                type="text"
+                value={treeSearch}
+                onChange={(e) => setTreeSearch(e.target.value)}
+                placeholder="Tìm miền, vùng, office, NPP, NVBH..."
+                className="rounded-lg border border-slate-200 bg-white pl-8 pr-3 py-1.5 text-xs focus:border-purple-500 focus:outline-none w-56 shadow-2xs"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={toggleAllTreeNodes}
+              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-sky-700 hover:bg-slate-50 shadow-2xs"
+            >
+              Bung / Đóng Hết
+            </button>
+            <ExportExcelButton
+              filename={tab === 'freezer' ? `CJ_POSM_Freezer_Tree_${year}.xlsx` : `CJ_POSM_Standee_Tree_${year}.xlsx`}
+              sheetName={tab === 'freezer' ? 'FreezerTree' : 'StandeeTree'}
+              rows={excelTreeRows}
+              columns={
+                tab === 'freezer'
+                  ? [
+                      { header: 'Cấp Tổ Chức', key: (r) => `${'  '.repeat(r.level)}${r.name}` },
+                      { header: 'Tổng Tủ', key: (r) => r.total },
+                      { header: '# Tủ Có Mua', key: (r) => r.active },
+                      { header: '# Tủ Chưa Mua', key: (r) => r.zero },
+                      { header: '% Tủ Có Mua', key: (r) => Number(r.actRate.toFixed(1)) },
+                      { header: 'DS Hàng Đông', key: (r) => r.mainSo },
+                      { header: 'Tổng Sell-out', key: (r) => r.subSo },
+                      { header: 'Năng Suất TB', key: (r) => r.vpo },
+                      { header: 'Tủ 3T Ko Mua', key: (r) => r.l3mZero },
+                      { header: '% Tủ 3T Ko Mua', key: (r) => Number(r.l3mZeroRate.toFixed(1)) },
+                      { header: 'TB 3T Đông', key: (r) => r.l3mAvg },
+                      { header: '= 0', key: (r) => r.tiers[0] },
+                      { header: '< 500k', key: (r) => r.tiers[1] },
+                      { header: '500k~1.5M', key: (r) => r.tiers[2] },
+                      { header: '1.5M~3M', key: (r) => r.tiers[3] },
+                      { header: '3M~5M', key: (r) => r.tiers[4] },
+                      { header: '5M~10M', key: (r) => r.tiers[5] },
+                      { header: '> 10M', key: (r) => r.tiers[6] },
+                    ]
+                  : [
+                      { header: 'Cấp Tổ Chức', key: (r) => `${'  '.repeat(r.level)}${r.name}` },
+                      { header: 'Tổng Kệ', key: (r) => r.total },
+                      { header: '# Kệ Có Mua', key: (r) => r.active },
+                      { header: '# Kệ Chưa Mua', key: (r) => r.zero },
+                      { header: '% Kệ Có Mua', key: (r) => Number(r.actRate.toFixed(1)) },
+                      { header: 'DS Hàng Khô', key: (r) => r.mainSo },
+                      { header: 'DS 03. Snack', key: (r) => r.subSo },
+                      { header: 'Năng Suất TB', key: (r) => r.vpo },
+                      { header: 'Kệ 3T Ko Mua', key: (r) => r.l3mZero },
+                      { header: '% Kệ 3T Ko Mua', key: (r) => Number(r.l3mZeroRate.toFixed(1)) },
+                      { header: 'TB 3T Khô', key: (r) => r.l3mAvg },
+                      { header: '= 0', key: (r) => r.tiers[0] },
+                      { header: '< 200k', key: (r) => r.tiers[1] },
+                      { header: '200k~500k', key: (r) => r.tiers[2] },
+                      { header: '500k~1M', key: (r) => r.tiers[3] },
+                      { header: '1M~2M', key: (r) => r.tiers[4] },
+                      { header: '> 2M', key: (r) => r.tiers[5] },
+                    ]
+              }
+              label="Xuất Excel Cây Phân Cấp"
+            />
+          </div>
+        </div>
+
+        <div className="table-scroll-container overflow-x-auto max-h-[600px]">
+          <table className="w-full border-collapse text-[11px]">
+            <thead className="sticky top-0 z-10 bg-slate-100 shadow-2xs">
+              <tr className="border-b border-slate-200 text-slate-800">
+                <th rowSpan={2} className="px-3 py-2 text-left font-bold min-w-[240px]">
+                  Cấp Tổ Chức / Quản Lý
+                </th>
+                <th rowSpan={2} className="px-2 py-2 text-center font-bold min-w-[70px]">
+                  {tab === 'freezer' ? 'Tổng Tủ' : 'Tổng Kệ'}
+                </th>
+                <th colSpan={6} className="px-2 py-1.5 text-center font-bold bg-sky-100/90 text-sky-950 border-l border-sky-300">
+                  CHỈ SỐ THÁNG HIỆN TẠI (1 THÁNG)
+                </th>
+                <th colSpan={3} className="px-2 py-1.5 text-center font-bold bg-amber-100/90 text-amber-950 border-l border-amber-300">
+                  CHỈ SỐ 3 THÁNG GẦN NHẤT (L3M)
+                </th>
+                <th colSpan={tab === 'freezer' ? 7 : 6} className="px-2 py-1.5 text-center font-bold bg-purple-100/90 text-purple-950 border-l border-purple-300">
+                  {tab === 'freezer' ? 'SỐ LƯỢNG TỦ THEO TỪNG MỨC DOANH SỐ ĐÔNG' : 'SỐ LƯỢNG KỆ THEO TỪNG MỨC DOANH SỐ KHÔ'}
+                </th>
+              </tr>
+              <tr className="border-b border-slate-200 text-slate-700 text-[10px]">
+                {/* 1 Tháng */}
+                <th className="px-2 py-1.5 text-center font-bold text-sky-950 bg-sky-50/90 border-l border-sky-200 min-w-[85px]">
+                  {tab === 'freezer' ? '# Tủ Có Mua' : '# Kệ Có Mua'}
+                </th>
+                <th className="px-2 py-1.5 text-center font-bold text-sky-950 bg-sky-50/90 border-l border-sky-200 min-w-[85px]">
+                  {tab === 'freezer' ? '# Tủ 0 Mua' : '# Kệ 0 Mua'}
+                </th>
+                <th className="px-2 py-1.5 text-center font-bold text-sky-950 bg-sky-50/90 border-l border-sky-200 min-w-[85px]">
+                  % Có Mua
+                </th>
+                <th className="px-2.5 py-1.5 text-center font-bold text-sky-950 bg-sky-50/90 border-l border-sky-200 min-w-[95px]">
+                  {tab === 'freezer' ? 'DS Hàng Đông' : 'DS Hàng Khô'}
+                </th>
+                <th className="px-2.5 py-1.5 text-center font-bold text-sky-950 bg-sky-50/90 border-l border-sky-200 min-w-[95px]">
+                  {tab === 'freezer' ? 'Tổng Sell-out' : 'DS 03. Snack'}
+                </th>
+                <th className="px-2.5 py-1.5 text-center font-bold text-sky-950 bg-sky-50/90 border-l border-sky-200 min-w-[105px]">
+                  Năng Suất TB
+                </th>
+                {/* L3M */}
+                <th className="px-2 py-1.5 text-center font-bold text-rose-800 bg-rose-50/80 border-l border-rose-200 min-w-[85px]">
+                  {tab === 'freezer' ? 'Tủ 3T Ko Mua' : 'Kệ 3T Ko Mua'}
+                </th>
+                <th className="px-2 py-1.5 text-center font-bold text-rose-900 bg-rose-50/80 border-l border-rose-200 min-w-[85px]">
+                  % 3T Ko Mua
+                </th>
+                <th className="px-2.5 py-1.5 text-center font-bold text-amber-950 bg-amber-50/90 border-l border-amber-200 min-w-[95px]">
+                  {tab === 'freezer' ? 'TB 3T Đông' : 'TB 3T Khô'}
+                </th>
+                {/* Tiers */}
+                {tab === 'freezer' ? (
+                  <>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-rose-700 bg-rose-50/90 border-l border-rose-200 min-w-[60px]">= 0</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-orange-700 bg-orange-50/90 border-l border-orange-200 min-w-[65px]">&lt; 500k</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-amber-800 bg-amber-50/90 border-l border-amber-200 min-w-[75px]">500k~1.5M</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-cyan-800 bg-cyan-50/90 border-l border-cyan-200 min-w-[75px]">1.5M~3M</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-blue-800 bg-blue-50/90 border-l border-blue-200 min-w-[70px]">3M~5M</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-emerald-800 bg-emerald-50/90 border-l border-emerald-200 min-w-[70px]">5M~10M</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-purple-800 bg-purple-50/90 border-l border-r border-purple-200 min-w-[65px]">&gt; 10M</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-rose-700 bg-rose-50/90 border-l border-rose-200 min-w-[60px]">= 0</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-orange-700 bg-orange-50/90 border-l border-orange-200 min-w-[65px]">&lt; 200k</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-amber-800 bg-amber-50/90 border-l border-amber-200 min-w-[75px]">200k~500k</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-cyan-800 bg-cyan-50/90 border-l border-cyan-200 min-w-[75px]">500k~1M</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-blue-800 bg-blue-50/90 border-l border-blue-200 min-w-[75px]">1M~2M</th>
+                    <th className="px-1.5 py-1.5 text-center font-bold text-emerald-800 bg-emerald-50/90 border-l border-r border-emerald-200 min-w-[65px]">&gt; 2M</th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {flatTreeRows.length === 0 ? (
+                <tr>
+                  <td colSpan={tab === 'freezer' ? 18 : 17} className="text-center py-8 text-slate-400 font-semibold">
+                    Không tìm thấy dữ liệu cây phân cấp phù hợp với bộ lọc
+                  </td>
+                </tr>
+              ) : (
+                flatTreeRows.map((n) => {
+                  const isExpanded = Boolean(openNodes[n.id] || treeSearch.trim().length > 0);
+                  const hasChildren = n.children.length > 0;
+                  const indentPx = n.level * 18;
+                  const badgeIcon =
+                    n.level === 0 ? '🇻🇳' :
+                    n.level === 1 ? '🏛️' :
+                    n.level === 2 ? '📍' :
+                    n.level === 3 ? '🏢' :
+                    n.level === 4 ? '🏪' : '🛵';
+
+                  let rowBg = 'bg-white hover:bg-slate-50 text-slate-800 border-b border-slate-100';
+                  let fontClass = 'font-normal text-xs';
+                  if (n.level === 0) {
+                    rowBg = 'bg-indigo-100/95 hover:bg-indigo-200/90 text-indigo-950 border-y-2 border-indigo-400';
+                    fontClass = 'font-black text-xs uppercase tracking-wider';
+                  } else if (n.level === 1) {
+                    rowBg = 'bg-blue-100/90 hover:bg-blue-200/80 text-blue-950 border-b-2 border-blue-300';
+                    fontClass = 'font-extrabold text-xs';
+                  } else if (n.level === 2) {
+                    rowBg = 'bg-indigo-50/80 hover:bg-indigo-100/70 text-indigo-950 border-b border-indigo-100';
+                    fontClass = 'font-bold text-xs';
+                  } else if (n.level === 3) {
+                    rowBg = 'bg-amber-50 hover:bg-amber-100/80 text-amber-950 border-l-4 border-l-amber-500 border-b border-amber-200';
+                    fontClass = 'font-bold text-xs';
+                  } else if (n.level === 4) {
+                    rowBg = 'bg-emerald-50/60 hover:bg-emerald-100/60 text-emerald-950 border-b border-emerald-100';
+                    fontClass = 'font-semibold text-xs';
+                  }
+
+                  const actBadgeColor =
+                    n.actRate >= 80
+                      ? 'bg-emerald-600 text-white'
+                      : n.actRate >= 50
+                        ? 'bg-amber-500 text-amber-950'
+                        : 'bg-rose-600 text-white';
+
+                  const l3mBadgeColor =
+                    n.l3mZeroRate === 0
+                      ? 'bg-slate-100 text-slate-600 border border-slate-200'
+                      : n.l3mZeroRate <= 15
+                        ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                        : 'bg-rose-100 text-rose-900 border border-rose-300';
+
+                  return (
+                    <tr
+                      key={n.id}
+                      onClick={() => hasChildren && toggleNode(n.id)}
+                      className={`${rowBg} transition-colors ${hasChildren ? 'cursor-pointer' : ''}`}
+                    >
+                      <td className={`px-3 py-2 ${fontClass}`} style={{ paddingLeft: `${indentPx + 12}px` }}>
+                        <span className="inline-flex items-center justify-center w-4 text-slate-400">
+                          {hasChildren ? (
+                            isExpanded ? (
+                              <ChevronDown className="h-3.5 w-3.5 text-slate-600" />
+                            ) : (
+                              <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                            )
+                          ) : null}
+                        </span>
+                        <span className="mr-1">{badgeIcon}</span>
+                        <span className="truncate">{n.name}</span>
+                      </td>
+                      <td className="px-2 py-2 text-right font-mono-num font-bold text-blue-700">
+                        {n.total.toLocaleString('vi-VN')}
+                      </td>
+                      {/* 1 Tháng */}
+                      <td className="px-2 py-2 text-right font-mono-num font-bold text-emerald-700 border-l border-sky-100">
+                        {n.active.toLocaleString('vi-VN')}
+                      </td>
+                      <td className="px-2 py-2 text-right font-mono-num font-bold border-l border-sky-100">
+                        {n.zero > 0 ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 inline-block">
+                            {n.zero.toLocaleString('vi-VN')}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">0</span>
+                        )}
+                      </td>
+                      <td className="px-2 py-2 text-right font-mono-num border-l border-sky-100">
+                        <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-black min-w-[42px] text-center shadow-2xs ${actBadgeColor}`}>
+                          {n.actRate.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="px-2.5 py-2 text-right font-mono-num font-bold text-purple-700 border-l border-sky-100">
+                        {formatPosmShort(n.mainSo)}
+                      </td>
+                      <td className="px-2.5 py-2 text-right font-mono-num font-semibold text-slate-700 border-l border-sky-100">
+                        {formatPosmShort(n.subSo)}
+                      </td>
+                      <td className="px-2.5 py-2 text-right font-mono-num font-black text-sky-950 bg-sky-50/70 border-l border-sky-200/70">
+                        {formatPosmShort(n.vpo)}
+                      </td>
+                      {/* L3M */}
+                      <td className="px-2 py-2 text-right font-mono-num font-bold bg-rose-50/40 border-l border-rose-200/70">
+                        {n.l3mZero > 0 ? (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 inline-block">
+                            {n.l3mZero.toLocaleString('vi-VN')}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">0</span>
+                        )}
+                      </td>
+                      <td className="px-2 py-2 text-right font-mono-num bg-rose-50/20 border-l border-rose-100/60">
+                        <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold min-w-[42px] text-center ${l3mBadgeColor}`}>
+                          {n.l3mZeroRate.toFixed(1)}%
+                        </span>
+                      </td>
+                      <td className="px-2.5 py-2 text-right font-mono-num font-bold text-amber-900 bg-amber-50/60 border-l border-amber-200/70 border-r border-amber-200/80">
+                        {formatPosmShort(n.l3mAvg)}
+                      </td>
+                      {/* Tiers */}
+                      {n.tiers.map((cnt, idx) => (
+                        <td
+                          key={idx}
+                          className="px-1.5 py-2 text-right font-mono-num border-l border-purple-100/70"
+                        >
+                          {cnt > 0 ? (
+                            <span className="font-bold text-purple-900">{cnt.toLocaleString('vi-VN')}</span>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Detail Table */}
       <div className="material-card p-4">

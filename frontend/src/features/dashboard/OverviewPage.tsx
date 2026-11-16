@@ -20,6 +20,18 @@ interface DailyRecord {
   daily_sellout?: number;
 }
 
+interface TargetSellinRecord {
+  year: string;
+  month: string;
+  channel?: string;
+  sub_channel?: string;
+  account_npp?: string;
+  distributor_code?: string;
+  storage?: string;
+  ph1?: string;
+  target_amt?: number;
+}
+
 interface ChannelSummaryRow {
   channel: string;
   sellin: number;
@@ -87,6 +99,7 @@ export function OverviewPage() {
   const apiMonth = useMemo(() => getActiveApiMonth(year, selectedMonths), [year, selectedMonths]);
   const [sellinRows, setSellinRows] = useState<SellinRecord[]>([]);
   const [dailyRows, setDailyRows] = useState<DailyRecord[]>([]);
+  const [targetRows, setTargetRows] = useState<TargetSellinRecord[]>([]);
   const [expandedChannels, setExpandedChannels] = useState<Record<string, boolean>>({});
   const [expandedSubs, setExpandedSubs] = useState<Record<string, boolean>>({});
   const [expandedCates, setExpandedCates] = useState<Record<string, boolean>>({});
@@ -141,6 +154,11 @@ export function OverviewPage() {
     loadPayload('DAILY_DATA', user).then((data) => {
       if (active && Array.isArray(data)) {
         setDailyRows(data as DailyRecord[]);
+      }
+    });
+    loadPayload('TARGET_SELLIN', user).then((data) => {
+      if (active && Array.isArray(data)) {
+        setTargetRows(data as TargetSellinRecord[]);
       }
     });
     return () => {
@@ -260,6 +278,48 @@ export function OverviewPage() {
     };
   }, [sellinRows, year, ytdMonths, dashChannel, dashSubChannel, dashAccount, prodStorage, prodCate, prodPh1]);
 
+  const targetMap = useMemo(() => {
+    const chanMap: Record<string, number> = {};
+    const chanScMap: Record<string, number> = {};
+    const chanAccMap: Record<string, number> = {};
+    let totalTarget = 0;
+
+    for (const d of targetRows) {
+      if (String(d.year) !== year) continue;
+      const mStr = String(d.month || '');
+      const mNum = mStr.length >= 7 ? mStr.substring(5, 7) : mStr;
+      if (!matchMonthNum(mNum, selectedMonths)) continue;
+
+      if (dashChannel !== 'ALL' && d.channel !== dashChannel) continue;
+      if (dashSubChannel !== 'ALL' && d.sub_channel && d.sub_channel !== dashSubChannel) continue;
+      if (dashAccount !== 'ALL' && d.account_npp !== dashAccount && d.distributor_code !== dashAccount) continue;
+      if (prodStorage !== 'ALL' && d.storage && d.storage !== prodStorage) continue;
+      if (prodPh1 !== 'ALL' && d.ph1 && d.ph1 !== prodPh1) continue;
+
+      const amtB = (Number(d.target_amt) || 0) / 1e9;
+      totalTarget += amtB;
+
+      const ch = (d.channel || 'Khác').toUpperCase();
+      const sc = d.sub_channel || 'Khác';
+      chanMap[ch] = (chanMap[ch] || 0) + amtB;
+      chanScMap[`${ch}_${sc}`] = (chanScMap[`${ch}_${sc}`] || 0) + amtB;
+      chanScMap[sc] = (chanScMap[sc] || 0) + amtB;
+
+      if (d.distributor_code) {
+        chanAccMap[d.distributor_code] = (chanAccMap[d.distributor_code] || 0) + amtB;
+        chanAccMap[`${ch}_${sc}_${d.distributor_code}`] = (chanAccMap[`${ch}_${sc}_${d.distributor_code}`] || 0) + amtB;
+      }
+      if (d.account_npp) {
+        chanAccMap[d.account_npp] = (chanAccMap[d.account_npp] || 0) + amtB;
+        chanAccMap[d.account_npp.toLowerCase().trim()] = (chanAccMap[d.account_npp.toLowerCase().trim()] || 0) + amtB;
+        chanAccMap[`${ch}_${sc}_${d.account_npp}`] = (chanAccMap[`${ch}_${sc}_${d.account_npp}`] || 0) + amtB;
+        chanAccMap[`${ch}_${sc}_${d.account_npp.toLowerCase().trim()}`] = (chanAccMap[`${ch}_${sc}_${d.account_npp.toLowerCase().trim()}`] || 0) + amtB;
+      }
+    }
+
+    return { totalTarget, chanMap, chanScMap, chanAccMap };
+  }, [targetRows, year, selectedMonths, dashChannel, dashSubChannel, dashAccount, prodStorage, prodPh1]);
+
   const channelTableRows = useMemo<ChannelSummaryRow[]>(() => {
     const summaryData = summaryQuery.data as
       | {
@@ -275,84 +335,119 @@ export function OverviewPage() {
         }
       | undefined;
 
+    let rows: ChannelSummaryRow[] = [];
+
     if (summaryData?.channels && summaryData.channels.length > 0) {
       const total = summaryData.total_sellin || summaryData.channels.reduce((s, c) => s + (c.cy_sellin || 0), 0);
-      return summaryData.channels.map((c) => {
+      rows = summaryData.channels.map((c) => {
         const chKey = c.channel.toUpperCase();
         const ytdEntry = ytdByChannel.map.get(chKey) || { cy: 0, ly: 0 };
         const ytdPct = ytdEntry.ly > 0 ? ((ytdEntry.cy - ytdEntry.ly) / ytdEntry.ly) * 100 : 0;
+        const tgtB = (c.target_amt || 0) > 0 ? (c.target_amt || 0) / 1e9 : (targetMap.chanMap[chKey] || 0);
+        const sellinB = (c.cy_sellin || 0) / 1e9;
+        const ach = tgtB > 0 ? (sellinB / tgtB) * 100 : (c.ach_pct || 0);
         return {
           channel: c.channel,
-          sellin: (c.cy_sellin || 0) / 1e9,
-          target: (c.target_amt || 0) / 1e9,
+          sellin: sellinB,
+          target: tgtB,
           ly: (c.ly_sellin || 0) / 1e9,
           ytdCy: ytdEntry.cy,
           ytdLy: ytdEntry.ly,
           ytdPct,
           momMtdPct: momMtdStats.byChannel[chKey] ?? null,
-          achievement: c.ach_pct || 0,
+          achievement: ach,
           yoy: c.yoy_pct || 0,
           share: total > 0 ? ((c.cy_sellin || 0) / total) * 100 : 0,
         };
       });
-    }
-
-    const channelsObj = overviewQuery.data?.channels || {};
-    const apiRows = Object.entries(channelsObj).map(([ch, m]) => {
-      const chKey = ch.toUpperCase();
-      const ytdEntry = ytdByChannel.map.get(chKey) || { cy: 0, ly: 0 };
-      const ytdPct = ytdEntry.ly > 0 ? ((ytdEntry.cy - ytdEntry.ly) / ytdEntry.ly) * 100 : 0;
-      return {
-        channel: ch,
-        sellin: m.sellin_revenue || 0,
-        target: m.target_sellin || 0,
-        ly: m.ly_sellin || 0,
-        ytdCy: ytdEntry.cy,
-        ytdLy: ytdEntry.ly,
-        ytdPct,
-        momMtdPct: momMtdStats.byChannel[chKey] ?? null,
-        achievement: m.achievement_rate || 0,
-        yoy: m.yoy_growth_rate || 0,
-        share: m.channel_share || 0,
-      };
-    });
-    if (apiRows.length > 0) return apiRows;
-
-    if (sellinRows.length === 0) return [];
-    const byChan = new Map<string, { sellin: number; target: number; ly: number }>();
-    const lyYear = String(parseInt(year, 10) - 1);
-    for (const r of sellinRows) {
-      if (!matchMonthNum(r.month_num, selectedMonths)) continue;
-      const ch = r.channel || 'OTHER';
-      const entry = byChan.get(ch) || { sellin: 0, target: 0, ly: 0 };
-      if (String(r.year) === year) {
-        entry.sellin += Number(r.sellin_val || 0) / 1e9;
-        entry.target += Number(r.target_val || 0) / 1e9;
-      } else if (String(r.year) === lyYear) {
-        entry.ly += Number(r.sellin_val || 0) / 1e9;
+    } else {
+      const channelsObj = overviewQuery.data?.channels || {};
+      const apiRows = Object.entries(channelsObj).map(([ch, m]) => {
+        const chKey = ch.toUpperCase();
+        const ytdEntry = ytdByChannel.map.get(chKey) || { cy: 0, ly: 0 };
+        const ytdPct = ytdEntry.ly > 0 ? ((ytdEntry.cy - ytdEntry.ly) / ytdEntry.ly) * 100 : 0;
+        const tgtB = (m.target_sellin || 0) > 0 ? m.target_sellin : (targetMap.chanMap[chKey] || 0);
+        const sellinB = m.sellin_revenue || 0;
+        const ach = tgtB > 0 ? (sellinB / tgtB) * 100 : (m.achievement_rate || 0);
+        return {
+          channel: ch,
+          sellin: sellinB,
+          target: tgtB,
+          ly: m.ly_sellin || 0,
+          ytdCy: ytdEntry.cy,
+          ytdLy: ytdEntry.ly,
+          ytdPct,
+          momMtdPct: momMtdStats.byChannel[chKey] ?? null,
+          achievement: ach,
+          yoy: m.yoy_growth_rate || 0,
+          share: m.channel_share || 0,
+        };
+      });
+      if (apiRows.length > 0) {
+        rows = apiRows;
+      } else if (sellinRows.length > 0) {
+        const byChan = new Map<string, { sellin: number; target: number; ly: number }>();
+        const lyYear = String(parseInt(year, 10) - 1);
+        for (const r of sellinRows) {
+          if (!matchMonthNum(r.month_num, selectedMonths)) continue;
+          const ch = r.channel || 'OTHER';
+          const entry = byChan.get(ch) || { sellin: 0, target: 0, ly: 0 };
+          if (String(r.year) === year) {
+            entry.sellin += Number(r.sellin_val || 0) / 1e9;
+          } else if (String(r.year) === lyYear) {
+            entry.ly += Number(r.sellin_val || 0) / 1e9;
+          }
+          byChan.set(ch, entry);
+        }
+        const total = Array.from(byChan.values()).reduce((s, v) => s + v.sellin, 0);
+        rows = Array.from(byChan.entries()).map(([channel, v]) => {
+          const chKey = channel.toUpperCase();
+          const ytdEntry = ytdByChannel.map.get(chKey) || { cy: 0, ly: 0 };
+          const ytdPct = ytdEntry.ly > 0 ? ((ytdEntry.cy - ytdEntry.ly) / ytdEntry.ly) * 100 : 0;
+          const tgtB = targetMap.chanMap[chKey] || v.target;
+          return {
+            channel,
+            sellin: v.sellin,
+            target: tgtB,
+            ly: v.ly,
+            ytdCy: ytdEntry.cy,
+            ytdLy: ytdEntry.ly,
+            ytdPct,
+            momMtdPct: momMtdStats.byChannel[chKey] ?? null,
+            achievement: tgtB > 0 ? (v.sellin / tgtB) * 100 : 0,
+            yoy: v.ly > 0 ? ((v.sellin - v.ly) / v.ly) * 100 : 0,
+            share: total > 0 ? (v.sellin / total) * 100 : 0,
+          };
+        });
       }
-      byChan.set(ch, entry);
     }
-    const total = Array.from(byChan.values()).reduce((s, v) => s + v.sellin, 0);
-    return Array.from(byChan.entries()).map(([channel, v]) => {
-      const chKey = channel.toUpperCase();
-      const ytdEntry = ytdByChannel.map.get(chKey) || { cy: 0, ly: 0 };
-      const ytdPct = ytdEntry.ly > 0 ? ((ytdEntry.cy - ytdEntry.ly) / ytdEntry.ly) * 100 : 0;
-      return {
-        channel,
-        sellin: v.sellin,
-        target: v.target,
-        ly: v.ly,
-        ytdCy: ytdEntry.cy,
-        ytdLy: ytdEntry.ly,
-        ytdPct,
-        momMtdPct: momMtdStats.byChannel[chKey] ?? null,
-        achievement: v.target > 0 ? (v.sellin / v.target) * 100 : 0,
-        yoy: v.ly > 0 ? ((v.sellin - v.ly) / v.ly) * 100 : 0,
-        share: total > 0 ? (v.sellin / total) * 100 : 0,
-      };
-    });
-  }, [summaryQuery.data, overviewQuery.data, sellinRows, year, selectedMonths, ytdByChannel, momMtdStats]);
+
+    // Ensure all 4 channels are present if filter is ALL
+    if (dashChannel === 'ALL') {
+      const existing = new Set(rows.map((r) => r.channel.toUpperCase()));
+      for (const ch of ['GT', 'MT', 'B2B', 'KR']) {
+        if (!existing.has(ch)) {
+          const tgtB = targetMap.chanMap[ch] || 0;
+          const ytdEntry = ytdByChannel.map.get(ch) || { cy: 0, ly: 0 };
+          rows.push({
+            channel: ch,
+            sellin: 0,
+            target: tgtB,
+            ly: 0,
+            ytdCy: ytdEntry.cy,
+            ytdLy: ytdEntry.ly,
+            ytdPct: 0,
+            momMtdPct: momMtdStats.byChannel[ch] ?? null,
+            achievement: 0,
+            yoy: 0,
+            share: 0,
+          });
+        }
+      }
+    }
+
+    return rows;
+  }, [summaryQuery.data, overviewQuery.data, sellinRows, year, selectedMonths, ytdByChannel, momMtdStats, targetMap, dashChannel]);
 
   const dimOptions = useMemo(() => {
     const comm = dimensionsQuery.data?.commercial || [];
@@ -437,18 +532,55 @@ export function OverviewPage() {
       const accNode = scNode.accounts.get(acc)!;
 
       const valB = (Number(r.sellin_val) || 0) / 1e9;
-      const tgtB = (Number(r.target_val) || 0) / 1e9;
       if (String(r.year) === year) {
         chNode.sellin += valB;
-        chNode.target += tgtB;
         scNode.sellin += valB;
-        scNode.target += tgtB;
         accNode.sellin += valB;
-        accNode.target += tgtB;
       } else if (String(r.year) === lyYear) {
         chNode.ly += valB;
         scNode.ly += valB;
         accNode.ly += valB;
+      }
+    }
+
+    // Supplement nodes from targetRows so all budgeted accounts appear in tree
+    for (const d of targetRows) {
+      if (String(d.year) !== year) continue;
+      const mStr = String(d.month || '');
+      const mNum = mStr.length >= 7 ? mStr.substring(5, 7) : mStr;
+      if (!matchMonthNum(mNum, selectedMonths)) continue;
+      if (dashChannel !== 'ALL' && d.channel !== dashChannel) continue;
+      if (dashSubChannel !== 'ALL' && d.sub_channel && d.sub_channel !== dashSubChannel) continue;
+      if (dashAccount !== 'ALL' && d.account_npp !== dashAccount && d.distributor_code !== dashAccount) continue;
+      if (prodStorage !== 'ALL' && d.storage && d.storage !== prodStorage) continue;
+      if (prodPh1 !== 'ALL' && d.ph1 && d.ph1 !== prodPh1) continue;
+
+      const ch = d.channel || 'Khác';
+      const sc = d.sub_channel || 'Khác';
+      const acc = d.account_npp || d.distributor_code || 'Khác';
+
+      if (!chanMap.has(ch)) chanMap.set(ch, { sellin: 0, target: 0, ly: 0, subs: new Map() });
+      const chNode = chanMap.get(ch)!;
+      if (!chNode.subs.has(sc)) chNode.subs.set(sc, { sellin: 0, target: 0, ly: 0, accounts: new Map() });
+      const scNode = chNode.subs.get(sc)!;
+      if (!scNode.accounts.has(acc)) scNode.accounts.set(acc, { sellin: 0, target: 0, ly: 0 });
+    }
+
+    // Assign targets from targetMap
+    for (const [chName, chNode] of chanMap.entries()) {
+      const chKey = chName.toUpperCase();
+      chNode.target = targetMap.chanMap[chKey] || chNode.target;
+      for (const [scName, scNode] of chNode.subs.entries()) {
+        scNode.target = targetMap.chanScMap[`${chKey}_${scName}`] || targetMap.chanScMap[scName] || scNode.target;
+        for (const [accName, accNode] of scNode.accounts.entries()) {
+          const accLower = accName.toLowerCase().trim();
+          accNode.target =
+            targetMap.chanAccMap[`${chKey}_${scName}_${accName}`] ||
+            targetMap.chanAccMap[`${chKey}_${scName}_${accLower}`] ||
+            targetMap.chanAccMap[accName] ||
+            targetMap.chanAccMap[accLower] ||
+            accNode.target;
+        }
       }
     }
 
@@ -471,7 +603,7 @@ export function OverviewPage() {
           .sort((a, b) => b.sellin - a.sellin),
       }))
       .sort((a, b) => b.sellin - a.sellin);
-  }, [sellinRows, year, selectedMonths, dashChannel, dashSubChannel, dashAccount, prodStorage, prodCate, prodPh1]);
+  }, [sellinRows, targetRows, targetMap, year, selectedMonths, dashChannel, dashSubChannel, dashAccount, prodStorage, prodCate, prodPh1]);
 
   const categoryTree = useMemo<CategoryTreeNode[]>(() => {
     const lyYear = String(parseInt(year, 10) - 1);
@@ -528,24 +660,44 @@ export function OverviewPage() {
     | { total_sellin?: number; total_target?: number; ach_pct?: number; total_ly_sellin?: number; yoy_pct?: number }
     | undefined;
   const legacyOverall = overviewQuery.data?.overall;
+
+  const totalTargetB = targetMap.totalTarget > 0
+    ? targetMap.totalTarget
+    : ((summaryOverall?.total_target || 0) / 1e9);
+
   const overall = summaryOverall?.total_sellin !== undefined
     ? {
         channel: 'ALL',
         sellin_revenue: (summaryOverall.total_sellin || 0) / 1e9,
-        target_sellin: (summaryOverall.total_target || 0) / 1e9,
-        achievement_rate: summaryOverall.ach_pct || 0,
+        target_sellin: totalTargetB,
+        achievement_rate: totalTargetB > 0 ? (((summaryOverall.total_sellin || 0) / 1e9) / totalTargetB) * 100 : 0,
         ly_sellin: (summaryOverall.total_ly_sellin || 0) / 1e9,
         yoy_growth_rate: summaryOverall.yoy_pct || 0,
-        gap_sellin: ((summaryOverall.total_sellin || 0) - (summaryOverall.total_target || 0)) / 1e9,
+        gap_sellin: ((summaryOverall.total_sellin || 0) / 1e9) - totalTargetB,
         yoy_growth_amt: ((summaryOverall.total_sellin || 0) - (summaryOverall.total_ly_sellin || 0)) / 1e9,
         mom_mtd_rate: momMtdStats.overall ?? legacyOverall?.mom_mtd_rate ?? null,
       }
     : legacyOverall
       ? {
           ...legacyOverall,
+          target_sellin: totalTargetB > 0 ? totalTargetB : legacyOverall.target_sellin,
+          achievement_rate: totalTargetB > 0 ? (legacyOverall.sellin_revenue / totalTargetB) * 100 : legacyOverall.achievement_rate,
+          gap_sellin: totalTargetB > 0 ? (legacyOverall.sellin_revenue - totalTargetB) : legacyOverall.gap_sellin,
           mom_mtd_rate: momMtdStats.overall ?? legacyOverall.mom_mtd_rate ?? null,
         }
-      : undefined;
+      : totalChannelTreeSellin > 0 || totalTargetB > 0
+        ? {
+            channel: 'ALL',
+            sellin_revenue: totalChannelTreeSellin,
+            target_sellin: totalTargetB,
+            achievement_rate: totalTargetB > 0 ? (totalChannelTreeSellin / totalTargetB) * 100 : 0,
+            ly_sellin: channelHierarchyTree.reduce((sum, c) => sum + c.ly, 0),
+            yoy_growth_rate: 0,
+            gap_sellin: totalChannelTreeSellin - totalTargetB,
+            yoy_growth_amt: 0,
+            mom_mtd_rate: momMtdStats.overall,
+          }
+        : undefined;
 
   const dailyChartOption = useMemo(() => {
     let labels: string[] = [];
